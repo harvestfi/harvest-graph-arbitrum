@@ -1,6 +1,131 @@
-type ExampleEntity @entity {
+type Controller @entity {
+  "controller address"
   id: ID!
-  count: BigInt!
-  vault: Bytes! # address
-  strategy: Bytes! # address
+  createAtBlock: BigInt!
+  timestamp: BigInt!
+}
+
+type Vault @entity {
+  "vault address"
+  id: ID!
+  name: String!
+  symbol: String!
+  decimal: BigInt!
+  createAtBlock: BigInt!
+  timestamp: BigInt!
+  strategy: Strategy
+  active: Boolean
+  pool: Pool
+  underlying: Token!
+}
+
+type Strategy @entity {
+  "strategy address"
+  id: ID!
+  timestamp: BigInt!
+  createAtBlock: BigInt!
+}
+
+type SharePrice @entity {
+  "tx hash"
+  id: ID!
+  vault: Vault
+  strategy: Strategy
+  oldSharePrice: BigInt
+  newSharePrice: BigInt
+  timestamp: BigInt!
+  createAtBlock: BigInt!
+}
+
+type Tvl @entity {
+  "tx-vault"
+  id: ID!
+  vault: Vault
+  totalSupply: BigInt!
+  value: BigDecimal!
+  priceUnderlying: BigDecimal!
+  sharePrice: BigInt!
+  timestamp: BigInt!
+  createAtBlock: BigInt!
+  sharePriceDivDecimal: BigDecimal!
+  decimal: BigDecimal!
+}
+
+type Pool @entity {
+  "pool address"
+  id: ID!
+  vault: Vault!
+  "pool type"
+  type: PoolType!
+  # lpToken: Token!
+  rewardTokens: [Token!]!
+  timestamp: BigInt!
+  createAtBlock: BigInt!
+}
+
+type Token @entity {
+  "token address"
+  id: ID!
+  name: String!
+  symbol: String!
+  decimals: Int!
+}
+
+type User @entity {
+  id: ID!
+}
+
+enum PoolType {
+  NoMintRewardPool
+  PotPool
+  ExclusiveRewardPool
+}
+
+type Reward @entity {
+  # transaction hash alone is not unique, we need to add pool address
+  "transactionhash-pooladdress-rewardtoken"
+  id: ID!
+  timestamp: BigInt!
+  pool: Pool!
+  "token that is rewarded"
+  token: Token!
+  "amount of reward added"
+  reward: BigInt!
+  "reward rate after reward was added - valid untill next reward or periodFinish"
+  rewardRate: BigInt!
+  "timestamp when the pool runs out of rewards if no new rewards are added"
+  periodFinish: BigInt!
+}
+
+type Apy @entity {
+  "transactionhash-vaultaddress"
+  id: ID!
+  vault: Vault!
+  apy: BigDecimal!
+  apr: BigDecimal!
+  priceUnderlying: BigDecimal!
+  periodFinish: BigInt!
+  rewardAmount: BigInt!
+  rewardRate: BigInt!
+  rewardForPeriod: BigDecimal!
+  tvlUsd: BigDecimal!
+  timestamp: BigInt!
+  createAtBlock: BigInt!
+}
+
+type AutoStake @entity {
+  "farm pool address"
+  id: ID!
+  timestamp: BigInt!
+  createAtBlock: BigInt!
+}
+
+type UniswapV3Pool @entity {
+  "symbol-symbol-fee"
+  id: ID!
+  tokenA: Token!
+  tokenB: Token!
+  pool: String!
+  timestamp: BigInt!
+  createAtBlock: BigInt!
 }
