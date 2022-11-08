@@ -17,6 +17,7 @@ type Vault @entity {
   active: Boolean
   pool: Pool
   underlying: Token!
+  lastShareTimestamp: BigInt!
 }
 
 type Strategy @entity {
@@ -31,8 +32,8 @@ type SharePrice @entity {
   id: ID!
   vault: Vault
   strategy: Strategy
-  oldSharePrice: BigInt
-  newSharePrice: BigInt
+  oldSharePrice: BigInt!
+  newSharePrice: BigInt!
   timestamp: BigInt!
   createAtBlock: BigInt!
 }
@@ -97,7 +98,7 @@ type Reward @entity {
   periodFinish: BigInt!
 }
 
-type Apy @entity {
+type ApyReward @entity {
   "transactionhash-vaultaddress"
   id: ID!
   vault: Vault!
@@ -109,6 +110,17 @@ type Apy @entity {
   rewardRate: BigInt!
   rewardForPeriod: BigDecimal!
   tvlUsd: BigDecimal!
+  timestamp: BigInt!
+  createAtBlock: BigInt!
+}
+
+type ApyAutoCompound @entity {
+  "transactionhash-vaultaddress"
+  id: ID!
+  vault: Vault!
+  apy: BigDecimal!
+  apr: BigDecimal!
+  diffSharePrice: BigDecimal!
   timestamp: BigInt!
   createAtBlock: BigInt!
 }

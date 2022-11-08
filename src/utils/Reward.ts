@@ -1,4 +1,4 @@
-import { Apy, Pool, Reward, Vault } from "../../generated/schema";
+import { Pool, Reward, Vault } from "../../generated/schema";
 import { Address, BigDecimal, BigInt, ethereum } from "@graphprotocol/graph-ts";
 
 export function saveReward(

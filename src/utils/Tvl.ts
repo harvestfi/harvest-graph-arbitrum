@@ -2,7 +2,7 @@ import { Address, BigDecimal, BigInt, ethereum } from "@graphprotocol/graph-ts";
 import { Tvl, Vault } from "../../generated/schema";
 import { fetchContractDecimal, fetchContractTotalSupply } from "./ERC20";
 import { getPriceByVault, getPriceForCoin } from "./Price";
-import { BD_18, BD_ZERO, D_18, SECONDS_OF_YEAR, YEAR_PERIOD } from "./Constant";
+import { BD_18, BD_ZERO, BI_18, SECONDS_OF_YEAR, YEAR_PERIOD } from "./Constant";
 import { fetchPricePerFullShare } from "./Vault";
 
 // TODO for LP change logic
@@ -41,7 +41,7 @@ export function createTvl(address: Address, transaction: ethereum.Transaction, b
   }
 }
 
-export function calculateTvlUsd(vaultAddress: Address, price: BigDecimal, block: ethereum.Block): BigDecimal {
+export function calculateTvlUsd(vaultAddress: Address, price: BigDecimal): BigDecimal {
   if (price.le(BigDecimal.zero())) {
     return BD_ZERO
   }

@@ -4,7 +4,7 @@ import {
   BALANCER_CONTRACT_NAME,
   BD_18,
   BD_ONE, BD_TEN, CURVE_CONTRACT_NAME,
-  D_18,
+  BI_18,
   DEFAULT_PRICE, F_UNI_V3_CONTRACT_NAME, FARM_TOKEN, LP_UNI_PAIR_CONTRACT_NAME, NULL_ADDRESS,
   ORACLE_ADDRESS_FIRST,
   ORACLE_ADDRESS_SECOND, PS_ADDRESSES,
@@ -20,11 +20,12 @@ import { CurveMinterContract } from "../../generated/templates/VaultListener/Cur
 import { getUniswapV3ByVault } from "./UniswapV3Pool";
 import { UniswapV3PoolContract } from "../../generated/ExclusiveRewardPoolListener/UniswapV3PoolContract";
 import { fetchContractDecimal } from "./ERC20";
+import { pow } from "./Math";
 
 
 export function getPriceForCoin(address: Address, block: number): BigInt {
   if (STABLE_COIN_ARRAY.join(' ').includes(address.toHex())) {
-    return D_18
+    return BI_18
   }
   if (block >= 12015724) {
     let oracle = OracleContract.bind(ORACLE_ADDRESS_FIRST)
@@ -86,13 +87,12 @@ function getPriceForUniswapV3(vault: Vault, block: number): BigDecimal {
   if (!poolAddress.equals(NULL_ADDRESS)) {
     const pool =  UniswapV3PoolContract.bind(poolAddress)
     const sqrtPriceX96 = pool.slot0().getSqrtPriceX96()
-    const sqrt = sqrtPriceX96.toBigDecimal().truncate(2)
+    const sqrt = pow(sqrtPriceX96.toBigDecimal(), 2)
     const tokenA = pool.token0()
     const tokenB = pool.token1()
     const decimalA = fetchContractDecimal(tokenA)
     const decimalB = fetchContractDecimal(tokenB)
-
-    const decimal = BD_TEN.truncate(decimalA.toI32()).div(BD_TEN.truncate(decimalB.toI32()))
+    const decimal = pow(BD_TEN, decimalA.toI32()).div(pow(BD_TEN, decimalB.toI32()))
     const price = sqrt.times(decimal.div(UNISWAP_V3_VALUE))
     const tokenBPrice = getPriceForCoin(tokenB, block).divDecimal(BD_18)
     return price.times(tokenBPrice)
@@ -134,7 +134,7 @@ function getPriceForCurve(underlyingAddress: string, block: number): BigDecimal 
 
 // amount / (10 ^ 18 / 10 ^ decimal)
 function normalizePrecision(amount: BigInt, decimal: BigInt): BigInt {
-  return amount.div(D_18.div(BigInt.fromI64(10 ** decimal.toI64())))
+  return amount.div(BI_18.div(BigInt.fromI64(10 ** decimal.toI64())))
 }
 
 function getPriceLpUniPair(underlyingAddress: string, block: number): BigDecimal {
@@ -184,7 +184,7 @@ function getPriceForBalancer(underlying: string, block: number): BigDecimal {
   return price.div(totalSupply.toBigDecimal())
 }
 
-function isPsAddress(address: string): boolean {
+export function isPsAddress(address: string): boolean {
   if (PS_ADDRESSES.join(' ').includes(address)) {
     return true
   }

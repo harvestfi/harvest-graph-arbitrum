@@ -1,13 +1,15 @@
 import { Address, BigDecimal, BigInt } from "@graphprotocol/graph-ts";
+import { pow } from "./Math";
 
 export const UNKNOWN = 'unknown';
 
-export const UNISWAP_V3_VALUE = BigDecimal.fromString('2').truncate(96).truncate(2)
+export const UNISWAP_V3_VALUE = pow(pow(BigDecimal.fromString('2'), 96), 2)
 export const SECONDS_OF_YEAR = BigDecimal.fromString('31557600');
 export const DEFAULT_DECIMAL = 18;
 export const DEFAULT_PRICE = BigInt.fromI32(0);
 export const YEAR_PERIOD = BigDecimal.fromString('365')
-export const D_18 = BigInt.fromI64(10 ** 18)
+export const BI_TEN = BigInt.fromI64(10)
+export const BI_18 = BigInt.fromI64(10 ** 18)
 export const BD_18 = BigDecimal.fromString('1000000000000000000')
 export const BD_ZERO = BigDecimal.fromString('0')
 export const BD_ONE = BigDecimal.fromString('1')

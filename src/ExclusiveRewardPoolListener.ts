@@ -8,6 +8,7 @@ import { Address, ethereum } from "@graphprotocol/graph-ts";
 import { AutoStake, Pool, Vault } from "../generated/schema";
 import { loadOrCreateERC20Token } from "./utils/Token";
 import { loadOrCreateVault } from "./utils/Vault";
+import { AutoStakeListner } from "../generated/templates";
 
 export function handleRewardAdded(event: RewardAdded): void {
   const poolAddress = event.address
@@ -30,6 +31,7 @@ export function handleInitExclusive(call: InitExclusiveCall): void {
     autoStack.timestamp = call.block.timestamp
     autoStack.createAtBlock = call.block.number
     autoStack.save()
+    AutoStakeListner.create(autoStakeAddress)
   }
 }
 

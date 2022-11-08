@@ -1,9 +1,9 @@
 import { AddVaultAndStrategyCall, SharePriceChangeLog } from "../generated/Controller/Controller";
 import { SharePrice, Strategy, Vault } from "../generated/schema";
-import { fetchContractDecimal, fetchContractName, fetchContractSymbol } from "./utils/ERC20";
-import { loadOrCreateERC20Token } from "./utils/Token";
-import { fetchUnderlyingAddress, loadOrCreateVault } from "./utils/Vault";
-import { VaultListener } from "../generated/templates";
+import { loadOrCreateVault } from "./utils/Vault";
+import { pow, powBI } from "./utils/Math";
+import { BD_TEN, BI_TEN } from "./utils/Constant";
+import { calculateAndSaveApyAutoCompound } from "./utils/Apy";
 
 
 export function handleSharePriceChangeLog(event: SharePriceChangeLog): void {
@@ -11,7 +11,7 @@ export function handleSharePriceChangeLog(event: SharePriceChangeLog): void {
   const strategyAddress = event.params.strategy.toHex();
   const block = event.block.number;
   const timestamp = event.block.timestamp;
-  const sharePrice = new SharePrice(event.transaction.hash.toHex())
+  const sharePrice = new SharePrice(`${event.transaction.hash.toHex()}-${vaultAddress}`)
   sharePrice.vault = vaultAddress;
   sharePrice.strategy = strategyAddress;
   sharePrice.oldSharePrice = event.params.oldSharePrice;
@@ -19,6 +19,19 @@ export function handleSharePriceChangeLog(event: SharePriceChangeLog): void {
   sharePrice.createAtBlock = block;
   sharePrice.timestamp = timestamp;
   sharePrice.save();
+
+  const vault = Vault.load(vaultAddress)
+  if (vault != null) {
+    const lastShareTimestamp = vault.lastShareTimestamp
+    if (!lastShareTimestamp.isZero()) {
+      const diffSharePrice = sharePrice.newSharePrice.minus(sharePrice.oldSharePrice).divDecimal(pow(BD_TEN, vault.decimal.toI32()))
+      const diffTimestamp = timestamp.minus(lastShareTimestamp)
+      calculateAndSaveApyAutoCompound(`${event.transaction.hash.toHex()}-${vaultAddress}`, diffSharePrice, diffTimestamp, vaultAddress, event.block)
+    }
+    vault.lastShareTimestamp = sharePrice.timestamp
+    vault.save()
+
+  }
 }
 
 export function handleAddVaultAndStrategy(call: AddVaultAndStrategyCall): void {

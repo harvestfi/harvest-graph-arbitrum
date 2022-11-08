@@ -15,6 +15,8 @@ export function handlePoolCreated(event: PoolCreated): void {
     uniswapPool.tokenA = tokenA.id
     uniswapPool.tokenB = tokenB.id
     uniswapPool.pool = pool.toHex()
+    uniswapPool.createAtBlock = event.block.number
+    uniswapPool.timestamp = event.block.timestamp
     uniswapPool.save()
   }
 }

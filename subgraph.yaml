@@ -26,8 +26,8 @@ dataSources:
     name: UniswapV3Factory
     network: mainnet
     source:
-      address: "0xc95CbE4ca30055c787CB784BE99D6a8494d0d197"
-      startBlock: 12369622
+      address: "0x1f98431c8ad98523631ae4a59f267346ea31f984"
+      startBlock: 12370536
       abi: UniswapV3FactoryContract
     mapping:
       kind: ethereum/events
@@ -250,6 +250,44 @@ templates:
         - event: Withdraw(indexed address,uint256)
           handler: handleWithdraw
       file: ./src/VaultListener.ts
+  - kind: ethereum/contract
+    name: AutoStakeListner
+    network: mainnet
+    source:
+      abi: AutoStakeContract
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.5
+      language: wasm/assemblyscript
+      entities:
+        - Vault
+      abis:
+        - name: AutoStakeContract
+          file: ./abis/harvest/AutoStake.json
+        - name: VaultContract
+          file: ./abis/Vault.json
+        - name: OracleContract
+          file: ./abis/Oracle.json
+        - name: ERC20
+          file: ./abis/ERC20.json
+        - name: UniswapV2PairContract
+          file: ./abis/uniswap/UniswapV2Pair.json
+        - name: WeightedPool2TokensContract
+          file: ./abis/balancer/WeightedPool2Tokens.json
+        - name: BalancerVaultContract
+          file: ./abis/balancer/BalancerVault.json
+        - name: CurveVaultContract
+          file: ./abis/curve/CurveVault.json
+        - name: CurveMinterContract
+          file: ./abis/curve/CurveMinter.json
+        - name: UniswapV3PoolContract
+          file: ./abis/uniswap/UniswapV3Pool.json
+      eventHandlers:
+        - event: Staked(indexed address,uint256,uint256,uint256,uint256,uint256)
+          handler: handleStaked
+        - event: Withdrawn(indexed address,uint256)
+          handler: handleWithdrawn
+      file: ./src/AutoStakeListener.ts
   - kind: ethereum/contract
     name: NoMintPoolListener
     network: mainnet
