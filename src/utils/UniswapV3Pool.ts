@@ -2,7 +2,7 @@ import { UniswapV3Pool, Vault } from "../../generated/schema";
 import { Address } from "@graphprotocol/graph-ts";
 import { NULL_ADDRESS, UNISWAP_V3_FEES } from "./Constant";
 
-export function getUniswapV3ByVault(vault: Vault): Address {
+export function getUniswapPoolV3ByVault(vault: Vault): Address {
 
   const symbolArray = vault.symbol.split('_')
 

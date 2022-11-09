@@ -63,3 +63,59 @@ For query use this urls:
 - `value` - TVL in usd
 - `sharePriceDivDecimal` - `sharePrice` / (10 ** `decimal`)
 
+### Get last apy by vault address
+
+    {
+        apyRewards(
+            first: 1,
+            where: {vault: "0xab7fa2b2985bccfc13c6d86b1d5a17486ab1e04c"}
+            orderBy: createAtBlock
+            orderDirection: desc
+        ) {
+            apy
+            createAtBlock
+        }
+
+        apyAutoCompounds(
+            first: 1,
+            where: {vault: "0xab7fa2b2985bccfc13c6d86b1d5a17486ab1e04c"}
+            orderBy: createAtBlock
+            orderDirection: desc
+        ) {
+            apy
+            createAtBlock
+        }
+    }
+
+### Get first 100 last apy by vault address, in timestamp from 11/09/2022 @ 1:15pm to 11/09/2022 @ 1:15pm
+
+
+    {
+        apyRewards(
+            first: 100,
+            where: {
+                timestamp_gte: "1648059270",
+                timestamp_lte: "1667999735",
+                vault: "0xab7fa2b2985bccfc13c6d86b1d5a17486ab1e04c"
+            }
+            orderBy: createAtBlock
+            orderDirection: desc
+        ) {
+            apy
+            createAtBlock
+        }
+
+        apyAutoCompounds(
+            first: 100,
+            where: {
+                timestamp_gte: "1648059270",
+                timestamp_lte: "1667999735",
+                vault: "0xab7fa2b2985bccfc13c6d86b1d5a17486ab1e04c"
+            }
+            orderBy: createAtBlock
+            orderDirection: desc
+        ) {
+            apy
+            createAtBlock
+        }
+    }

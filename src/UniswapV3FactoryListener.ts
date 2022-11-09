@@ -2,11 +2,11 @@ import { CreatePoolCall, PoolCreated } from "../generated/UniswapV3Factory/Unisw
 import { UniswapV3Pool } from "../generated/schema";
 import { loadOrCreateERC20Token } from "./utils/Token";
 
-export function handlePoolCreated(event: PoolCreated): void {
-  const tokenA = loadOrCreateERC20Token(event.params.token0)
-  const tokenB = loadOrCreateERC20Token(event.params.token1)
-  const fee = event.params.fee
-  const pool = event.params.pool
+export function handleCreatePool(call: CreatePoolCall): void {
+  const tokenA = loadOrCreateERC20Token(call.inputs.tokenA)
+  const tokenB = loadOrCreateERC20Token(call.inputs.tokenB)
+  const fee = call.inputs.fee
+  const pool = call.outputs.pool
   const id = `${tokenA.symbol.toLowerCase()}-${tokenB.symbol.toLowerCase()}-${fee}`
 
   let uniswapPool = UniswapV3Pool.load(id)
@@ -15,8 +15,8 @@ export function handlePoolCreated(event: PoolCreated): void {
     uniswapPool.tokenA = tokenA.id
     uniswapPool.tokenB = tokenB.id
     uniswapPool.pool = pool.toHex()
-    uniswapPool.createAtBlock = event.block.number
-    uniswapPool.timestamp = event.block.timestamp
+    uniswapPool.createAtBlock = call.block.number
+    uniswapPool.timestamp = call.block.timestamp
     uniswapPool.save()
   }
 }

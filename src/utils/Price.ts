@@ -17,7 +17,7 @@ import { BalancerVaultContract } from "../../generated/templates/VaultListener/B
 import { ERC20 } from "../../generated/Controller/ERC20";
 import { CurveVaultContract } from "../../generated/templates/VaultListener/CurveVaultContract";
 import { CurveMinterContract } from "../../generated/templates/VaultListener/CurveMinterContract";
-import { getUniswapV3ByVault } from "./UniswapV3Pool";
+import { getUniswapPoolV3ByVault } from "./UniswapV3Pool";
 import { UniswapV3PoolContract } from "../../generated/ExclusiveRewardPoolListener/UniswapV3PoolContract";
 import { fetchContractDecimal } from "./ERC20";
 import { pow } from "./Math";
@@ -82,8 +82,8 @@ export function getPriceByVault(vault: Vault, block: number): BigDecimal {
   return getPriceForCoin(Address.fromString(underlyingAddress), block).divDecimal(BD_18)
 }
 
-function getPriceForUniswapV3(vault: Vault, block: number): BigDecimal {
-  const poolAddress = getUniswapV3ByVault(vault)
+export function getPriceForUniswapV3(vault: Vault, block: number): BigDecimal {
+  const poolAddress = getUniswapPoolV3ByVault(vault)
   if (!poolAddress.equals(NULL_ADDRESS)) {
     const pool =  UniswapV3PoolContract.bind(poolAddress)
     const sqrtPriceX96 = pool.slot0().getSqrtPriceX96()

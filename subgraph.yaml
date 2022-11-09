@@ -40,9 +40,9 @@ dataSources:
           file: ./abis/ERC20.json
         - name: UniswapV3FactoryContract
           file: ./abis/uniswap/UniswapV3Factory.json
-      eventHandlers:
-        - event: PoolCreated(indexed address,indexed address,indexed uint24,int24,address)
-          handler: handlePoolCreated
+      callHandlers:
+        - function: createPool(address,address,uint24)
+          handler: handleCreatePool
       file: ./src/UniswapV3FactoryListener.ts
   - kind: ethereum
     name: NoMintNotifyHelperListener
