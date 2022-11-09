@@ -1,14 +1,12 @@
 # Harvest sub graph 
 
---- 
+
 ## Setup
 
 - Install dependencies `yarn install` 
 - Deploy on local machine `graph create --node http://localhost:8020/ harvest-graph`
 - Run tests `graph test`
 
-
----
 
 ## Queries
 
