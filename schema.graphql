@@ -121,6 +121,7 @@ type ApyAutoCompound @entity {
   apy: BigDecimal!
   apr: BigDecimal!
   diffSharePrice: BigDecimal!
+  diffTimestamp: BigDecimal!
   timestamp: BigInt!
   createAtBlock: BigInt!
 }
@@ -139,5 +140,21 @@ type UniswapV3Pool @entity {
   tokenB: Token!
   pool: String!
   timestamp: BigInt!
+  createAtBlock: BigInt!
+}
+
+# TODO remove after fix problem
+type UniswapV3Price @entity {
+  id: ID!
+  sqrtPriceX96: BigInt!
+  sqrt: BigDecimal!
+  tokenA: Token!
+  tokenB: Token!
+  decimalA: BigInt!
+  decimalB: BigInt!
+  decimal: BigDecimal!
+  value: BigDecimal!
+  tokenBPrice: BigDecimal!
+  price: BigDecimal!
   createAtBlock: BigInt!
 }

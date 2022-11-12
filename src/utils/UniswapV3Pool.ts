@@ -12,6 +12,7 @@ export function getUniswapPoolV3ByVault(vault: Vault): Address {
 
   const symbolA = symbolArray[1].toLowerCase()
   const symbolB = symbolArray[2].toLowerCase()
+
   for (let i=0;i<UNISWAP_V3_FEES.length;i++) {
     const result = findById(symbolA, symbolB, UNISWAP_V3_FEES[i])
     if (result != null) {

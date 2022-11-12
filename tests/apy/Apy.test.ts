@@ -4,7 +4,7 @@ import {
   test
 } from "matchstick-as/assembly/index"
 import { BigDecimal, BigInt, log } from "@graphprotocol/graph-ts";
-import { calculateApr, calculateApy } from "../../src/utils/Apy";
+import { calculateApr, calculateAprAutoCompound, calculateApy } from "../../src/utils/Apy";
 import { BD_18 } from "../../src/utils/Constant";
 
 
@@ -19,7 +19,7 @@ describe("Apy tests", () => {
     log.log(log.Level.INFO, `apr = ${apr}`)
     log.log(log.Level.INFO, `apy = ${apy}`)
     assert.assertTrue(apr.equals(BigDecimal.fromString('0.04916003790905653305305450860795048')))
-    assert.assertTrue(apy.equals(BigDecimal.fromString('0.049306841576986347555045448138')))
+    assert.assertTrue(apy.equals(BigDecimal.fromString('0.0491720903141718389099913495953')))
   })
 
   test("Calculate apr and apy for FARM_USDC with new data", () => {
@@ -39,7 +39,7 @@ describe("Apy tests", () => {
     log.log(log.Level.INFO, `apy = ${apy}`)
 
     assert.assertTrue(apr.equals(BigDecimal.fromString('0.005571167946891070300884955752212391')))
-    assert.assertTrue(apy.equals(BigDecimal.fromString('0.005586587038338487497310905335')))
+    assert.assertTrue(apy.equals(BigDecimal.fromString('0.0055713227141340043795132327171')))
   })
 
   test("Calculate apy with apr", () => {
@@ -47,7 +47,26 @@ describe("Apy tests", () => {
     const apy = calculateApy(apr)
       log.log(log.Level.INFO, `apr = ${apr}`)
     log.log(log.Level.INFO, `apy = ${apy}`)
-    assert.assertTrue(apy.equals(BigDecimal.fromString('110.4921850037745313399649836527732')))
+    assert.assertTrue(apy.equals(BigDecimal.fromString('110.0645741036129302244669591304885')))
+  })
 
+  test('Calculate autocompound apr', ()=> {
+    const diffSharePrice = BigDecimal.fromString('1014987267072829321')
+      .minus(BigDecimal.fromString('1014291243088230033'))
+      .div(BD_18)
+
+    const diffTimestamp = BigDecimal.fromString('1667147027').minus(BigDecimal.fromString('1665742271'))
+    const apr = calculateAprAutoCompound(diffSharePrice, diffTimestamp)
+    log.log(log.Level.INFO, `apr = ${apr}`)
+    assert.assertTrue(apr.equals(BigDecimal.fromString('1.56360581456071310525101868224802')))
+  })
+
+  test('Calculate autocompound apr for weth', ()=> {
+    const diffSharePrice = BigDecimal.fromString('0.00069602398')
+
+    const diffTimestamp = BigDecimal.fromString('1404756')
+    const apr = calculateAprAutoCompound(diffSharePrice, diffTimestamp)
+    log.log(log.Level.INFO, `apr = ${apr}`)
+    assert.assertTrue(apr.equals(BigDecimal.fromString('1.563605804228492350272929960790344')))
   })
 })

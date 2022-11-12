@@ -71,6 +71,7 @@ export function calculateAndSaveApyAutoCompound(id: string, diffSharePrice: BigD
     apyAutoCompound.apy = calculateApy(apyAutoCompound.apr)
     apyAutoCompound.vault = vaultAddress
     apyAutoCompound.diffSharePrice = diffSharePrice
+    apyAutoCompound.diffTimestamp = diffTimestamp.toBigDecimal()
     apyAutoCompound.save()
   }
   return apyAutoCompound.apr

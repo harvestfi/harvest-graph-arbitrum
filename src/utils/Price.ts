@@ -8,9 +8,9 @@ import {
   DEFAULT_PRICE, F_UNI_V3_CONTRACT_NAME, FARM_TOKEN, LP_UNI_PAIR_CONTRACT_NAME, NULL_ADDRESS,
   ORACLE_ADDRESS_FIRST,
   ORACLE_ADDRESS_SECOND, PS_ADDRESSES,
-  STABLE_COIN_ARRAY, UNISWAP_V3_VALUE,
+  STABLE_COIN_ARRAY, UNISWAP_V3_VALUE, DEFAULT_DECIMAL,
 } from "./Constant";
-import { Token, Vault } from "../../generated/schema";
+import { Token, UniswapV3Price, Vault } from "../../generated/schema";
 import { UniswapV2PairContract } from "../../generated/ExclusiveRewardPoolListener/UniswapV2PairContract";
 import { WeightedPool2TokensContract } from "../../generated/templates/VaultListener/WeightedPool2TokensContract";
 import { BalancerVaultContract } from "../../generated/templates/VaultListener/BalancerVaultContract";
@@ -35,7 +35,7 @@ export function getPriceForCoin(address: Address, block: number): BigInt {
 
     let tryGetPrice = oracle.try_getPrice(address)
     if (tryGetPrice.reverted) {
-      log.log(log.Level.ERROR, `Can not get price on block ${block} for address ${address.toHex()}`)
+      log.log(log.Level.WARNING, `Can not get price on block ${block} for address ${address.toHex()}`)
       return DEFAULT_PRICE
     }
     return tryGetPrice.value;
@@ -48,13 +48,18 @@ export function getPriceByVault(vault: Vault, block: number): BigDecimal {
   if (isPsAddress(vault.id)) {
     return getPriceForCoin(FARM_TOKEN, block).divDecimal(BD_18)
   }
+  const underlyingAddress = vault.underlying
+
+  let price = getPriceForCoin(Address.fromString(underlyingAddress), block)
+  if (!price.isZero()) {
+    return price.divDecimal(BD_18)
+  }
 
   // is from uniSwapV3 pools
   if (isUniswapV3(vault.name)) {
     return getPriceForUniswapV3(vault, block)
   }
 
-  const underlyingAddress = vault.underlying
   const underlying = Token.load(underlyingAddress)
   if (underlying != null) {
     if (isLpUniPair(underlying.name)) {
@@ -79,7 +84,8 @@ export function getPriceByVault(vault: Vault, block: number): BigDecimal {
     }
   }
 
-  return getPriceForCoin(Address.fromString(underlyingAddress), block).divDecimal(BD_18)
+  return BigDecimal.zero()
+
 }
 
 export function getPriceForUniswapV3(vault: Vault, block: number): BigDecimal {
@@ -93,10 +99,29 @@ export function getPriceForUniswapV3(vault: Vault, block: number): BigDecimal {
     const decimalA = fetchContractDecimal(tokenA)
     const decimalB = fetchContractDecimal(tokenB)
     const decimal = pow(BD_TEN, decimalA.toI32()).div(pow(BD_TEN, decimalB.toI32()))
-    const price = sqrt.times(decimal.div(UNISWAP_V3_VALUE))
+    const value = sqrt.times(decimal.div(UNISWAP_V3_VALUE))
     const tokenBPrice = getPriceForCoin(tokenB, block).divDecimal(BD_18)
-    return price.times(tokenBPrice)
+    const price = value.times(tokenBPrice)
+
+    let uniswapPrice = UniswapV3Price.load(`${poolAddress.toHex()}-${block}`)
+    if (uniswapPrice == null) {
+      uniswapPrice = new UniswapV3Price(`${poolAddress.toHex()}-${block}`)
+      uniswapPrice.sqrtPriceX96 = sqrtPriceX96
+      uniswapPrice.sqrt = sqrt
+      uniswapPrice.tokenA = tokenA.toHex()
+      uniswapPrice.tokenB = tokenB.toHex()
+      uniswapPrice.decimalA = decimalA
+      uniswapPrice.decimalB = decimalB
+      uniswapPrice.decimal = decimal
+      uniswapPrice.value = value
+      uniswapPrice.tokenBPrice = tokenBPrice
+      uniswapPrice.price = price
+      uniswapPrice.createAtBlock = BigInt.fromI64(block as i64)
+      uniswapPrice.save()
+    }
+    return price
   }
+
   return BigDecimal.zero()
 }
 
@@ -113,6 +138,13 @@ function getPriceForCurve(underlyingAddress: string, block: number): BigDecimal 
     index = index + 1
     tryCoins = minter.try_coins(BigInt.fromI32(index))
   }
+  const tryDecimals = curveContract.try_decimals()
+  let decimal = BigInt.fromI32(DEFAULT_DECIMAL)
+  if (!tryDecimals.reverted) {
+    decimal = tryDecimals.value
+  } else {
+    log.log(log.Level.WARNING, `Can not get decimals for ${underlyingAddress}`)
+  }
   const size = index + 1
   if (size < 1) {
     return BigDecimal.zero()
@@ -125,11 +157,17 @@ function getPriceForCurve(underlyingAddress: string, block: number): BigDecimal 
     const token = minter.coins(index)
     const tokenPrice = getPriceForCoin(token, block).divDecimal(BD_18)
     const balance = minter.balances(index)
-    const decimals = ERC20.bind(token).decimals()
-    value = value.plus(tokenPrice.times(normalizePrecision(balance, BigInt.fromI32(decimals)).toBigDecimal().div(BD_18)))
+    const tryDecimalsTemp = ERC20.bind(token).try_decimals()
+    let decimalsTemp = DEFAULT_DECIMAL
+    if (!tryDecimalsTemp.reverted) {
+      decimalsTemp = tryDecimalsTemp.value
+    } else {
+      log.log(log.Level.WARNING, `Can not get decimals for ${token}`)
+    }
+    value = value.plus(tokenPrice.times(normalizePrecision(balance, BigInt.fromI32(decimalsTemp)).toBigDecimal().div(BD_18)))
   }
 
-  return value.times(BD_18).div(normalizePrecision(curveContract.totalSupply(), curveContract.decimals()).toBigDecimal())
+  return value.times(BD_18).div(normalizePrecision(curveContract.totalSupply(), decimal).toBigDecimal())
 }
 
 // amount / (10 ^ 18 / 10 ^ decimal)
@@ -139,7 +177,13 @@ function normalizePrecision(amount: BigInt, decimal: BigInt): BigInt {
 
 function getPriceLpUniPair(underlyingAddress: string, block: number): BigDecimal {
   const uniswapV2Pair = UniswapV2PairContract.bind(Address.fromString(underlyingAddress))
-  const reserves = uniswapV2Pair.getReserves()
+  const tryGetReserves = uniswapV2Pair.try_getReserves()
+  if (tryGetReserves.reverted) {
+    log.log(log.Level.WARNING, `Can not get reserves for underlyingAddress = ${underlyingAddress}, try get price for coin`)
+
+    return getPriceForCoin(Address.fromString(underlyingAddress), block).divDecimal(BD_18)
+  }
+  const reserves = tryGetReserves.value
   const totalSupply = uniswapV2Pair.totalSupply()
   const positionFraction = BD_ONE.div(totalSupply.toBigDecimal())
   const firstCoin = reserves.get_reserve0().toBigDecimal().times(positionFraction)
@@ -192,16 +236,17 @@ export function isPsAddress(address: string): boolean {
   return false
 }
 
-function isLpUniPair(name: string): boolean {
-  if (LP_UNI_PAIR_CONTRACT_NAME.join(' ').includes(name.toLowerCase())) {
-    return true
+export function isLpUniPair(name: string): boolean {
+  for (let i=0;i<LP_UNI_PAIR_CONTRACT_NAME.length;i++) {
+    if (name.toLowerCase().startsWith(LP_UNI_PAIR_CONTRACT_NAME[i])) {
+      return true
+    }
   }
-
   return false
 }
 
 function isBalancer(name: string): boolean {
-  if (BALANCER_CONTRACT_NAME.startsWith(name.toLowerCase())) {
+  if (name.toLowerCase().startsWith(BALANCER_CONTRACT_NAME)) {
     return true
   }
 
@@ -209,15 +254,15 @@ function isBalancer(name: string): boolean {
 }
 
 function isCurve(name: string): boolean {
-  if (CURVE_CONTRACT_NAME.startsWith(name.toLowerCase())) {
+  if (name.toLowerCase().startsWith(CURVE_CONTRACT_NAME)) {
     return true
   }
 
   return false
 }
 
-function isUniswapV3(name: string): boolean {
-  if (F_UNI_V3_CONTRACT_NAME.startsWith(name.toLowerCase())) {
+export function isUniswapV3(name: string): boolean {
+  if (name.toLowerCase().startsWith(F_UNI_V3_CONTRACT_NAME)) {
     return true
   }
   return false
