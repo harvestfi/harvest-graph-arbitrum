@@ -4,10 +4,10 @@ schema:
 dataSources:
   - kind: ethereum
     name: Storage
-    network: mainnet
+    network: matic
     source:
       address: "0xc95CbE4ca30055c787CB784BE99D6a8494d0d197"
-      startBlock: 10770072
+      startBlock: 16568230
       abi: StorageContract
     mapping:
       kind: ethereum/events
@@ -22,63 +22,12 @@ dataSources:
         - function: setController(address)
           handler: handleSetController
       file: ./src/StorageListener.ts
-  - kind: ethereum
-    name: UniswapV3Factory
-    network: mainnet
-    source:
-      address: "0x1f98431c8ad98523631ae4a59f267346ea31f984"
-      startBlock: 12370536
-      abi: UniswapV3FactoryContract
-    mapping:
-      kind: ethereum/events
-      apiVersion: 0.0.5
-      language: wasm/assemblyscript
-      entities:
-        - UniswapV3Pool
-      abis:
-        - name: ERC20
-          file: ./abis/ERC20.json
-        - name: UniswapV3FactoryContract
-          file: ./abis/uniswap/UniswapV3Factory.json
-      callHandlers:
-        - function: createPool(address,address,uint24)
-          handler: handleCreatePool
-      file: ./src/UniswapV3FactoryListener.ts
-  - kind: ethereum
-    name: NoMintNotifyHelperListener
-    network: mainnet
-    source:
-      address: "0xE20c31e3d08027F5AfACe84A3A46B7b3B165053c"
-      startBlock: 11276997
-      abi: NotifyHelperContract
-    mapping:
-      kind: ethereum/events
-      apiVersion: 0.0.5
-      language: wasm/assemblyscript
-      entities:
-        - Pool
-        - Vault
-      abis:
-        - name: NotifyHelperContract
-          file: ./abis/harvest/NotifyHelper.json
-        - name: NoMintRewardPoolContract
-          file: ./abis/harvest/NoMintRewardPool.json
-        - name: ERC20
-          file: ./abis/ERC20.json
-        - name: VaultContract
-          file: ./abis/Vault.json
-      callHandlers:
-        - function: notifyPools(uint256[],address[],uint256)
-          handler: handleNotifyPools
-        - function: notifyPoolsIncludingProfitShare(uint256[],address[],uint256,uint256,uint256)
-          handler: handleNotifyPoolsIncludingProfitShare
-      file: ./src/NoMintNotifyHelperListener.ts
   - kind: ethereum/contract
     name: PotNotifyHelperListener
-    network: mainnet
+    network: matic
     source:
-      address: "0x657F0A6b628caB0d119398fE725C3C5792E4Dd0F"
-      startBlock: 12049016
+      address: "0xfe092d36CcDc81019Bc1A7835bF793abABD76f33"
+      startBlock: 21831493
       abi: PotNotifyHelperContract
     mapping:
       kind: ethereum/events
@@ -100,83 +49,10 @@ dataSources:
         - function: notifyPools(uint256[],address[],uint256)
           handler: handlePotNotifyPools
       file: ./src/PotNotifyHelperListener.ts
-  - kind: ethereum/contract
-    name: NotifyHelperIFARMListener
-    network: mainnet
-    source:
-      address: "0x8af7Eb5a93076F6A2316261aC8D42F97aDaab64E"
-      startBlock: 12902984
-      abi: NotifyHelperIFARMContract
-    mapping:
-      kind: ethereum/events
-      apiVersion: 0.0.5
-      language: wasm/assemblyscript
-      entities:
-        - Pool
-        - Vault
-      abis:
-        - name: NotifyHelperIFARMContract
-          file: ./abis/harvest/NotifyHelperIFARM.json
-        - name: PotPoolContract
-          file: ./abis/harvest/PotPool.json
-        - name: ERC20
-          file: ./abis/ERC20.json
-        - name: VaultContract
-          file: ./abis/Vault.json
-      callHandlers:
-        - function: notifyPools(uint256[],address[],uint256)
-          handler: handlePotNotifyPools
-      file: ./src/NotifyHelperIFARMListener.ts
-  - kind: ethereum/contract
-    name: ExclusiveRewardPoolListener
-    network: mainnet
-    source:
-      address: "0x8f5adC58b32D4e5Ca02EAC0E293D35855999436C"
-      startBlock: 10957880
-      abi: ExclusiveRewardPoolContract
-    mapping:
-      kind: ethereum/events
-      apiVersion: 0.0.5
-      language: wasm/assemblyscript
-      entities:
-        - Pool
-        - Vault
-      abis:
-        - name: ExclusiveRewardPoolContract
-          file: ./abis/harvest/ExclusiveRewardPool.json
-        - name: PotPoolContract
-          file: ./abis/harvest/PotPool.json
-        - name: ERC20
-          file: ./abis/ERC20.json
-        - name: VaultContract
-          file: ./abis/Vault.json
-        - name: AutoStakeContract
-          file: ./abis/harvest/AutoStake.json
-        - name: OracleContract
-          file: ./abis/Oracle.json
-        - name: UniswapV2PairContract
-          file: ./abis/uniswap/UniswapV2Pair.json
-        - name: WeightedPool2TokensContract
-          file: ./abis/balancer/WeightedPool2Tokens.json
-        - name: BalancerVaultContract
-          file: ./abis/balancer/BalancerVault.json
-        - name: CurveVaultContract
-          file: ./abis/curve/CurveVault.json
-        - name: CurveMinterContract
-          file: ./abis/curve/CurveMinter.json
-        - name: UniswapV3PoolContract
-          file: ./abis/uniswap/UniswapV3Pool.json
-      eventHandlers:
-        - event: RewardAdded(uint256)
-          handler: handleRewardAdded
-      callHandlers:
-        - function: initExclusive(address)
-          handler: handleInitExclusive
-      file: ./src/ExclusiveRewardPoolListener.ts
 templates:
   - kind: ethereum
     name: ControllerListener
-    network: mainnet
+    network: matic
     source:
       abi: ControllerContract
     mapping:
@@ -216,7 +92,7 @@ templates:
       file: ./src/ControllerListener.ts
   - kind: ethereum/contract
     name: VaultListener
-    network: mainnet
+    network: matic
     source:
       abi: VaultContract
     mapping:
@@ -251,82 +127,8 @@ templates:
           handler: handleWithdraw
       file: ./src/VaultListener.ts
   - kind: ethereum/contract
-    name: AutoStakeListner
-    network: mainnet
-    source:
-      abi: AutoStakeContract
-    mapping:
-      kind: ethereum/events
-      apiVersion: 0.0.5
-      language: wasm/assemblyscript
-      entities:
-        - Vault
-      abis:
-        - name: AutoStakeContract
-          file: ./abis/harvest/AutoStake.json
-        - name: VaultContract
-          file: ./abis/Vault.json
-        - name: OracleContract
-          file: ./abis/Oracle.json
-        - name: ERC20
-          file: ./abis/ERC20.json
-        - name: UniswapV2PairContract
-          file: ./abis/uniswap/UniswapV2Pair.json
-        - name: WeightedPool2TokensContract
-          file: ./abis/balancer/WeightedPool2Tokens.json
-        - name: BalancerVaultContract
-          file: ./abis/balancer/BalancerVault.json
-        - name: CurveVaultContract
-          file: ./abis/curve/CurveVault.json
-        - name: CurveMinterContract
-          file: ./abis/curve/CurveMinter.json
-        - name: UniswapV3PoolContract
-          file: ./abis/uniswap/UniswapV3Pool.json
-      eventHandlers:
-        - event: Staked(indexed address,uint256,uint256,uint256,uint256,uint256)
-          handler: handleStaked
-        - event: Withdrawn(indexed address,uint256)
-          handler: handleWithdrawn
-      file: ./src/AutoStakeListener.ts
-  - kind: ethereum/contract
-    name: NoMintPoolListener
-    network: mainnet
-    source:
-      abi: NoMintPoolContract
-    mapping:
-      kind: ethereum/events
-      apiVersion: 0.0.5
-      language: wasm/assemblyscript
-      entities:
-        - Pool
-      abis:
-        - name: NoMintPoolContract
-          file: ./abis/harvest/NoMintRewardPool.json
-        - name: ERC20
-          file: ./abis/ERC20.json
-        - name: VaultContract
-          file: ./abis/Vault.json
-        - name: OracleContract
-          file: ./abis/Oracle.json
-        - name: UniswapV2PairContract
-          file: ./abis/uniswap/UniswapV2Pair.json
-        - name: WeightedPool2TokensContract
-          file: ./abis/balancer/WeightedPool2Tokens.json
-        - name: BalancerVaultContract
-          file: ./abis/balancer/BalancerVault.json
-        - name: CurveVaultContract
-          file: ./abis/curve/CurveVault.json
-        - name: CurveMinterContract
-          file: ./abis/curve/CurveMinter.json
-        - name: UniswapV3PoolContract
-          file: ./abis/uniswap/UniswapV3Pool.json
-      eventHandlers:
-        - event: RewardAdded(uint256)
-          handler: handleRewardAdded
-      file: ./src/NoMintPoolListener.ts
-  - kind: ethereum/contract
     name: PotPoolListener
-    network: mainnet
+    network: matic
     source:
       abi: PotPoolContract
     mapping:
