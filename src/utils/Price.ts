@@ -3,14 +3,19 @@ import { OracleContract } from "../../generated/templates/VaultListener/OracleCo
 import {
   BALANCER_CONTRACT_NAME,
   BD_18,
-  BD_ONE, BD_TEN, CURVE_CONTRACT_NAME,
+  BD_ONE,
+  BD_TEN,
   BI_18,
-  DEFAULT_PRICE, F_UNI_V3_CONTRACT_NAME, FARM_TOKEN, LP_UNI_PAIR_CONTRACT_NAME, NULL_ADDRESS,
-  ORACLE_ADDRESS_FIRST,
-  ORACLE_ADDRESS_SECOND, PS_ADDRESSES,
-  STABLE_COIN_ARRAY, UNISWAP_V3_VALUE, DEFAULT_DECIMAL,
+  CURVE_CONTRACT_NAME,
+  DEFAULT_DECIMAL,
+  DEFAULT_PRICE,
+  F_UNI_V3_CONTRACT_NAME, getFarmToken,
+  getOracleAddress, isPsAddress, isStableCoin,
+  LP_UNI_PAIR_CONTRACT_NAME,
+  NULL_ADDRESS,
+  UNISWAP_V3_VALUE,
 } from "./Constant";
-import { Token, UniswapV3Price, Vault } from "../../generated/schema";
+import { Token, Vault } from "../../generated/schema";
 import { UniswapV2PairContract } from "../../generated/ExclusiveRewardPoolListener/UniswapV2PairContract";
 import { WeightedPool2TokensContract } from "../../generated/templates/VaultListener/WeightedPool2TokensContract";
 import { BalancerVaultContract } from "../../generated/templates/VaultListener/BalancerVaultContract";
@@ -24,15 +29,12 @@ import { pow } from "./Math";
 
 
 export function getPriceForCoin(address: Address, block: number): BigInt {
-  if (STABLE_COIN_ARRAY.join(' ').includes(address.toHex())) {
+  if (isStableCoin(address.toHex())) {
     return BI_18
   }
-  if (block >= 12015724) {
-    let oracle = OracleContract.bind(ORACLE_ADDRESS_FIRST)
-    if (block > 12820106) {
-      oracle = OracleContract.bind(ORACLE_ADDRESS_SECOND)
-    }
-
+  const oracleAddress = getOracleAddress(block)
+  if (oracleAddress != NULL_ADDRESS) {
+    const oracle = OracleContract.bind(oracleAddress)
     let tryGetPrice = oracle.try_getPrice(address)
     if (tryGetPrice.reverted) {
       log.log(log.Level.WARNING, `Can not get price on block ${block} for address ${address.toHex()}`)
@@ -46,7 +48,7 @@ export function getPriceForCoin(address: Address, block: number): BigInt {
 export function getPriceByVault(vault: Vault, block: number): BigDecimal {
 
   if (isPsAddress(vault.id)) {
-    return getPriceForCoin(FARM_TOKEN, block).divDecimal(BD_18)
+    return getPriceForCoin(getFarmToken(), block).divDecimal(BD_18)
   }
   const underlyingAddress = vault.underlying
 
@@ -101,25 +103,7 @@ export function getPriceForUniswapV3(vault: Vault, block: number): BigDecimal {
     const decimal = pow(BD_TEN, decimalA.toI32()).div(pow(BD_TEN, decimalB.toI32()))
     const value = sqrt.times(decimal.div(UNISWAP_V3_VALUE))
     const tokenBPrice = getPriceForCoin(tokenB, block).divDecimal(BD_18)
-    const price = value.times(tokenBPrice)
-
-    let uniswapPrice = UniswapV3Price.load(`${poolAddress.toHex()}-${block}`)
-    if (uniswapPrice == null) {
-      uniswapPrice = new UniswapV3Price(`${poolAddress.toHex()}-${block}`)
-      uniswapPrice.sqrtPriceX96 = sqrtPriceX96
-      uniswapPrice.sqrt = sqrt
-      uniswapPrice.tokenA = tokenA.toHex()
-      uniswapPrice.tokenB = tokenB.toHex()
-      uniswapPrice.decimalA = decimalA
-      uniswapPrice.decimalB = decimalB
-      uniswapPrice.decimal = decimal
-      uniswapPrice.value = value
-      uniswapPrice.tokenBPrice = tokenBPrice
-      uniswapPrice.price = price
-      uniswapPrice.createAtBlock = BigInt.fromI64(block as i64)
-      uniswapPrice.save()
-    }
-    return price
+    return value.times(tokenBPrice)
   }
 
   return BigDecimal.zero()
@@ -226,14 +210,6 @@ function getPriceForBalancer(underlying: string, block: number): BigDecimal {
     return price
   }
   return price.div(totalSupply.toBigDecimal())
-}
-
-export function isPsAddress(address: string): boolean {
-  if (PS_ADDRESSES.join(' ').includes(address)) {
-    return true
-  }
-
-  return false
 }
 
 export function isLpUniPair(name: string): boolean {

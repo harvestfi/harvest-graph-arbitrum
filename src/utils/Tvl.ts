@@ -5,7 +5,6 @@ import { getPriceByVault, getPriceForCoin } from "./Price";
 import { BD_18, BD_ZERO, BI_18, SECONDS_OF_YEAR, YEAR_PERIOD } from "./Constant";
 import { fetchPricePerFullShare } from "./Vault";
 
-// TODO for LP change logic
 export function createTvl(address: Address, transaction: ethereum.Transaction, block: ethereum.Block): void {
   const vaultAddress = address;
   const vault = Vault.load(vaultAddress.toHex())

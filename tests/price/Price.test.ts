@@ -1,7 +1,8 @@
 import { describe, test, assert } from "matchstick-as/assembly/index";
-import { getPriceForUniswapV3, isLpUniPair, isPsAddress, isUniswapV3 } from "../../src/utils/Price";
+import { getPriceForUniswapV3, isLpUniPair, isUniswapV3 } from "../../src/utils/Price";
 import { Vault } from "../../generated/schema";
 import { BigDecimal, BigInt } from "@graphprotocol/graph-ts";
+import { isPsAddress } from "../../src/utils/Constant";
 
 describe('Get price for uniswapV3', () => {
   test('Price by UniV3_WBTC_WETH', () => {
@@ -13,6 +14,7 @@ describe('Get price for uniswapV3', () => {
     vault.timestamp = BigInt.fromI32(12412424)
     vault.underlying = '1'
     vault.lastShareTimestamp = BigInt.fromI32(0)
+    vault.lastSharePrice = BigInt.fromI32(0)
     const price = getPriceForUniswapV3(vault, 123)
     assert.assertTrue(price.equals(BigDecimal.zero()))
   })

@@ -45,6 +45,7 @@ export function loadOrCreateVault(vaultAddress: Address, block: ethereum.Block, 
     vault.timestamp = block.timestamp;
     vault.underlying = loadOrCreateERC20Token(underlying).id
     vault.lastShareTimestamp = BigInt.zero()
+    vault.lastSharePrice = BigInt.zero()
     vault.save();
     VaultListener.create(vaultAddress)
   }

@@ -1,7 +1,7 @@
 import { RewardAdded } from "../generated/NoMintNotifyHelperListener/NoMintRewardPoolContract";
 import { NoMintPoolContract } from "../generated/templates/NoMintPoolListener/NoMintPoolContract";
 import { saveReward } from "./utils/Reward";
-import { saveApy } from "./utils/Apy";
+import { saveApyReward } from "./utils/Apy";
 
 export function handleRewardAdded(event: RewardAdded): void {
   const poolAddress = event.address
@@ -12,5 +12,5 @@ export function handleRewardAdded(event: RewardAdded): void {
   const periodFinish = poolContract.periodFinish()
 
   saveReward(poolAddress, rewardToken, rewardRate, periodFinish, rewardAmount, event.transaction, event.block)
-  saveApy(poolAddress, rewardToken, rewardRate, periodFinish, rewardAmount, event.transaction, event.block)
+  saveApyReward(poolAddress, rewardToken, rewardRate, periodFinish, rewardAmount, event.transaction, event.block)
 }

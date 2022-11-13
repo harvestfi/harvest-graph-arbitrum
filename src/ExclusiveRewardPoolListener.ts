@@ -1,5 +1,5 @@
 import { saveReward } from "./utils/Reward";
-import { saveApy } from "./utils/Apy";
+import { saveApyReward } from "./utils/Apy";
 import {
   ExclusiveRewardPoolContract, InitExclusiveCall,
   RewardAdded
@@ -20,7 +20,7 @@ export function handleRewardAdded(event: RewardAdded): void {
   const periodFinish = poolContract.periodFinish()
 
   saveReward(poolAddress, rewardToken, rewardRate, periodFinish, rewardAmount, event.transaction, event.block)
-  saveApy(poolAddress, rewardToken, rewardRate, periodFinish, rewardAmount, event.transaction, event.block)
+  saveApyReward(poolAddress, rewardToken, rewardRate, periodFinish, rewardAmount, event.transaction, event.block)
 }
 
 export function handleInitExclusive(call: InitExclusiveCall): void {
