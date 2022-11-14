@@ -5,6 +5,7 @@ import { Vault } from "../../generated/schema";
 import { fetchContractDecimal, fetchContractName, fetchContractSymbol } from "./ERC20";
 import { loadOrCreateERC20Token } from "./Token";
 import { VaultListener } from "../../generated/templates";
+import { loadOrCreateStrategy } from "./Strategy";
 
 
 export function fetchUnderlyingAddress(address: Address): Address {
@@ -31,7 +32,7 @@ export function fetchPricePerFullShare(address: Address): BigInt {
   return sharePrice
 }
 
-export function loadOrCreateVault(vaultAddress: Address, block: ethereum.Block, strategy: string = 'unknown'): Vault {
+export function loadOrCreateVault(vaultAddress: Address, block: ethereum.Block, strategyAddress: string = 'unknown'): Vault {
   let vault = Vault.load(vaultAddress.toHex())
   if (vault == null) {
     vault = new Vault(vaultAddress.toHex());
@@ -40,7 +41,10 @@ export function loadOrCreateVault(vaultAddress: Address, block: ethereum.Block, 
     vault.symbol = fetchContractSymbol(vaultAddress)
     const underlying = fetchUnderlyingAddress(vaultAddress)
     vault.createAtBlock = block.number;
-    vault.strategy = strategy
+    if (strategyAddress != 'unknown' && strategyAddress != null) {
+      loadOrCreateStrategy(strategyAddress, block)
+    }
+    vault.strategy = strategyAddress
     vault.active = true;
     vault.timestamp = block.timestamp;
     vault.underlying = loadOrCreateERC20Token(underlying).id

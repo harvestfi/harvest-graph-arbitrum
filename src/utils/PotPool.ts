@@ -32,3 +32,8 @@ export function loadOrCreatePotPool(poolAddress: Address, ethBlock: ethereum.Blo
     PotPoolListener.create(poolAddress);
   }
 }
+
+export function isPool(address: Address): boolean {
+  const pool = PotPoolContract.bind(address)
+  return pool.try_lpToken().reverted == false
+}

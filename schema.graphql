@@ -1,10 +1,3 @@
-type Controller @entity {
-  "controller address"
-  id: ID!
-  createAtBlock: BigInt!
-  timestamp: BigInt!
-}
-
 type Vault @entity {
   "vault address"
   id: ID!
@@ -130,16 +123,6 @@ type ApyAutoCompound @entity {
 type AutoStake @entity {
   "farm pool address"
   id: ID!
-  timestamp: BigInt!
-  createAtBlock: BigInt!
-}
-
-type UniswapV3Pool @entity {
-  "symbol-symbol-fee"
-  id: ID!
-  tokenA: Token!
-  tokenB: Token!
-  pool: String!
   timestamp: BigInt!
   createAtBlock: BigInt!
 }

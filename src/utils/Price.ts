@@ -22,8 +22,6 @@ import { BalancerVaultContract } from "../../generated/templates/VaultListener/B
 import { ERC20 } from "../../generated/Controller/ERC20";
 import { CurveVaultContract } from "../../generated/templates/VaultListener/CurveVaultContract";
 import { CurveMinterContract } from "../../generated/templates/VaultListener/CurveMinterContract";
-import { getUniswapPoolV3ByVault } from "./UniswapV3Pool";
-import { UniswapV3PoolContract } from "../../generated/ExclusiveRewardPoolListener/UniswapV3PoolContract";
 import { fetchContractDecimal } from "./ERC20";
 import { pow } from "./Math";
 
@@ -57,11 +55,6 @@ export function getPriceByVault(vault: Vault, block: number): BigDecimal {
     return price.divDecimal(BD_18)
   }
 
-  // is from uniSwapV3 pools
-  if (isUniswapV3(vault.name)) {
-    return getPriceForUniswapV3(vault, block)
-  }
-
   const underlying = Token.load(underlyingAddress)
   if (underlying != null) {
     if (isLpUniPair(underlying.name)) {
@@ -90,24 +83,6 @@ export function getPriceByVault(vault: Vault, block: number): BigDecimal {
 
 }
 
-export function getPriceForUniswapV3(vault: Vault, block: number): BigDecimal {
-  const poolAddress = getUniswapPoolV3ByVault(vault)
-  if (!poolAddress.equals(NULL_ADDRESS)) {
-    const pool =  UniswapV3PoolContract.bind(poolAddress)
-    const sqrtPriceX96 = pool.slot0().getSqrtPriceX96()
-    const sqrt = pow(sqrtPriceX96.toBigDecimal(), 2)
-    const tokenA = pool.token0()
-    const tokenB = pool.token1()
-    const decimalA = fetchContractDecimal(tokenA)
-    const decimalB = fetchContractDecimal(tokenB)
-    const decimal = pow(BD_TEN, decimalA.toI32()).div(pow(BD_TEN, decimalB.toI32()))
-    const value = sqrt.times(decimal.div(UNISWAP_V3_VALUE))
-    const tokenBPrice = getPriceForCoin(tokenB, block).divDecimal(BD_18)
-    return value.times(tokenBPrice)
-  }
-
-  return BigDecimal.zero()
-}
 
 function getPriceForCurve(underlyingAddress: string, block: number): BigDecimal {
   const curveContract = CurveVaultContract.bind(Address.fromString(underlyingAddress))
