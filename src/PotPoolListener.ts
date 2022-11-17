@@ -2,15 +2,29 @@ import { RewardAdded } from "../generated/PotNotifyHelperListener/PotPoolContrac
 import { PotPoolContract } from "../generated/templates/PotPoolListener/PotPoolContract";
 import { saveReward } from "./utils/Reward";
 import { saveApyReward } from "./utils/Apy";
+import { log } from "@graphprotocol/graph-ts";
 
 export function handleRewardAdded(event: RewardAdded): void {
   const poolAddress = event.address
-  const poolContract = PotPoolContract.bind(poolAddress)
-  const rewardToken = poolContract.rewardToken()
   const rewardAmount = event.params.reward
-  const rewardRate = poolContract.rewardRate()
-  const periodFinish = poolContract.periodFinish()
 
-  saveReward(poolAddress, rewardToken, rewardRate, periodFinish, rewardAmount, event.transaction, event.block)
-  saveApyReward(poolAddress, rewardToken, rewardRate, periodFinish, rewardAmount, event.transaction, event.block)
+  const poolContract = PotPoolContract.bind(poolAddress)
+  const tryRewardToken = poolContract.try_rewardToken()
+  const tryRewardRate = poolContract.try_rewardRate()
+  const tryPeriodFinish = poolContract.try_periodFinish()
+
+  if (tryPeriodFinish.reverted) {
+    log.log(log.Level.WARNING, `Can not get periodFinish, handleRewardAdded on ${poolAddress}`)
+  }
+
+  if (tryRewardToken.reverted) {
+    log.log(log.Level.WARNING, `Can not get rewardToken, handleRewardAdded on ${poolAddress}`)
+  }
+
+  if (tryRewardRate.reverted) {
+    log.log(log.Level.WARNING, `Can not get rewardRate, handleRewardAdded on ${poolAddress}`)
+  }
+
+  saveReward(poolAddress, tryRewardToken.value, tryRewardRate.value, tryPeriodFinish.value, rewardAmount, event.transaction, event.block)
+  saveApyReward(poolAddress, tryRewardToken.value, tryRewardRate.value, tryPeriodFinish.value, rewardAmount, event.transaction, event.block)
 }
