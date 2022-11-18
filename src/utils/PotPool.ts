@@ -10,8 +10,11 @@ export function loadOrCreatePotPool(poolAddress: Address, ethBlock: ethereum.Blo
   if (pool == null) {
     let poolContract = PotPoolContract.bind(poolAddress)
     let vaultAddress = poolContract.lpToken();
-    let rewardTokenAddress = poolContract.rewardToken();
-    let rewardToken = loadOrCreateERC20Token(rewardTokenAddress)
+    let tryRewardToken = poolContract.try_rewardToken();
+    if (tryRewardToken.reverted) {
+      return;
+    }
+    let rewardToken = loadOrCreateERC20Token(tryRewardToken.value)
     let pool = new Pool(poolAddress.toHex())
     pool.timestamp = ethBlock.timestamp
     pool.createAtBlock = ethBlock.number
