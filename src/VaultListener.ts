@@ -12,5 +12,4 @@ export function handleTransfer(event: Transfer): void {
     PotPoolListener.create(to)
   }
   createTvl(event.address, event.transaction, event.block)
-  saveApyAutoCompound(event.address, event.block, event.transaction)
 }
