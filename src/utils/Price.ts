@@ -86,10 +86,12 @@ export function getPriceByVault(vault: Vault, block: number): BigDecimal {
 export function getPriceForCurve(underlyingAddress: string, block: number): BigDecimal {
   const curveContract = CurveVaultContract.bind(Address.fromString(underlyingAddress))
   const tryMinter = curveContract.try_minter()
-  if (tryMinter.reverted) {
-    return BigDecimal.zero()
+
+  let minter = CurveMinterContract.bind(Address.fromString(underlyingAddress))
+  if (!tryMinter.reverted) {
+    minter = CurveMinterContract.bind(tryMinter.value)
   }
-  const minter = CurveMinterContract.bind(tryMinter.value)
+
   let index = 0
   let tryCoins = minter.try_coins(BigInt.fromI32(index))
   while (!tryCoins.reverted) {
@@ -142,7 +144,7 @@ function normalizePrecision(amount: BigInt, decimal: BigInt): BigInt {
   return amount.div(BI_18.div(BigInt.fromI64(10 ** decimal.toI64())))
 }
 
-function getPriceLpUniPair(underlyingAddress: string, block: number): BigDecimal {
+export function getPriceLpUniPair(underlyingAddress: string, block: number): BigDecimal {
   const uniswapV2Pair = UniswapV2PairContract.bind(Address.fromString(underlyingAddress))
   const tryGetReserves = uniswapV2Pair.try_getReserves()
   if (tryGetReserves.reverted) {
@@ -152,13 +154,19 @@ function getPriceLpUniPair(underlyingAddress: string, block: number): BigDecimal
   }
   const reserves = tryGetReserves.value
   const totalSupply = uniswapV2Pair.totalSupply()
-  const positionFraction = BD_ONE.div(totalSupply.toBigDecimal())
+  const positionFraction = BD_ONE.div(totalSupply.toBigDecimal().div(BD_18))
+
+  const token0 = uniswapV2Pair.token0()
+  const token1 = uniswapV2Pair.token1()
+
   const firstCoin = reserves.get_reserve0().toBigDecimal().times(positionFraction)
+    .div(pow(BD_TEN, fetchContractDecimal(token0).toI32()))
   const secondCoin = reserves.get_reserve1().toBigDecimal().times(positionFraction)
+    .div(pow(BD_TEN, fetchContractDecimal(token1).toI32()))
 
 
-  const token0Price = getPriceForCoin(uniswapV2Pair.token0(), block)
-  const token1Price = getPriceForCoin(uniswapV2Pair.token1(), block)
+  const token0Price = getPriceForCoin(token0, block)
+  const token1Price = getPriceForCoin(token1, block)
 
   if (token0Price.isZero() || token1Price.isZero()) {
     return BigDecimal.zero()
@@ -172,7 +180,6 @@ function getPriceLpUniPair(underlyingAddress: string, block: number): BigDecimal
         .divDecimal(BD_18)
         .times(secondCoin)
     )
-    .times(BD_18)
 }
 
 export function getPriceForBalancer(underlying: string, block: number): BigDecimal {
