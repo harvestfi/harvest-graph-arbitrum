@@ -11,7 +11,7 @@ import {
   DEFAULT_PRICE,
   F_UNI_V3_CONTRACT_NAME, getFarmToken,
   getOracleAddress, isPsAddress, isStableCoin,
-  LP_UNI_PAIR_CONTRACT_NAME,
+  LP_UNI_PAIR_CONTRACT_NAME, MESH_SWAP_CONTRACT,
   NULL_ADDRESS,
   UNISWAP_V3_VALUE,
 } from "./Constant";
@@ -24,6 +24,7 @@ import { CurveVaultContract } from "../../generated/templates/VaultListener/Curv
 import { CurveMinterContract } from "../../generated/templates/VaultListener/CurveMinterContract";
 import { fetchContractDecimal } from "./ERC20";
 import { pow } from "./Math";
+import { MeshSwapContract } from "../../generated/Controller1/MeshSwapContract";
 
 
 export function getPriceForCoin(address: Address, block: number): BigInt {
@@ -207,6 +208,49 @@ export function getPriceForBalancer(underlying: string, block: number): BigDecim
   return price.div(totalSupply.toBigDecimal())
 }
 
+
+export function getPriceFotMeshSwap(underlyingAddress: string, block: number): BigDecimal {
+  const meshSwap = MeshSwapContract.bind(Address.fromString(underlyingAddress))
+
+  const tryReserve0 = meshSwap.try_reserve0()
+  const tryReserve1 = meshSwap.try_reserve1()
+
+  if (tryReserve0.reverted || tryReserve1.reverted) {
+    log.log(log.Level.WARNING, `Can not get reserves for underlyingAddress = ${underlyingAddress}, try get price for coin`)
+
+    return BigDecimal.zero()
+  }
+
+  const reserve0 = tryReserve0.value
+  const reserve1 = tryReserve1.value
+  const totalSupply = meshSwap.totalSupply()
+  const token0 = meshSwap.token0()
+  const token1 = meshSwap.token1()
+  const positionFraction = BD_ONE.div(totalSupply.toBigDecimal().div(pow(BD_TEN, meshSwap.decimals())))
+
+  const firstCoin = reserve0.toBigDecimal().times(positionFraction)
+    .div(pow(BD_TEN, fetchContractDecimal(token0).toI32()))
+  const secondCoin = reserve1.toBigDecimal().times(positionFraction)
+    .div(pow(BD_TEN, fetchContractDecimal(token1).toI32()))
+
+
+  const token0Price = getPriceForCoin(token0, block)
+  const token1Price = getPriceForCoin(token1, block)
+
+  if (token0Price.isZero() || token1Price.isZero()) {
+    return BigDecimal.zero()
+  }
+
+  return token0Price
+    .divDecimal(BD_18)
+    .times(firstCoin)
+    .plus(
+      token1Price
+        .divDecimal(BD_18)
+        .times(secondCoin)
+    )
+}
+
 export function isLpUniPair(name: string): boolean {
   for (let i=0;i<LP_UNI_PAIR_CONTRACT_NAME.length;i++) {
     if (name.toLowerCase().startsWith(LP_UNI_PAIR_CONTRACT_NAME[i])) {
@@ -234,6 +278,13 @@ function isCurve(name: string): boolean {
 
 export function isUniswapV3(name: string): boolean {
   if (name.toLowerCase().startsWith(F_UNI_V3_CONTRACT_NAME)) {
+    return true
+  }
+  return false
+}
+
+export function isMeshSwap(name: string): boolean {
+  if (name.toLowerCase().startsWith(MESH_SWAP_CONTRACT)) {
     return true
   }
   return false
