@@ -78,6 +78,10 @@ export function getPriceByVault(vault: Vault, block: number): BigDecimal {
 
       return getPriceForCurve(underlyingAddress, block)
     }
+
+    if (isMeshSwap(underlying.name)) {
+      return getPriceFotMeshSwap(underlyingAddress, block)
+    }
   }
 
   return BigDecimal.zero()
