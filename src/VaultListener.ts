@@ -1,9 +1,10 @@
 import { createTvl } from "./utils/Tvl";
 import { saveApyAutoCompound } from "./utils/Apy";
-import { Transfer } from "../generated/Controller/VaultContract";
+import { Deposit, Invest, Transfer, Withdraw } from "../generated/Controller/VaultContract";
 import { isPool, loadOrCreatePotPool } from "./utils/PotPool";
 import { PotPoolContract } from "../generated/templates/PotPoolListener/PotPoolContract";
 import { PotPoolListener } from "../generated/templates";
+import { createUserBalance } from "./utils/Vault";
 
 export function handleTransfer(event: Transfer): void {
   const to = event.params.to
@@ -11,5 +12,17 @@ export function handleTransfer(event: Transfer): void {
     loadOrCreatePotPool(to, event.block)
     PotPoolListener.create(to)
   }
+  createTvl(event.address, event.transaction, event.block)
+}
+
+export function handleDeposit(event: Deposit): void {
+  createUserBalance(event.address, event.params.amount, event.params.beneficiary, event.transaction, event.block, true)
+}
+
+export function handleWithdraw(event: Withdraw): void {
+  createUserBalance(event.address, event.params.amount, event.params.beneficiary, event.transaction, event.block, false)
+}
+
+export function handleInvest(event: Invest): void {
   createTvl(event.address, event.transaction, event.block)
 }
