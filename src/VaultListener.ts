@@ -5,6 +5,7 @@ import { isPool, loadOrCreatePotPool } from "./utils/PotPool";
 import { PotPoolContract } from "../generated/templates/PotPoolListener/PotPoolContract";
 import { PotPoolListener } from "../generated/templates";
 import { createUserBalance } from "./utils/Vault";
+import { Approval } from "../generated/Controller/ERC20";
 
 export function handleTransfer(event: Transfer): void {
   const to = event.params.to
@@ -24,5 +25,9 @@ export function handleWithdraw(event: Withdraw): void {
 }
 
 export function handleInvest(event: Invest): void {
+  createTvl(event.address, event.transaction, event.block)
+}
+
+export function handleApproval(event: Approval): void {
   createTvl(event.address, event.transaction, event.block)
 }

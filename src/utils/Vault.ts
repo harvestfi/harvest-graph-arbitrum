@@ -63,14 +63,15 @@ export function createUserBalance(vaultAddress: Address, amount: BigInt, benefic
   const vault = Vault.load(vaultAddress.toHex())
   if (vault != null) {
     const vaultContract = VaultContract.bind(vaultAddress)
-    const sharePrice = vaultContract.getPricePerFullShare().divDecimal(pow(BD_TEN, vault.decimal.toI32()))
-    let poolBalance = BigDecimal.zero()
+    const sharePrice = vaultContract.getPricePerFullShare()
+    let poolBalance = BigInt.zero()
     if (vault.pool != null) {
       const poolContract = ERC20.bind(Address.fromString(vault.pool!))
-      poolBalance = poolContract.balanceOf(beneficary).toBigDecimal().times(sharePrice)
+      poolBalance = poolContract.balanceOf(beneficary).times(sharePrice)
     }
-    const vaultBalance = vaultContract.balanceOf(beneficary).toBigDecimal().times(sharePrice)
+    const vaultBalance = vaultContract.balanceOf(beneficary).times(sharePrice)
     const value = vaultBalance.plus(poolBalance)
+
     const userBalanceId = `${vault.id}-${beneficary.toHex()}`
     let userBalance = UserBalance.load(userBalanceId)
     if (userBalance == null) {
@@ -78,19 +79,22 @@ export function createUserBalance(vaultAddress: Address, amount: BigInt, benefic
       userBalance.createAtBlock = block.number
       userBalance.timestamp = block.timestamp
       userBalance.vault = vault.id
-      userBalance.value = BigDecimal.zero()
+      userBalance.value = BigInt.zero()
       userBalance.userAddress = beneficary.toHex()
     }
-    // if (isDeposit) {
-    //   userBalance.value = userBalance.value.plus(amount)
-    // } else {
-    //   const tempValue = userBalance.value.minus(amount)
-    //   userBalance.value = tempValue.lt(BigInt.zero())
-    //     ? BigInt.zero()
-    //     : tempValue
-    // }
 
-    userBalance.value = value
+    if (isDeposit) {
+      userBalance.value = userBalance.value.plus(amount)
+    } else {
+      const tempValue = userBalance.value.minus(amount)
+
+      // if tempValue < 0, then find balance from vault and pool
+      userBalance.value = tempValue.lt(BigInt.zero())
+        ? value
+        : tempValue
+    }
+
+    // userBalance.value = value
 
     userBalance.save()
     const userBalanceHistory = new UserBalanceHistory(`${tx.hash.toHex()}-${beneficary.toHex()}`)
@@ -102,8 +106,8 @@ export function createUserBalance(vaultAddress: Address, amount: BigInt, benefic
       ? 'Deposit'
       : 'Withdraw'
     userBalanceHistory.value = userBalance.value
-    userBalanceHistory.vaultBalance = vaultBalance
-    userBalanceHistory.poolBalance = poolBalance
+    // userBalanceHistory.vaultBalance = vaultBalance
+    // userBalanceHistory.poolBalance = poolBalance
 
     userBalanceHistory.sharePrice = vaultContract.getPricePerFullShare()
     userBalanceHistory.save()
