@@ -50,6 +50,12 @@ export function saveApyReward(
     let vault = Vault.load(pool.vault)
     if (vault != null) {
 
+      if (vault.skipFirstApyReward == true) {
+        vault.skipFirstApyReward = false
+        vault.save()
+        return
+      }
+
       let price = BigDecimal.zero()
       if (isPsAddress(pool.vault)) {
         price = getPriceForCoin(getFarmToken(), block.number.toI32()).divDecimal(BD_18)
@@ -82,6 +88,11 @@ export function saveApyReward(
           apy.apr = apr
           apy.apy = apyValue
         }
+      }
+
+      if (apy.apy.le(BigDecimal.zero())) {
+        // don't save 0 APY
+        return;
       }
       apy.vault = vault.id
       apy.timestamp = block.timestamp

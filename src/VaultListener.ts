@@ -4,7 +4,7 @@ import { Deposit, Invest, Transfer, Withdraw } from "../generated/Controller/Vau
 import { isPool, loadOrCreatePotPool } from "./utils/PotPool";
 import { PotPoolContract } from "../generated/templates/PotPoolListener/PotPoolContract";
 import { PotPoolListener } from "../generated/templates";
-import { createUserBalance } from "./utils/Vault";
+import { createUserBalance } from "./utils/User";
 import { Approval } from "../generated/Controller/ERC20";
 
 export function handleTransfer(event: Transfer): void {

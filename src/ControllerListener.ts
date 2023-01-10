@@ -26,7 +26,7 @@ export function handleSharePriceChangeLog(event: SharePriceChangeLog): void {
   sharePrice.timestamp = timestamp;
   sharePrice.save();
 
-  if (vault != null) {
+  if (vault != null && sharePrice.oldSharePrice != sharePrice.newSharePrice) {
     const lastShareTimestamp = vault.lastShareTimestamp
     if (!lastShareTimestamp.isZero()) {
       const diffSharePrice = sharePrice.newSharePrice.minus(sharePrice.oldSharePrice).divDecimal(pow(BD_TEN, vault.decimal.toI32()))
