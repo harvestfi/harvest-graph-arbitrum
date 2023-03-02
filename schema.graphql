@@ -1,3 +1,12 @@
+type Controller @entity {
+  "controller address"
+  id: ID!
+  governance: String!
+  store: String!
+  createAtBlock: BigInt!
+  timestamp: BigInt!
+}
+
 type Vault @entity {
   "vault address"
   id: ID!
@@ -99,11 +108,10 @@ type ApyReward @entity {
   vault: Vault!
   apy: BigDecimal!
   apr: BigDecimal!
-  priceUnderlying: BigDecimal!
-  periodFinish: BigInt!
-  rewardAmount: BigInt!
-  rewardRate: BigInt!
-  rewardForPeriod: BigDecimal!
+  prices: [BigDecimal!]!
+  periodFinishes: [BigInt!]!
+  rewardRates: [BigInt!]!
+  rewardForPeriods: [BigDecimal!]!
   tvlUsd: BigDecimal!
   timestamp: BigInt!
   createAtBlock: BigInt!

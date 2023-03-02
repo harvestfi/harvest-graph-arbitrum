@@ -1,5 +1,5 @@
 import { describe, test, assert } from "matchstick-as/assembly/index";
-import { isLpUniPair } from "../../src/utils/Price";
+import { isLpUniPair } from "../../src/utils/PriceUtils";
 
 describe('Utils tests', () => {
   test('Check ApeSwapFinance', () => {

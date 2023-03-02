@@ -13,7 +13,6 @@ import {
   getOracleAddress, isPsAddress, isStableCoin,
   LP_UNI_PAIR_CONTRACT_NAME, MESH_SWAP_CONTRACT,
   NULL_ADDRESS,
-  UNISWAP_V3_VALUE,
 } from "./Constant";
 import { Token, Vault } from "../../generated/schema";
 import { UniswapV2PairContract } from "../../generated/ExclusiveRewardPoolListener/UniswapV2PairContract";
@@ -22,9 +21,10 @@ import { BalancerVaultContract } from "../../generated/templates/VaultListener/B
 import { ERC20 } from "../../generated/Controller/ERC20";
 import { CurveVaultContract } from "../../generated/templates/VaultListener/CurveVaultContract";
 import { CurveMinterContract } from "../../generated/templates/VaultListener/CurveMinterContract";
-import { fetchContractDecimal } from "./ERC20";
-import { pow } from "./Math";
+import { fetchContractDecimal } from "./ERC20Utils";
+import { pow } from "./MathUtils";
 import { MeshSwapContract } from "../../generated/Controller1/MeshSwapContract";
+import { isBalancer, isCurve, isLpUniPair, isMeshSwap } from "./PlatformUtils";
 
 
 export function getPriceForCoin(address: Address, block: number): BigInt {
@@ -253,43 +253,4 @@ export function getPriceFotMeshSwap(underlyingAddress: string, block: number): B
         .divDecimal(BD_18)
         .times(secondCoin)
     )
-}
-
-export function isLpUniPair(name: string): boolean {
-  for (let i=0;i<LP_UNI_PAIR_CONTRACT_NAME.length;i++) {
-    if (name.toLowerCase().startsWith(LP_UNI_PAIR_CONTRACT_NAME[i])) {
-      return true
-    }
-  }
-  return false
-}
-
-function isBalancer(name: string): boolean {
-  if (name.toLowerCase().startsWith(BALANCER_CONTRACT_NAME)) {
-    return true
-  }
-
-  return false
-}
-
-function isCurve(name: string): boolean {
-  if (name.toLowerCase().startsWith(CURVE_CONTRACT_NAME)) {
-    return true
-  }
-
-  return false
-}
-
-export function isUniswapV3(name: string): boolean {
-  if (name.toLowerCase().startsWith(F_UNI_V3_CONTRACT_NAME)) {
-    return true
-  }
-  return false
-}
-
-export function isMeshSwap(name: string): boolean {
-  if (name.toLowerCase().startsWith(MESH_SWAP_CONTRACT)) {
-    return true
-  }
-  return false
 }

@@ -1,11 +1,10 @@
 import { SharePrice, Strategy, Vault } from "../generated/schema";
-import { loadOrCreateVault } from "./utils/Vault";
-import { pow, powBI } from "./utils/Math";
+import { loadOrCreateVault } from "./types/Vault";
+import { pow, powBI } from "./utils/MathUtils";
 import { BD_TEN, BI_TEN } from "./utils/Constant";
-import { calculateAndSaveApyAutoCompound } from "./utils/Apy";
 import { SharePriceChangeLog } from "../generated/Controller/ControllerContract";
 import { Address } from "@graphprotocol/graph-ts";
-import { VaultContract } from "../generated/Controller/VaultContract";
+import { calculateAndSaveApyAutoCompound } from "./types/Apy";
 
 
 export function handleSharePriceChangeLog(event: SharePriceChangeLog): void {

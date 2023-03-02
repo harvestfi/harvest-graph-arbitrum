@@ -122,10 +122,6 @@ templates:
       eventHandlers:
         - event: Transfer(indexed address,indexed address,uint256)
           handler: handleTransfer
-        - event: Deposit(indexed address,uint256)
-          handler: handleDeposit
-        - event: Withdraw(indexed address,uint256)
-          handler: handleWithdraw
         - event: Invest(uint256)
           handler: handleInvest
         - event: Approval(indexed address,indexed address,uint256)

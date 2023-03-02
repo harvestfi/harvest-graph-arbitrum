@@ -5,7 +5,7 @@ import {
   getPriceLpUniPair,
   isLpUniPair, isMeshSwap,
   isUniswapV3
-} from "../../src/utils/Price";
+} from "../../src/utils/PriceUtils";
 import { Vault } from "../../generated/schema";
 import { Address, BigDecimal, BigInt, Bytes, ethereum, log } from "@graphprotocol/graph-ts";
 import {

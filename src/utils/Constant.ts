@@ -1,5 +1,5 @@
 import { Address, BigDecimal, BigInt, dataSource } from "@graphprotocol/graph-ts";
-import { pow } from "./Math";
+import { pow } from "./MathUtils";
 
 export const UNKNOWN = 'unknown';
 

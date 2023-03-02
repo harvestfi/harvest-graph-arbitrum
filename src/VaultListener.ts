@@ -1,11 +1,9 @@
-import { createTvl } from "./utils/Tvl";
-import { saveApyAutoCompound } from "./utils/Apy";
-import { Deposit, Invest, Transfer, Withdraw } from "../generated/Controller/VaultContract";
-import { isPool, loadOrCreatePotPool } from "./utils/PotPool";
-import { PotPoolContract } from "../generated/templates/PotPoolListener/PotPoolContract";
 import { PotPoolListener } from "../generated/templates";
-import { createUserBalance } from "./utils/User";
-import { Approval } from "../generated/Controller/ERC20";
+import { createUserBalance } from "./types/UserBalance";
+import { isPool } from "./utils/PotPoolUtils";
+import { loadOrCreatePotPool } from "./types/PotPool";
+import { createTvl } from "./types/Tvl";
+import { Invest, Approval, Transfer } from "../generated/Controller/VaultContract";
 
 export function handleTransfer(event: Transfer): void {
   const to = event.params.to
@@ -14,14 +12,8 @@ export function handleTransfer(event: Transfer): void {
     PotPoolListener.create(to)
   }
   createTvl(event.address, event.transaction, event.block)
-}
-
-export function handleDeposit(event: Deposit): void {
-  createUserBalance(event.address, event.params.amount, event.params.beneficiary, event.transaction, event.block, true)
-}
-
-export function handleWithdraw(event: Withdraw): void {
-  createUserBalance(event.address, event.params.amount, event.params.beneficiary, event.transaction, event.block, false)
+  createUserBalance(event.address, event.params.value, event.params.from, event.transaction, event.block, false)
+  createUserBalance(event.address, event.params.value, event.params.to, event.transaction, event.block, true)
 }
 
 export function handleInvest(event: Invest): void {
