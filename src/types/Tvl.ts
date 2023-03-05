@@ -1,9 +1,9 @@
 import { Address, BigDecimal, ethereum } from "@graphprotocol/graph-ts";
 import { Tvl, Vault } from "../../generated/schema";
 import { fetchContractTotalSupply } from "../utils/ERC20Utils";
-import { BD_TEN, BD_ZERO } from "../utils/Constant";
+import { BD_TEN, BD_ZERO, getFromTotalAssets } from "../utils/Constant";
 import { pow } from "../utils/MathUtils";
-import { fetchPricePerFullShare } from "../utils/VaultUtils";
+import { fetchContractTotalAssets, fetchPricePerFullShare } from "../utils/VaultUtils";
 import { getPriceByVault } from "../utils/PriceUtils";
 
 export function createTvl(address: Address, transaction: ethereum.Transaction, block: ethereum.Block): void {
@@ -18,7 +18,12 @@ export function createTvl(address: Address, transaction: ethereum.Transaction, b
       tvl.vault = vault.id
       tvl.timestamp = block.timestamp
       tvl.createAtBlock = block.number
-      tvl.totalSupply = fetchContractTotalSupply(vaultAddress)
+
+      if (getFromTotalAssets(vault.id)) {
+        tvl.totalSupply = fetchContractTotalAssets(vaultAddress)
+      } else {
+        tvl.totalSupply = fetchContractTotalSupply(vaultAddress)
+      }
 
       const decimal = pow(BD_TEN, vault.decimal.toI32())
       tvl.sharePrice = fetchPricePerFullShare(vaultAddress)

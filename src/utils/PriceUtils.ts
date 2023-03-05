@@ -5,43 +5,55 @@ import {
   BD_18,
   BD_ONE,
   BD_TEN,
-  BI_18,
+  BI_18, BI_TEN,
   CURVE_CONTRACT_NAME,
   DEFAULT_DECIMAL,
   DEFAULT_PRICE,
   F_UNI_V3_CONTRACT_NAME, getFarmToken,
   getOracleAddress, isPsAddress, isStableCoin,
   LP_UNI_PAIR_CONTRACT_NAME, MESH_SWAP_CONTRACT,
-  NULL_ADDRESS,
+  NULL_ADDRESS, SUSHI_SWAP_FACTORY, USDC_ARBITRUM, USDC_DECIMAL,
 } from "./Constant";
 import { Token, Vault } from "../../generated/schema";
-import { UniswapV2PairContract } from "../../generated/ExclusiveRewardPoolListener/UniswapV2PairContract";
 import { WeightedPool2TokensContract } from "../../generated/templates/VaultListener/WeightedPool2TokensContract";
 import { BalancerVaultContract } from "../../generated/templates/VaultListener/BalancerVaultContract";
 import { ERC20 } from "../../generated/Controller/ERC20";
 import { CurveVaultContract } from "../../generated/templates/VaultListener/CurveVaultContract";
 import { CurveMinterContract } from "../../generated/templates/VaultListener/CurveMinterContract";
 import { fetchContractDecimal } from "./ERC20Utils";
-import { pow } from "./MathUtils";
-import { MeshSwapContract } from "../../generated/Controller1/MeshSwapContract";
+import { pow, powBI } from "./MathUtils";
 import { isBalancer, isCurve, isLpUniPair, isMeshSwap } from "./PlatformUtils";
+import { UniswapV2PairContract } from "../../generated/Controller/UniswapV2PairContract";
+import { MeshSwapContract } from "../../generated/Controller/MeshSwapContract";
+import { UniswapV2Factory } from "../../generated/Controller/UniswapV2Factory";
+import { UniswapV2FactoryContract } from "../../generated/Controller/UniswapV2FactoryContract";
 
 
 export function getPriceForCoin(address: Address, block: number): BigInt {
   if (isStableCoin(address.toHex())) {
     return BI_18
   }
-  const oracleAddress = getOracleAddress(block)
-  if (oracleAddress != NULL_ADDRESS) {
-    const oracle = OracleContract.bind(oracleAddress)
-    let tryGetPrice = oracle.try_getPrice(address)
-    if (tryGetPrice.reverted) {
-      log.log(log.Level.WARNING, `Can not get price on block ${block} for address ${address.toHex()}`)
-      return DEFAULT_PRICE
-    }
-    return tryGetPrice.value;
+  const uniswapFactoryContract = UniswapV2FactoryContract.bind(SUSHI_SWAP_FACTORY)
+  const tryGetPair = uniswapFactoryContract.try_getPair(USDC_ARBITRUM, address)
+  if (tryGetPair.reverted) {
+    return DEFAULT_PRICE
   }
-  return DEFAULT_PRICE
+
+  const poolAddress = tryGetPair.value
+
+  const uniswapPairContract = UniswapV2PairContract.bind(poolAddress);
+  const tryGetReserves = uniswapPairContract.try_getReserves()
+  if (tryGetReserves.reverted) {
+    log.log(log.Level.WARNING, `Can not get reserves for ${poolAddress.toHex()}`)
+
+    return DEFAULT_PRICE
+  }
+  const reserves = tryGetReserves.value
+  const decimal = fetchContractDecimal(address)
+
+  const delimiter = powBI(BI_TEN, decimal.toI32() - USDC_DECIMAL + DEFAULT_DECIMAL)
+
+  return reserves.get_reserve1().times(delimiter).div(reserves.get_reserve0())
 }
 
 export function getPriceByVault(vault: Vault, block: number): BigDecimal {
@@ -129,7 +141,12 @@ export function getPriceForCurve(underlyingAddress: string, block: number): BigD
       break
     }
     const token = tryCoins1.value
-    const tokenPrice = getPriceForCoin(token, block).divDecimal(BD_18)
+    let tokenPrice = getPriceForCoin(token, block).toBigDecimal()
+    if (tokenPrice == BigDecimal.zero()) {
+      tokenPrice = getPriceForCurve(token.toHex(), block)
+    } else {
+      tokenPrice = tokenPrice.div(BD_18)
+    }
     const balance = minter.balances(index)
     const tryDecimalsTemp = ERC20.bind(token).try_decimals()
     let decimalsTemp = DEFAULT_DECIMAL
@@ -174,6 +191,7 @@ export function getPriceLpUniPair(underlyingAddress: string, block: number): Big
   const token1Price = getPriceForCoin(token1, block)
 
   if (token0Price.isZero() || token1Price.isZero()) {
+    log.log(log.Level.WARNING, `Some price is zero token0 ${token0.toHex()} = ${token0Price} , token1 ${token1.toHex()} = ${token1Price}`)
     return BigDecimal.zero()
   }
 

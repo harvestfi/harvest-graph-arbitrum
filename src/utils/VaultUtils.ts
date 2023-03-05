@@ -1,6 +1,8 @@
 import { Address, BigInt } from "@graphprotocol/graph-ts";
 import { VaultContract } from "../../generated/templates/VaultListener/VaultContract";
 import { NULL_ADDRESS } from "./Constant";
+import { ERC20 } from "../../generated/Controller/ERC20";
+import { VaultV2Contract } from "../../generated/Controller/VaultV2Contract";
 
 export function fetchUnderlyingAddress(address: Address): Address {
   const vault = VaultContract.bind(address)
@@ -24,4 +26,16 @@ export function fetchPricePerFullShare(address: Address): BigInt {
     return BigInt.fromI32(10 ** vault.decimals())
   }
   return sharePrice
+}
+
+
+
+export function fetchContractTotalAssets(address: Address): BigInt {
+  const contract = VaultV2Contract.bind(address);
+  let totalSupply = BigInt.fromI32(0)
+  let tryTotalAssets = contract.try_totalAssets()
+  if (!tryTotalAssets.reverted) {
+    totalSupply = tryTotalAssets.value
+  }
+  return totalSupply
 }

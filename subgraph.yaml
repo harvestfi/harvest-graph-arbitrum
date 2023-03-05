@@ -3,11 +3,11 @@ schema:
   file: ./schema.graphql
 dataSources:
   - kind: ethereum
-    name: Controller1
-    network: matic
+    name: Controller
+    network: arbitrum-one
     source:
-      address: "0x2CE34b1bb247f242f1d2A33811E01138968EFBFF"
-      startBlock: 16612706
+      address: "0xd5c5017659af1e53b48ae9d55b02756342a7d4ff"
+      startBlock: 8274092
       abi: ControllerContract
     mapping:
       kind: ethereum/events
@@ -39,47 +39,10 @@ dataSources:
           file: ./abis/uniswap/UniswapV3Pool.json
         - name: MeshSwapContract
           file: ./abis/meshswap/MeshSwapContract.json
-      eventHandlers:
-        - event: SharePriceChangeLog(indexed address,indexed address,uint256,uint256,uint256)
-          handler: handleSharePriceChangeLog
-      file: ./src/ControllerListener.ts
-  - kind: ethereum
-    name: Controller2
-    network: matic
-    source:
-      address: "0xebaFc813f66c3142E7993a88EE3361a1f4BDaB16"
-      startBlock: 21978995
-      abi: ControllerContract
-    mapping:
-      kind: ethereum/events
-      apiVersion: 0.0.5
-      language: wasm/assemblyscript
-      entities:
-        - Vault
-        - Strategy
-      abis:
-        - name: ControllerContract
-          file: ./abis/harvest/Controller.json
-        - name: ERC20
-          file: ./abis/ERC20.json
-        - name: VaultContract
-          file: ./abis/Vault.json
-        - name: OracleContract
-          file: ./abis/Oracle.json
-        - name: UniswapV2PairContract
-          file: ./abis/uniswap/UniswapV2Pair.json
-        - name: WeightedPool2TokensContract
-          file: ./abis/balancer/WeightedPool2Tokens.json
-        - name: BalancerVaultContract
-          file: ./abis/balancer/BalancerVault.json
-        - name: CurveVaultContract
-          file: ./abis/curve/CurveVault.json
-        - name: CurveMinterContract
-          file: ./abis/curve/CurveMinter.json
-        - name: UniswapV3PoolContract
-          file: ./abis/uniswap/UniswapV3Pool.json
-        - name: MeshSwapContract
-          file: ./abis/meshswap/MeshSwapContract.json
+        - name: UniswapV2FactoryContract
+          file: ./abis/sushiswap/UniswapV2Factory.json
+        - name: VaultV2Contract
+          file: ./abis/VaultV2.json
       eventHandlers:
         - event: SharePriceChangeLog(indexed address,indexed address,uint256,uint256,uint256)
           handler: handleSharePriceChangeLog
@@ -87,7 +50,7 @@ dataSources:
 templates:
   - kind: ethereum/contract
     name: VaultListener
-    network: matic
+    network: arbitrum-one
     source:
       abi: VaultContract
     mapping:
@@ -119,6 +82,10 @@ templates:
           file: ./abis/harvest/PotPool.json
         - name: MeshSwapContract
           file: ./abis/meshswap/MeshSwapContract.json
+        - name: UniswapV2FactoryContract
+          file: ./abis/sushiswap/UniswapV2Factory.json
+        - name: VaultV2Contract
+          file: ./abis/VaultV2.json
       eventHandlers:
         - event: Transfer(indexed address,indexed address,uint256)
           handler: handleTransfer
@@ -129,7 +96,7 @@ templates:
       file: ./src/VaultListener.ts
   - kind: ethereum/contract
     name: PotPoolListener
-    network: matic
+    network: arbitrum-one
     source:
       abi: PotPoolContract
     mapping:
@@ -161,6 +128,10 @@ templates:
           file: ./abis/uniswap/UniswapV3Pool.json
         - name: MeshSwapContract
           file: ./abis/meshswap/MeshSwapContract.json
+        - name: UniswapV2FactoryContract
+          file: ./abis/sushiswap/UniswapV2Factory.json
+        - name: VaultV2Contract
+          file: ./abis/VaultV2.json
       eventHandlers:
         - event: RewardAdded(address,uint256)
           handler: handleRewardAdded

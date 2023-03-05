@@ -15,6 +15,9 @@ export const BD_ZERO = BigDecimal.fromString('0')
 export const BD_ONE = BigDecimal.fromString('1')
 export const BD_TEN = BigDecimal.fromString('10')
 export const BD_ONE_HUNDRED = BigDecimal.fromString('100')
+export const USDC_DECIMAL = 6;
+
+export const USDC_ARBITRUM = Address.fromString('0xff970a61a04b1ca14834a43f5de4533ebddb5cc8');
 
 export const STABLE_COIN_ARRAY_MAINNET = [
   '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48'.toLowerCase(),
@@ -48,6 +51,16 @@ export const STABLE_COIN_ARRAY_MATIC = [
   '0xa34e0eacb7fbb0b0d45da89b083e0f87fcdf6157'.toLowerCase(),
   // Orbit Bridge Polygon MOOI (oMOOI)
   '0x746351ab4b9d4f802b7b770f33184d0a6b17363d'.toLowerCase()
+]
+
+export const STABLE_COIN_ARRAY_ARBITRUM = [
+  '0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9'.toLowerCase(),
+  '0xff970a61a04b1ca14834a43f5de4533ebddb5cc8'.toLowerCase(),
+  '0xda10009cbd5d07dd0cecc66161fc93d7c9000da1'.toLowerCase(),
+  // STASIS EURS Token (EURS)
+  '0xD22a58f79e9481D1a88e00c343885A588b34b68B'.toLowerCase(),
+  // USD Coin (Arb1)-LP (S*USDC)
+  '0x892785f33cdee22a30aef750f285e18c18040c3e'.toLowerCase(),
 ]
 
 export const PS_ADDRESSES_MAINNET = [
@@ -91,13 +104,21 @@ export const ORACLE_ADDRESS_MAINNET_FIRST = Address.fromString('0x48DC32eCA58106
 export const ORACLE_ADDRESS_MAINNET_SECOND = Address.fromString('0x1358c91D5b25D3eDAc2b7B26A619163d78f1717d');
 export const ORACLE_ADDRESS_MATIC = Address.fromString('0x0E74303d0D18884Ce2CEb3670e72686645c4f38B');
 
+export const SUSHI_SWAP_FACTORY = Address.fromString('0xc35dadb65012ec5796536bd9864ed8773abc74c4');
+
 export const NULL_ADDRESS = Address.fromString('0x0000000000000000000000000000000000000000');
 
+
+export const TAKE_FROM_TOTAL_ASSETS = [
+  '0xfC2640ca71B1724B89dc2714E661B0089f8c0EED'.toLowerCase(),
+]
 export function isStableCoin(address: string): boolean {
   if (dataSource.network() == 'mainnet') {
     return STABLE_COIN_ARRAY_MAINNET.join(' ').includes(address) == true
   } else if (dataSource.network() == 'matic') {
     return STABLE_COIN_ARRAY_MATIC.join(' ').includes(address) == true
+  } else if (dataSource.network() == 'arbitrum-one') {
+    return STABLE_COIN_ARRAY_ARBITRUM.join(' ').includes(address) == true
   }
   return false
 }
@@ -135,4 +156,8 @@ export function getFarmToken(): Address {
     return FARM_TOKEN_MATIC
   }
   return NULL_ADDRESS
+}
+
+export function getFromTotalAssets(address: string): boolean {
+  return TAKE_FROM_TOTAL_ASSETS.join(' ').includes(address.toLowerCase()) == true
 }
