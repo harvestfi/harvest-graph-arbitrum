@@ -12,7 +12,7 @@ import {
   F_UNI_V3_CONTRACT_NAME, getFarmToken,
   getOracleAddress, isPsAddress, isStableCoin,
   LP_UNI_PAIR_CONTRACT_NAME, MESH_SWAP_CONTRACT,
-  NULL_ADDRESS, SUSHI_SWAP_FACTORY, USDC_ARBITRUM, USDC_DECIMAL,
+  NULL_ADDRESS, SUSHI_SWAP_FACTORY, UNISWAP_V3_POISON_FINANCE_POOL, USDC_ARBITRUM, USDC_DECIMAL,
 } from "./Constant";
 import { Token, Vault } from "../../generated/schema";
 import { WeightedPool2TokensContract } from "../../generated/templates/VaultListener/WeightedPool2TokensContract";
@@ -22,11 +22,12 @@ import { CurveVaultContract } from "../../generated/templates/VaultListener/Curv
 import { CurveMinterContract } from "../../generated/templates/VaultListener/CurveMinterContract";
 import { fetchContractDecimal } from "./ERC20Utils";
 import { pow, powBI } from "./MathUtils";
-import { isBalancer, isCurve, isLpUniPair, isMeshSwap } from "./PlatformUtils";
+import { isBalancer, isCurve, isLpUniPair, isMeshSwap, isPoisonFinanceToken } from "./PlatformUtils";
 import { UniswapV2PairContract } from "../../generated/Controller/UniswapV2PairContract";
 import { MeshSwapContract } from "../../generated/Controller/MeshSwapContract";
 import { UniswapV2Factory } from "../../generated/Controller/UniswapV2Factory";
 import { UniswapV2FactoryContract } from "../../generated/Controller/UniswapV2FactoryContract";
+import { UniswapV3PoolContract } from "../../generated/Controller/UniswapV3PoolContract";
 
 
 export function getPriceForCoin(address: Address, block: number): BigInt {
@@ -78,6 +79,9 @@ export function getPriceByVault(vault: Vault, block: number): BigDecimal {
       return getPriceLpUniPair(underlying.id, block)
     }
 
+    if (isPoisonFinanceToken(underlying.name)) {
+      return getPriceForUniswapV3(UNISWAP_V3_POISON_FINANCE_POOL);
+    }
     if (isBalancer(underlying.name)) {
       return getPriceForBalancer(underlying.id, block)
     }
@@ -271,4 +275,27 @@ export function getPriceFotMeshSwap(underlyingAddress: string, block: number): B
         .divDecimal(BD_18)
         .times(secondCoin)
     )
+}
+
+// example poison/usdt
+export function getPriceForUniswapV3(poolAddress: Address): BigDecimal {
+  const pool =  UniswapV3PoolContract.bind(poolAddress)
+
+  const trySlot0 = pool.try_slot0()
+
+  if (trySlot0.reverted) {
+    return BigDecimal.zero()
+  }
+
+  const sqrtPriceX96 = trySlot0.value.getSqrtPriceX96()
+
+  const value = sqrtPriceX96.divDecimal(
+    pow(BigDecimal.fromString('2'), 96)
+  )
+
+  const valueInPow = pow(value, 2)
+
+  // TODO fix if you will you for other vaults
+  // https://blog.uniswap.org/uniswap-v3-math-primer
+  return valueInPow.times(pow(BD_TEN, 12))
 }

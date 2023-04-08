@@ -2,7 +2,7 @@ import {
   BALANCER_CONTRACT_NAME,
   CURVE_CONTRACT_NAME,
   F_UNI_V3_CONTRACT_NAME,
-  LP_UNI_PAIR_CONTRACT_NAME, MESH_SWAP_CONTRACT
+  LP_UNI_PAIR_CONTRACT_NAME, MESH_SWAP_CONTRACT, POISON_FINANCE_CONTRACT
 } from "./Constant";
 
 export function isLpUniPair(name: string): boolean {
@@ -42,4 +42,8 @@ export function isMeshSwap(name: string): boolean {
     return true
   }
   return false
+}
+
+export function isPoisonFinanceToken(name: string): boolean {
+  return name.toLowerCase() == POISON_FINANCE_CONTRACT;
 }

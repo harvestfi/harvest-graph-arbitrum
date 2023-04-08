@@ -83,11 +83,14 @@ export const LP_UNI_PAIR_CONTRACT_NAME = [
   'Pancake'.toLowerCase(),
   'Kyber'.toLowerCase(),
   'ApeSwapFinance'.toLowerCase(),
+  'Volatile AMM'.toLowerCase(),
+  'Stable AMM'.toLowerCase(),
 ]
 export const BALANCER_CONTRACT_NAME = 'Balancer'.toLowerCase()
 export const CURVE_CONTRACT_NAME = 'Curve.fi'.toLowerCase()
 export const F_UNI_V3_CONTRACT_NAME = 'fUniV3'.toLowerCase()
 export const MESH_SWAP_CONTRACT = 'Meshswap'.toLowerCase()
+export const POISON_FINANCE_CONTRACT = 'Poison.Finance Poison Ivy'.toLowerCase();
 
 
 export const UNISWAP_V3_FEES = [
@@ -105,6 +108,8 @@ export const ORACLE_ADDRESS_MAINNET_SECOND = Address.fromString('0x1358c91D5b25D
 export const ORACLE_ADDRESS_MATIC = Address.fromString('0x0E74303d0D18884Ce2CEb3670e72686645c4f38B');
 
 export const SUSHI_SWAP_FACTORY = Address.fromString('0xc35dadb65012ec5796536bd9864ed8773abc74c4');
+
+export const UNISWAP_V3_POISON_FINANCE_POOL = Address.fromString('0xa74eceae9c7670b019e0890881598b4c398d1c01');
 
 export const NULL_ADDRESS = Address.fromString('0x0000000000000000000000000000000000000000');
 
