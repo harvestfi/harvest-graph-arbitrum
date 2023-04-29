@@ -5,15 +5,26 @@ import {
   BD_18,
   BD_ONE,
   BD_TEN,
-  BI_18, BI_TEN,
+  BI_18,
+  BI_TEN,
   CURVE_CONTRACT_NAME,
   DEFAULT_DECIMAL,
   DEFAULT_PRICE,
-  F_UNI_V3_CONTRACT_NAME, getFarmToken,
-  getOracleAddress, isPsAddress, isStableCoin,
-  LP_UNI_PAIR_CONTRACT_NAME, MESH_SWAP_CONTRACT,
-  NULL_ADDRESS, SUSHI_SWAP_FACTORY, UNISWAP_V3_POISON_FINANCE_POOL, USDC_ARBITRUM, USDC_DECIMAL,
-} from "./Constant";
+  F_UNI_V3_CONTRACT_NAME,
+  getFarmToken,
+  getOracleAddress,
+  isPsAddress,
+  isStableCoin,
+  LP_UNI_PAIR_CONTRACT_NAME,
+  MESH_SWAP_CONTRACT,
+  NULL_ADDRESS,
+  SOLID_LIZARD_FACTORY,
+  SUSHI_SWAP_FACTORY,
+  UNISWAP_V3_POISON_FINANCE_POOL,
+  USD_PLUS,
+  USDC_ARBITRUM,
+  USDC_DECIMAL,
+} from './Constant';
 import { Token, Vault } from "../../generated/schema";
 import { WeightedPool2TokensContract } from "../../generated/templates/VaultListener/WeightedPool2TokensContract";
 import { BalancerVaultContract } from "../../generated/templates/VaultListener/BalancerVaultContract";
@@ -25,17 +36,24 @@ import { pow, powBI } from "./MathUtils";
 import { isBalancer, isCurve, isLpUniPair, isMeshSwap, isPoisonFinanceToken } from "./PlatformUtils";
 import { UniswapV2PairContract } from "../../generated/Controller/UniswapV2PairContract";
 import { MeshSwapContract } from "../../generated/Controller/MeshSwapContract";
-import { UniswapV2Factory } from "../../generated/Controller/UniswapV2Factory";
 import { UniswapV2FactoryContract } from "../../generated/Controller/UniswapV2FactoryContract";
 import { UniswapV3PoolContract } from "../../generated/Controller/UniswapV3PoolContract";
 
 
-export function getPriceForCoin(address: Address, block: number): BigInt {
+export function getPriceForCoin(address: Address): BigInt {
+  const price = getPriceForCoinWithSwap(address, USDC_ARBITRUM, SUSHI_SWAP_FACTORY)
+  if (price.isZero()) {
+    return getPriceForCoinWithSwap(address, USD_PLUS, SOLID_LIZARD_FACTORY);
+  }
+  return price;
+}
+
+function getPriceForCoinWithSwap(address: Address, stableCoin: Address, factory: Address): BigInt {
   if (isStableCoin(address.toHex())) {
     return BI_18
   }
-  const uniswapFactoryContract = UniswapV2FactoryContract.bind(SUSHI_SWAP_FACTORY)
-  const tryGetPair = uniswapFactoryContract.try_getPair(USDC_ARBITRUM, address)
+  const uniswapFactoryContract = UniswapV2FactoryContract.bind(factory)
+  const tryGetPair = uniswapFactoryContract.try_getPair(stableCoin, address)
   if (tryGetPair.reverted) {
     return DEFAULT_PRICE
   }
@@ -57,14 +75,14 @@ export function getPriceForCoin(address: Address, block: number): BigInt {
   return reserves.get_reserve1().times(delimiter).div(reserves.get_reserve0())
 }
 
-export function getPriceByVault(vault: Vault, block: number): BigDecimal {
+export function getPriceByVault(vault: Vault): BigDecimal {
 
   if (isPsAddress(vault.id)) {
-    return getPriceForCoin(getFarmToken(), block).divDecimal(BD_18)
+    return getPriceForCoin(getFarmToken()).divDecimal(BD_18)
   }
   const underlyingAddress = vault.underlying
 
-  let price = getPriceForCoin(Address.fromString(underlyingAddress), block)
+  let price = getPriceForCoin(Address.fromString(underlyingAddress))
   if (!price.isZero()) {
     return price.divDecimal(BD_18)
   }
@@ -72,31 +90,31 @@ export function getPriceByVault(vault: Vault, block: number): BigDecimal {
   const underlying = Token.load(underlyingAddress)
   if (underlying != null) {
     if (isLpUniPair(underlying.name)) {
-      const tempPrice = getPriceForCoin(Address.fromString(underlyingAddress), block)
+      const tempPrice = getPriceForCoin(Address.fromString(underlyingAddress))
       if (tempPrice.gt(DEFAULT_PRICE)) {
         return tempPrice.divDecimal(BD_18)
       }
-      return getPriceLpUniPair(underlying.id, block)
+      return getPriceLpUniPair(underlying.id)
     }
 
     if (isPoisonFinanceToken(underlying.name)) {
       return getPriceForUniswapV3(UNISWAP_V3_POISON_FINANCE_POOL);
     }
     if (isBalancer(underlying.name)) {
-      return getPriceForBalancer(underlying.id, block)
+      return getPriceForBalancer(underlying.id)
     }
 
     if (isCurve(underlying.name)) {
-      const tempPrice = getPriceForCoin(Address.fromString(underlying.id), block)
+      const tempPrice = getPriceForCoin(Address.fromString(underlying.id))
       if (!tempPrice.isZero()) {
         return tempPrice.divDecimal(BD_18)
       }
 
-      return getPriceForCurve(underlyingAddress, block)
+      return getPriceForCurve(underlyingAddress)
     }
 
     if (isMeshSwap(underlying.name)) {
-      return getPriceFotMeshSwap(underlyingAddress, block)
+      return getPriceFotMeshSwap(underlyingAddress)
     }
   }
 
@@ -104,7 +122,7 @@ export function getPriceByVault(vault: Vault, block: number): BigDecimal {
 
 }
 
-export function getPriceForCurve(underlyingAddress: string, block: number): BigDecimal {
+export function getPriceForCurve(underlyingAddress: string): BigDecimal {
   const curveContract = CurveVaultContract.bind(Address.fromString(underlyingAddress))
   const tryMinter = curveContract.try_minter()
 
@@ -145,9 +163,9 @@ export function getPriceForCurve(underlyingAddress: string, block: number): BigD
       break
     }
     const token = tryCoins1.value
-    let tokenPrice = getPriceForCoin(token, block).toBigDecimal()
+    let tokenPrice = getPriceForCoin(token).toBigDecimal()
     if (tokenPrice == BigDecimal.zero()) {
-      tokenPrice = getPriceForCurve(token.toHex(), block)
+      tokenPrice = getPriceForCurve(token.toHex())
     } else {
       tokenPrice = tokenPrice.div(BD_18)
     }
@@ -170,13 +188,13 @@ function normalizePrecision(amount: BigInt, decimal: BigInt): BigInt {
   return amount.div(BI_18.div(BigInt.fromI64(10 ** decimal.toI64())))
 }
 
-export function getPriceLpUniPair(underlyingAddress: string, block: number): BigDecimal {
+export function getPriceLpUniPair(underlyingAddress: string): BigDecimal {
   const uniswapV2Pair = UniswapV2PairContract.bind(Address.fromString(underlyingAddress))
   const tryGetReserves = uniswapV2Pair.try_getReserves()
   if (tryGetReserves.reverted) {
     log.log(log.Level.WARNING, `Can not get reserves for underlyingAddress = ${underlyingAddress}, try get price for coin`)
 
-    return getPriceForCoin(Address.fromString(underlyingAddress), block).divDecimal(BD_18)
+    return getPriceForCoin(Address.fromString(underlyingAddress)).divDecimal(BD_18)
   }
   const reserves = tryGetReserves.value
   const totalSupply = uniswapV2Pair.totalSupply()
@@ -191,8 +209,8 @@ export function getPriceLpUniPair(underlyingAddress: string, block: number): Big
     .div(pow(BD_TEN, fetchContractDecimal(token1).toI32()))
 
 
-  const token0Price = getPriceForCoin(token0, block)
-  const token1Price = getPriceForCoin(token1, block)
+  const token0Price = getPriceForCoin(token0)
+  const token1Price = getPriceForCoin(token1)
 
   if (token0Price.isZero() || token1Price.isZero()) {
     log.log(log.Level.WARNING, `Some price is zero token0 ${token0.toHex()} = ${token0Price} , token1 ${token1.toHex()} = ${token1Price}`)
@@ -209,7 +227,7 @@ export function getPriceLpUniPair(underlyingAddress: string, block: number): Big
     )
 }
 
-export function getPriceForBalancer(underlying: string, block: number): BigDecimal {
+export function getPriceForBalancer(underlying: string): BigDecimal {
   const balancer = WeightedPool2TokensContract.bind(Address.fromString(underlying))
   const poolId = balancer.getPoolId()
   const totalSupply = balancer.totalSupply()
@@ -218,7 +236,7 @@ export function getPriceForBalancer(underlying: string, block: number): BigDecim
 
   let price = BigDecimal.zero()
   for (let i=0;i<tokenInfo.getTokens().length;i++) {
-    const tokenPrice = getPriceForCoin(tokenInfo.getTokens()[i], block).divDecimal(BD_18)
+    const tokenPrice = getPriceForCoin(tokenInfo.getTokens()[i]).divDecimal(BD_18)
     const tryDecimals = ERC20.bind(tokenInfo.getTokens()[i]).try_decimals()
     let decimal = DEFAULT_DECIMAL
     if (!tryDecimals.reverted) {
@@ -235,7 +253,7 @@ export function getPriceForBalancer(underlying: string, block: number): BigDecim
 }
 
 
-export function getPriceFotMeshSwap(underlyingAddress: string, block: number): BigDecimal {
+export function getPriceFotMeshSwap(underlyingAddress: string): BigDecimal {
   const meshSwap = MeshSwapContract.bind(Address.fromString(underlyingAddress))
 
   const tryReserve0 = meshSwap.try_reserve0()
@@ -260,8 +278,8 @@ export function getPriceFotMeshSwap(underlyingAddress: string, block: number): B
     .div(pow(BD_TEN, fetchContractDecimal(token1).toI32()))
 
 
-  const token0Price = getPriceForCoin(token0, block)
-  const token1Price = getPriceForCoin(token1, block)
+  const token0Price = getPriceForCoin(token0)
+  const token1Price = getPriceForCoin(token1)
 
   if (token0Price.isZero() || token1Price.isZero()) {
     return BigDecimal.zero()

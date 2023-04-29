@@ -1,10 +1,12 @@
 import { SharePrice, Strategy, Vault } from "../generated/schema";
 import { loadOrCreateVault } from "./types/Vault";
 import { pow, powBI } from "./utils/MathUtils";
-import { BD_TEN, BI_TEN } from "./utils/Constant";
+import { BD_TEN, BI_EVERY_24_HOURS, BI_TEN, EVERY_24_HOURS, MODULE_RESULT } from './utils/Constant';
 import { SharePriceChangeLog } from "../generated/Controller/ControllerContract";
-import { Address } from "@graphprotocol/graph-ts";
+import { Address, BigDecimal, ethereum } from '@graphprotocol/graph-ts';
 import { calculateAndSaveApyAutoCompound } from "./types/Apy";
+import { createTotalTvl, getTvlUtils } from './types/TotalTvlUtils';
+import { createTvl, createTvlV2 } from './types/Tvl';
 
 
 export function handleSharePriceChangeLog(event: SharePriceChangeLog): void {
@@ -36,5 +38,14 @@ export function handleSharePriceChangeLog(event: SharePriceChangeLog): void {
     vault.lastSharePrice = sharePrice.newSharePrice
     vault.save()
 
+  }
+}
+
+export function handleBlock(block: ethereum.Block): void {
+  const tvlUtils = getTvlUtils(block)
+  if (block.timestamp.toI32() % EVERY_24_HOURS == MODULE_RESULT) {
+    createTotalTvl(block)
+  } else if (block.timestamp.ge(tvlUtils.lastTimestampUpdate.plus(BI_EVERY_24_HOURS))) {
+    createTotalTvl(block)
   }
 }

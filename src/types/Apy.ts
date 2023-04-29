@@ -70,9 +70,9 @@ export function saveApyReward(
 
       let price = BigDecimal.zero()
       if (isPsAddress(pool.vault)) {
-        price = getPriceForCoin(getFarmToken(), block.number.toI32()).divDecimal(BD_18)
+        price = getPriceForCoin(getFarmToken()).divDecimal(BD_18)
       } else {
-        price = getPriceByVault(vault, block.number.toI32())
+        price = getPriceByVault(vault)
       }
 
       const tvlUsd = calculateTvlUsd(Address.fromString(vault.id), price)
@@ -91,7 +91,7 @@ export function saveApyReward(
         if (periodFinish == BigInt.zero()) {
           continue;
         }
-        const price = getPriceForCoin(rewardToken, block.number.toI32())
+        const price = getPriceForCoin(rewardToken)
         const period = (periodFinish.minus(block.timestamp)).toBigDecimal()
 
         if (period.gt(BigDecimal.zero()) && price.gt(BigInt.zero())) {

@@ -17,7 +17,15 @@ export const BD_TEN = BigDecimal.fromString('10')
 export const BD_ONE_HUNDRED = BigDecimal.fromString('100')
 export const USDC_DECIMAL = 6;
 
+
+export const EVERY_24_HOURS = 86400;
+export const BI_EVERY_24_HOURS = BigInt.fromString('86400');
+export const MODULE_RESULT = 75600;
+export const CONST_ID = '1';
+
 export const USDC_ARBITRUM = Address.fromString('0xff970a61a04b1ca14834a43f5de4533ebddb5cc8');
+export const USD_PLUS = Address.fromString('0xe80772eaf6e2e18b651f160bc9158b2a5cafca65');
+
 
 export const STABLE_COIN_ARRAY_MAINNET = [
   '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48'.toLowerCase(),
@@ -61,6 +69,8 @@ export const STABLE_COIN_ARRAY_ARBITRUM = [
   '0xD22a58f79e9481D1a88e00c343885A588b34b68B'.toLowerCase(),
   // USD Coin (Arb1)-LP (S*USDC)
   '0x892785f33cdee22a30aef750f285e18c18040c3e'.toLowerCase(),
+  // USD+
+  '0xe80772eaf6e2e18b651f160bc9158b2a5cafca65'.toLowerCase(),
 ]
 
 export const PS_ADDRESSES_MAINNET = [
@@ -108,6 +118,7 @@ export const ORACLE_ADDRESS_MAINNET_SECOND = Address.fromString('0x1358c91D5b25D
 export const ORACLE_ADDRESS_MATIC = Address.fromString('0x0E74303d0D18884Ce2CEb3670e72686645c4f38B');
 
 export const SUSHI_SWAP_FACTORY = Address.fromString('0xc35dadb65012ec5796536bd9864ed8773abc74c4');
+export const SOLID_LIZARD_FACTORY = Address.fromString('0x734d84631f00dC0d3FCD18b04b6cf42BFd407074');
 
 export const UNISWAP_V3_POISON_FINANCE_POOL = Address.fromString('0xa74eceae9c7670b019e0890881598b4c398d1c01');
 
