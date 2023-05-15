@@ -13,15 +13,27 @@ export function fetchRewardTokenLength(address: Address): BigInt {
   return tryRewardTokenLength.reverted ? BigInt.fromI32(1) : tryRewardTokenLength.value
 }
 
-export function fetchRewardToken(address: Address, index: BigInt): Address {
+export function fetchRewardTokenById(address: Address, index: BigInt): Address {
   const pool = PotPoolContract.bind(address);
   const tryRewardToken = pool.try_rewardTokens(index)
+  return tryRewardToken.reverted ? NULL_ADDRESS : tryRewardToken.value
+}
+
+export function fetchRewardToken(address: Address): Address {
+  const pool = PotPoolContract.bind(address);
+  const tryRewardToken = pool.try_rewardToken()
   return tryRewardToken.reverted ? NULL_ADDRESS : tryRewardToken.value
 }
 
 export function fetchRewardRateForToken(address: Address, token: Address): BigInt {
   const pool = PotPoolContract.bind(address);
   const tryRewardRateForToken = pool.try_rewardRateForToken(token)
+  return tryRewardRateForToken.reverted ? BigInt.zero() : tryRewardRateForToken.value
+}
+
+export function fetchRewardRate(address: Address): BigInt {
+  const pool = PotPoolContract.bind(address);
+  const tryRewardRateForToken = pool.try_rewardRate()
   return tryRewardRateForToken.reverted ? BigInt.zero() : tryRewardRateForToken.value
 }
 

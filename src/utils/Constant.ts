@@ -17,14 +17,21 @@ export const BD_TEN = BigDecimal.fromString('10')
 export const BD_ONE_HUNDRED = BigDecimal.fromString('100')
 export const USDC_DECIMAL = 6;
 
+export const DEFAULT_IFARM_PRICE = BigInt.fromString('40000000000000000000')
 
 export const EVERY_24_HOURS = 86400;
 export const BI_EVERY_24_HOURS = BigInt.fromString('86400');
+export const EVERY_7_DAYS = 604800;
+export const BI_EVERY_7_DAYS = BigInt.fromString('604800');
 export const MODULE_RESULT = 75600;
+export const MODULE_RESULT_V2 = 518400;
 export const CONST_ID = '1';
 
+export const WETH = Address.fromString('0x82af49447d8a07e3bd95bd0d56f35241523fbab1');
 export const USDC_ARBITRUM = Address.fromString('0xff970a61a04b1ca14834a43f5de4533ebddb5cc8');
 export const USD_PLUS = Address.fromString('0xe80772eaf6e2e18b651f160bc9158b2a5cafca65');
+export const IFARM = Address.fromString('0x9dca587dc65ac0a043828b0acd946d71eb8d46c1');
+export const CAMELOT_ETH_FARM = Address.fromString('0xd2a7084369cc93672b2ca868757a9f327e3677a4');
 
 
 export const STABLE_COIN_ARRAY_MAINNET = [

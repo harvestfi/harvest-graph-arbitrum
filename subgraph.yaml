@@ -43,11 +43,13 @@ dataSources:
           file: ./abis/sushiswap/UniswapV2Factory.json
         - name: VaultV2Contract
           file: ./abis/VaultV2.json
+        - name: CamelotPairContract
+          file: ./abis/CamelotPair.json
       eventHandlers:
         - event: SharePriceChangeLog(indexed address,indexed address,uint256,uint256,uint256)
           handler: handleSharePriceChangeLog
-      blockHandlers:
-        - handler: handleBlock
+#      blockHandlers:
+#        - handler: handleBlock
       file: ./src/ControllerListener.ts
 templates:
   - kind: ethereum/contract
@@ -88,6 +90,8 @@ templates:
           file: ./abis/sushiswap/UniswapV2Factory.json
         - name: VaultV2Contract
           file: ./abis/VaultV2.json
+        - name: CamelotPairContract
+          file: ./abis/CamelotPair.json
       eventHandlers:
         - event: Transfer(indexed address,indexed address,uint256)
           handler: handleTransfer
@@ -134,6 +138,8 @@ templates:
           file: ./abis/sushiswap/UniswapV2Factory.json
         - name: VaultV2Contract
           file: ./abis/VaultV2.json
+        - name: CamelotPairContract
+          file: ./abis/CamelotPair.json
       eventHandlers:
         - event: RewardAdded(address,uint256)
           handler: handleRewardAdded

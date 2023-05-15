@@ -6,13 +6,13 @@ import {
   BD_ONE,
   BD_TEN,
   BI_18,
-  BI_TEN,
+  BI_TEN, CAMELOT_ETH_FARM,
   CURVE_CONTRACT_NAME,
-  DEFAULT_DECIMAL,
+  DEFAULT_DECIMAL, DEFAULT_IFARM_PRICE,
   DEFAULT_PRICE,
   F_UNI_V3_CONTRACT_NAME,
   getFarmToken,
-  getOracleAddress,
+  getOracleAddress, IFARM,
   isPsAddress,
   isStableCoin,
   LP_UNI_PAIR_CONTRACT_NAME,
@@ -23,7 +23,7 @@ import {
   UNISWAP_V3_POISON_FINANCE_POOL,
   USD_PLUS,
   USDC_ARBITRUM,
-  USDC_DECIMAL,
+  USDC_DECIMAL, WETH,
 } from './Constant';
 import { Token, Vault } from "../../generated/schema";
 import { WeightedPool2TokensContract } from "../../generated/templates/VaultListener/WeightedPool2TokensContract";
@@ -38,9 +38,14 @@ import { UniswapV2PairContract } from "../../generated/Controller/UniswapV2PairC
 import { MeshSwapContract } from "../../generated/Controller/MeshSwapContract";
 import { UniswapV2FactoryContract } from "../../generated/Controller/UniswapV2FactoryContract";
 import { UniswapV3PoolContract } from "../../generated/Controller/UniswapV3PoolContract";
+import { CamelotPairContract } from '../../generated/Controller/CamelotPairContract';
 
 
 export function getPriceForCoin(address: Address): BigInt {
+  if (address.equals(IFARM)) {
+    const price = getPriceForIFARM();
+    return price.isZero() ? DEFAULT_IFARM_PRICE : price;
+  }
   const price = getPriceForCoinWithSwap(address, USDC_ARBITRUM, SUSHI_SWAP_FACTORY)
   if (price.isZero()) {
     return getPriceForCoinWithSwap(address, USD_PLUS, SOLID_LIZARD_FACTORY);
@@ -74,6 +79,21 @@ function getPriceForCoinWithSwap(address: Address, stableCoin: Address, factory:
 
   return reserves.get_reserve1().times(delimiter).div(reserves.get_reserve0())
 }
+
+function getPriceForIFARM(): BigInt {
+  const camelotPairContract = CamelotPairContract.bind(CAMELOT_ETH_FARM);
+  const tryGetReserves = camelotPairContract.try_getReserves()
+  if (tryGetReserves.reverted) {
+    log.log(log.Level.WARNING, `Can not get reserves for ${CAMELOT_ETH_FARM.toHex()}`)
+
+    return DEFAULT_PRICE
+  }
+  const reserves = tryGetReserves.value
+  const result = reserves.get_reserve1().div(reserves.get_reserve0())
+  const ethPrice = getPriceForCoin(WETH)
+  return ethPrice.div(result);
+}
+
 
 export function getPriceByVault(vault: Vault): BigDecimal {
 
