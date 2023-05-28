@@ -45,6 +45,12 @@ dataSources:
           file: ./abis/VaultV2.json
         - name: CamelotPairContract
           file: ./abis/CamelotPair.json
+        - name: RadiantPriceProvider
+          file: ./abis/radiant/PriceProvider.json
+        - name: LizardFactoryContract
+          file: ./abis/lizard/LizardFactory.json
+        - name: LizardPairContract
+          file: ./abis/lizard/LizardPair.json
       eventHandlers:
         - event: SharePriceChangeLog(indexed address,indexed address,uint256,uint256,uint256)
           handler: handleSharePriceChangeLog
@@ -92,6 +98,12 @@ templates:
           file: ./abis/VaultV2.json
         - name: CamelotPairContract
           file: ./abis/CamelotPair.json
+        - name: RadiantPriceProvider
+          file: ./abis/radiant/PriceProvider.json
+        - name: LizardFactoryContract
+          file: ./abis/lizard/LizardFactory.json
+        - name: LizardPairContract
+          file: ./abis/lizard/LizardPair.json
       eventHandlers:
         - event: Transfer(indexed address,indexed address,uint256)
           handler: handleTransfer
@@ -140,6 +152,12 @@ templates:
           file: ./abis/VaultV2.json
         - name: CamelotPairContract
           file: ./abis/CamelotPair.json
+        - name: RadiantPriceProvider
+          file: ./abis/radiant/PriceProvider.json
+        - name: LizardFactoryContract
+          file: ./abis/lizard/LizardFactory.json
+        - name: LizardPairContract
+          file: ./abis/lizard/LizardPair.json
       eventHandlers:
         - event: RewardAdded(address,uint256)
           handler: handleRewardAdded

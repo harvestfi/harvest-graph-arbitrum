@@ -17,8 +17,8 @@ import {
   isStableCoin,
   LP_UNI_PAIR_CONTRACT_NAME,
   MESH_SWAP_CONTRACT,
-  NULL_ADDRESS,
-  SOLID_LIZARD_FACTORY,
+  NULL_ADDRESS, RADIANT, RADIANT_PRICE,
+  SOLID_LIZARD_FACTORY, SUSHI_ETH_RADIANT,
   SUSHI_SWAP_FACTORY,
   UNISWAP_V3_POISON_FINANCE_POOL,
   USD_PLUS,
@@ -39,6 +39,9 @@ import { MeshSwapContract } from "../../generated/Controller/MeshSwapContract";
 import { UniswapV2FactoryContract } from "../../generated/Controller/UniswapV2FactoryContract";
 import { UniswapV3PoolContract } from "../../generated/Controller/UniswapV3PoolContract";
 import { CamelotPairContract } from '../../generated/Controller/CamelotPairContract';
+import { RadiantPriceProvider } from '../../generated/Controller/RadiantPriceProvider';
+import { LizardFactoryContract } from '../../generated/Controller/LizardFactoryContract';
+import { LizardPairContract } from '../../generated/Controller/LizardPairContract';
 
 
 export function getPriceForCoin(address: Address): BigInt {
@@ -46,9 +49,12 @@ export function getPriceForCoin(address: Address): BigInt {
     const price = getPriceForIFARM();
     return price.isZero() ? DEFAULT_IFARM_PRICE : price;
   }
+  if (address.toHex().toLowerCase() == RADIANT) {
+    return getPriceForRadiant();
+  }
   const price = getPriceForCoinWithSwap(address, USDC_ARBITRUM, SUSHI_SWAP_FACTORY)
   if (price.isZero()) {
-    return getPriceForCoinWithSwap(address, USD_PLUS, SOLID_LIZARD_FACTORY);
+    return getPriceForCoinWithSwapLizard(address);
   }
   return price;
 }
@@ -80,6 +86,33 @@ function getPriceForCoinWithSwap(address: Address, stableCoin: Address, factory:
   return reserves.get_reserve1().times(delimiter).div(reserves.get_reserve0())
 }
 
+function getPriceForCoinWithSwapLizard(address: Address): BigInt {
+  if (isStableCoin(address.toHex())) {
+    return BI_18
+  }
+  const uniswapFactoryContract = LizardFactoryContract.bind(SOLID_LIZARD_FACTORY)
+  const tryGetPair = uniswapFactoryContract.try_getPair(USDC_ARBITRUM, address, false)
+  if (tryGetPair.reverted) {
+    return DEFAULT_PRICE
+  }
+
+  const poolAddress = tryGetPair.value
+
+  const uniswapPairContract = LizardPairContract.bind(poolAddress);
+  const tryGetReserves = uniswapPairContract.try_getReserves()
+  if (tryGetReserves.reverted) {
+    log.log(log.Level.WARNING, `Can not get reserves for ${poolAddress.toHex()}`)
+
+    return DEFAULT_PRICE
+  }
+  const reserves = tryGetReserves.value
+  const decimal = fetchContractDecimal(address)
+
+  const delimiter = powBI(BI_TEN, decimal.toI32() - USDC_DECIMAL + DEFAULT_DECIMAL)
+
+  return reserves.get_reserve1().times(delimiter).div(reserves.get_reserve0())
+}
+
 function getPriceForIFARM(): BigInt {
   const camelotPairContract = CamelotPairContract.bind(CAMELOT_ETH_FARM);
   const tryGetReserves = camelotPairContract.try_getReserves()
@@ -92,6 +125,26 @@ function getPriceForIFARM(): BigInt {
   const result = reserves.get_reserve1().div(reserves.get_reserve0())
   const ethPrice = getPriceForCoin(WETH)
   return ethPrice.div(result);
+}
+
+function getPriceForRadiant(): BigInt {
+  const camelotPairContract = UniswapV2PairContract.bind(SUSHI_ETH_RADIANT);
+  const tryGetReserves = camelotPairContract.try_getReserves()
+  if (tryGetReserves.reverted) {
+    log.log(log.Level.WARNING, `Can not get reserves for ${SUSHI_ETH_RADIANT.toHex()}`)
+
+    return DEFAULT_PRICE
+  }
+  const reserves = tryGetReserves.value
+  const result = reserves.get_reserve1().divDecimal(reserves.get_reserve0().toBigDecimal())
+  const ethPrice = getPriceForCoin(WETH)
+  const price = ethPrice.divDecimal(BD_18).times(result);
+
+  const val = price.times(BD_18).toString().split('.');
+  if (val.length < 1) {
+    return BigInt.zero();
+  }
+  return BigInt.fromString(val[0])
 }
 
 

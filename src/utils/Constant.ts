@@ -31,7 +31,11 @@ export const WETH = Address.fromString('0x82af49447d8a07e3bd95bd0d56f35241523fba
 export const USDC_ARBITRUM = Address.fromString('0xff970a61a04b1ca14834a43f5de4533ebddb5cc8');
 export const USD_PLUS = Address.fromString('0xe80772eaf6e2e18b651f160bc9158b2a5cafca65');
 export const IFARM = Address.fromString('0x9dca587dc65ac0a043828b0acd946d71eb8d46c1');
+export const RADIANT = '0x3082CC23568eA640225c2467653dB90e9250AaA0'.toLowerCase()
+export const RADIANT_PRICE = Address.fromString('0x76663727c39Dd46Fed5414d6801c4E8890df85cF');
+
 export const CAMELOT_ETH_FARM = Address.fromString('0xd2a7084369cc93672b2ca868757a9f327e3677a4');
+export const SUSHI_ETH_RADIANT = Address.fromString('0x3BFB1ac033ff0aE278Be0583FCCc900FBD9382c6');
 
 
 export const STABLE_COIN_ARRAY_MAINNET = [
@@ -78,6 +82,9 @@ export const STABLE_COIN_ARRAY_ARBITRUM = [
   '0x892785f33cdee22a30aef750f285e18c18040c3e'.toLowerCase(),
   // USD+
   '0xe80772eaf6e2e18b651f160bc9158b2a5cafca65'.toLowerCase(),
+  // agEUR
+  '0xfa5ed56a203466cbbc2430a43c66b9d8723528e7'.toLowerCase(),
+  '0x93b346b6bc2548da6a1e7d98e9a421b42541425b'.toLowerCase()
 ]
 
 export const PS_ADDRESSES_MAINNET = [
