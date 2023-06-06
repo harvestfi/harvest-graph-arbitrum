@@ -1,9 +1,11 @@
 import {
-  BALANCER_CONTRACT_NAME,
+  BALANCER_CONTRACT_NAME, CAMELOT_CONTRACT,
   CURVE_CONTRACT_NAME,
   F_UNI_V3_CONTRACT_NAME,
-  LP_UNI_PAIR_CONTRACT_NAME, MESH_SWAP_CONTRACT, POISON_FINANCE_CONTRACT
-} from "./Constant";
+  LP_UNI_PAIR_CONTRACT_NAME, MESH_SWAP_CONTRACT, POISON_FINANCE_CONTRACT,
+} from './Constant';
+import { WeightedPool2TokensContract } from '../../generated/Controller/WeightedPool2TokensContract';
+import { Address } from '@graphprotocol/graph-ts';
 
 export function isLpUniPair(name: string): boolean {
   for (let i=0;i<LP_UNI_PAIR_CONTRACT_NAME.length;i++) {
@@ -15,10 +17,11 @@ export function isLpUniPair(name: string): boolean {
 }
 
 export function isBalancer(name: string): boolean {
-  if (name.toLowerCase().startsWith(BALANCER_CONTRACT_NAME)) {
-    return true
+  for (let i=0;i<BALANCER_CONTRACT_NAME.length;i++) {
+    if (name.toLowerCase().startsWith(BALANCER_CONTRACT_NAME[i])) {
+      return true
+    }
   }
-
   return false
 }
 
@@ -44,6 +47,18 @@ export function isMeshSwap(name: string): boolean {
   return false
 }
 
+export function isCamelot(name: string): boolean {
+  if (name.toLowerCase().startsWith(CAMELOT_CONTRACT)) {
+    return true
+  }
+  return false
+}
+
 export function isPoisonFinanceToken(name: string): boolean {
   return name.toLowerCase() == POISON_FINANCE_CONTRACT;
+}
+
+export function checkBalancer(address: Address): boolean {
+  const contract = WeightedPool2TokensContract.bind(address);
+  return !contract.try_getPoolId().reverted
 }

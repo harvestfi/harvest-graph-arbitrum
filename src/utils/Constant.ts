@@ -31,12 +31,16 @@ export const WETH = Address.fromString('0x82af49447d8a07e3bd95bd0d56f35241523fba
 export const USDC_ARBITRUM = Address.fromString('0xff970a61a04b1ca14834a43f5de4533ebddb5cc8');
 export const USD_PLUS = Address.fromString('0xe80772eaf6e2e18b651f160bc9158b2a5cafca65');
 export const IFARM = Address.fromString('0x9dca587dc65ac0a043828b0acd946d71eb8d46c1');
-export const RADIANT = '0x3082CC23568eA640225c2467653dB90e9250AaA0'.toLowerCase()
+export const RADIANT = Address.fromString('0x3082CC23568eA640225c2467653dB90e9250AaA0');
 export const RADIANT_PRICE = Address.fromString('0x76663727c39Dd46Fed5414d6801c4E8890df85cF');
+export const X_GRAIL = Address.fromString('0x3caae25ee616f2c8e13c74da0813402eae3f496b');
+export const GRAIL = Address.fromString('0x3d9907f9a368ad0a51be60f7da3b97cf940982d8');
+export const WA_WETH = Address.fromString('0x18C100415988bEF4354EfFAd1188d1c22041B046');
 
 export const CAMELOT_ETH_FARM = Address.fromString('0xd2a7084369cc93672b2ca868757a9f327e3677a4');
 export const SUSHI_ETH_RADIANT = Address.fromString('0x3BFB1ac033ff0aE278Be0583FCCc900FBD9382c6');
 
+export const CAMELOT_FACTORY = Address.fromString('0x6eccab422d763ac031210895c81787e87b43a652');
 
 export const STABLE_COIN_ARRAY_MAINNET = [
   '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48'.toLowerCase(),
@@ -110,11 +114,16 @@ export const LP_UNI_PAIR_CONTRACT_NAME = [
   'Volatile AMM'.toLowerCase(),
   'Stable AMM'.toLowerCase(),
 ]
-export const BALANCER_CONTRACT_NAME = 'Balancer'.toLowerCase()
+export const BALANCER_CONTRACT_NAME = [
+  'Balancer'.toLowerCase(),
+  '50wstETH-BPT-50bbaUSD'.toLowerCase(),
+  'RDNT-WETH'.toLowerCase()
+]
 export const CURVE_CONTRACT_NAME = 'Curve.fi'.toLowerCase()
 export const F_UNI_V3_CONTRACT_NAME = 'fUniV3'.toLowerCase()
 export const MESH_SWAP_CONTRACT = 'Meshswap'.toLowerCase()
 export const POISON_FINANCE_CONTRACT = 'Poison.Finance Poison Ivy'.toLowerCase();
+export const CAMELOT_CONTRACT = 'Camelot'.toLowerCase();
 
 
 export const UNISWAP_V3_FEES = [

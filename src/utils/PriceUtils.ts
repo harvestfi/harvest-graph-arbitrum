@@ -4,15 +4,15 @@ import {
   BALANCER_CONTRACT_NAME,
   BD_18,
   BD_ONE,
-  BD_TEN,
+  BD_TEN, BD_ZERO,
   BI_18,
-  BI_TEN, CAMELOT_ETH_FARM,
+  BI_TEN, CAMELOT_ETH_FARM, CAMELOT_FACTORY,
   CURVE_CONTRACT_NAME,
   DEFAULT_DECIMAL, DEFAULT_IFARM_PRICE,
   DEFAULT_PRICE,
   F_UNI_V3_CONTRACT_NAME,
   getFarmToken,
-  getOracleAddress, IFARM,
+  getOracleAddress, GRAIL, IFARM,
   isPsAddress,
   isStableCoin,
   LP_UNI_PAIR_CONTRACT_NAME,
@@ -23,7 +23,7 @@ import {
   UNISWAP_V3_POISON_FINANCE_POOL,
   USD_PLUS,
   USDC_ARBITRUM,
-  USDC_DECIMAL, WETH,
+  USDC_DECIMAL, WA_WETH, WETH, X_GRAIL,
 } from './Constant';
 import { Token, Vault } from "../../generated/schema";
 import { WeightedPool2TokensContract } from "../../generated/templates/VaultListener/WeightedPool2TokensContract";
@@ -33,15 +33,23 @@ import { CurveVaultContract } from "../../generated/templates/VaultListener/Curv
 import { CurveMinterContract } from "../../generated/templates/VaultListener/CurveMinterContract";
 import { fetchContractDecimal } from "./ERC20Utils";
 import { pow, powBI } from "./MathUtils";
-import { isBalancer, isCurve, isLpUniPair, isMeshSwap, isPoisonFinanceToken } from "./PlatformUtils";
+import {
+  checkBalancer,
+  isBalancer,
+  isCamelot,
+  isCurve,
+  isLpUniPair,
+  isMeshSwap,
+  isPoisonFinanceToken,
+} from './PlatformUtils';
 import { UniswapV2PairContract } from "../../generated/Controller/UniswapV2PairContract";
 import { MeshSwapContract } from "../../generated/Controller/MeshSwapContract";
 import { UniswapV2FactoryContract } from "../../generated/Controller/UniswapV2FactoryContract";
 import { UniswapV3PoolContract } from "../../generated/Controller/UniswapV3PoolContract";
 import { CamelotPairContract } from '../../generated/Controller/CamelotPairContract';
-import { RadiantPriceProvider } from '../../generated/Controller/RadiantPriceProvider';
 import { LizardFactoryContract } from '../../generated/Controller/LizardFactoryContract';
 import { LizardPairContract } from '../../generated/Controller/LizardPairContract';
+import { CamelotFactoryContract } from '../../generated/Controller/CamelotFactoryContract';
 
 
 export function getPriceForCoin(address: Address): BigInt {
@@ -49,12 +57,22 @@ export function getPriceForCoin(address: Address): BigInt {
     const price = getPriceForIFARM();
     return price.isZero() ? DEFAULT_IFARM_PRICE : price;
   }
-  if (address.toHex().toLowerCase() == RADIANT) {
+  if (address.equals(RADIANT)) {
     return getPriceForRadiant();
   }
-  const price = getPriceForCoinWithSwap(address, USDC_ARBITRUM, SUSHI_SWAP_FACTORY)
+  if (address.equals(X_GRAIL)) {
+    return getPriceForCamelot(GRAIL);
+  }
+  if (address.equals(WA_WETH)) {
+    return getPriceForCoinWithSwap(WETH, USDC_ARBITRUM, SUSHI_SWAP_FACTORY)
+  }
+
+  let price = getPriceForCoinWithSwap(address, USDC_ARBITRUM, SUSHI_SWAP_FACTORY)
   if (price.isZero()) {
-    return getPriceForCoinWithSwapLizard(address);
+    price = getPriceForCoinWithSwapLizard(address);
+  }
+  if (price.isZero()) {
+    price = getPriceForCamelot(address);
   }
   return price;
 }
@@ -111,6 +129,34 @@ function getPriceForCoinWithSwapLizard(address: Address): BigInt {
   const delimiter = powBI(BI_TEN, decimal.toI32() - USDC_DECIMAL + DEFAULT_DECIMAL)
 
   return reserves.get_reserve1().times(delimiter).div(reserves.get_reserve0())
+}
+
+function getPriceForCamelot(address: Address): BigInt {
+  const camelotFactory = CamelotFactoryContract.bind(CAMELOT_FACTORY);
+  const tryPair = camelotFactory.try_getPair(WETH, address);
+  if (tryPair.reverted) {
+    return BigInt.zero();
+  }
+  const pairAddress = tryPair.value;
+  const camelotPairContract = CamelotPairContract.bind(pairAddress);
+  const tryGetReserves = camelotPairContract.try_getReserves()
+  if (tryGetReserves.reverted) {
+    log.log(log.Level.WARNING, `Can not get reserves for ${pairAddress.toHexString()} , for address: ${address.toHexString()}`)
+
+    return DEFAULT_PRICE
+  }
+  const reserves = tryGetReserves.value
+  if (reserves.get_reserve0().isZero()) {
+    log.log(log.Level.WARNING, `get_reserve0 is 0 for ${pairAddress.toHexString()} , for address: ${address.toHexString()}`)
+    return BigInt.zero();
+  }
+  const result = reserves.get_reserve1().divDecimal(reserves.get_reserve0().toBigDecimal())
+  if (result.equals(BD_ZERO)) {
+    log.log(log.Level.WARNING, `Result is 0 for ${pairAddress.toHexString()} , for address: ${address.toHexString()}`)
+    return BigInt.zero();
+  }
+  const ethPrice = getPriceForCoin(WETH)
+  return toBigInt(ethPrice.divDecimal(BD_18).div(result).times(BD_18));
 }
 
 function getPriceForIFARM(): BigInt {
@@ -188,6 +234,10 @@ export function getPriceByVault(vault: Vault): BigDecimal {
 
     if (isMeshSwap(underlying.name)) {
       return getPriceFotMeshSwap(underlyingAddress)
+    }
+
+    if (isMeshSwap(isCamelot.name)) {
+      return getPriceCamelotUniPair(underlyingAddress)
     }
   }
 
@@ -300,6 +350,45 @@ export function getPriceLpUniPair(underlyingAddress: string): BigDecimal {
     )
 }
 
+export function getPriceCamelotUniPair(underlyingAddress: string): BigDecimal {
+  const uniswapV2Pair = CamelotPairContract.bind(Address.fromString(underlyingAddress))
+  const tryGetReserves = uniswapV2Pair.try_getReserves()
+  if (tryGetReserves.reverted) {
+    log.log(log.Level.WARNING, `Can not get reserves for underlyingAddress = ${underlyingAddress}, try get price for coin`)
+
+    return getPriceForCoin(Address.fromString(underlyingAddress)).divDecimal(BD_18)
+  }
+  const reserves = tryGetReserves.value
+  const totalSupply = uniswapV2Pair.totalSupply()
+  const positionFraction = BD_ONE.div(totalSupply.toBigDecimal().div(BD_18))
+
+  const token0 = uniswapV2Pair.token0()
+  const token1 = uniswapV2Pair.token1()
+
+  const firstCoin = reserves.get_reserve0().toBigDecimal().times(positionFraction)
+    .div(pow(BD_TEN, fetchContractDecimal(token0).toI32()))
+  const secondCoin = reserves.get_reserve1().toBigDecimal().times(positionFraction)
+    .div(pow(BD_TEN, fetchContractDecimal(token1).toI32()))
+
+
+  const token0Price = getPriceForCoin(token0)
+  const token1Price = getPriceForCoin(token1)
+
+  if (token0Price.isZero() || token1Price.isZero()) {
+    log.log(log.Level.WARNING, `Some price is zero token0 ${token0.toHex()} = ${token0Price} , token1 ${token1.toHex()} = ${token1Price}`)
+    return BigDecimal.zero()
+  }
+
+  return token0Price
+    .divDecimal(BD_18)
+    .times(firstCoin)
+    .plus(
+      token1Price
+        .divDecimal(BD_18)
+        .times(secondCoin)
+    )
+}
+
 export function getPriceForBalancer(underlying: string): BigDecimal {
   const balancer = WeightedPool2TokensContract.bind(Address.fromString(underlying))
   const poolId = balancer.getPoolId()
@@ -309,13 +398,23 @@ export function getPriceForBalancer(underlying: string): BigDecimal {
 
   let price = BigDecimal.zero()
   for (let i=0;i<tokenInfo.getTokens().length;i++) {
-    const tokenPrice = getPriceForCoin(tokenInfo.getTokens()[i]).divDecimal(BD_18)
-    const tryDecimals = ERC20.bind(tokenInfo.getTokens()[i]).try_decimals()
+    const tokenAddress = tokenInfo.getTokens()[i]
+    const tryDecimals = ERC20.bind(tokenAddress).try_decimals()
     let decimal = DEFAULT_DECIMAL
     if (!tryDecimals.reverted) {
       decimal = tryDecimals.value
     }
     const balance = normalizePrecision(tokenInfo.getBalances()[i], BigInt.fromI32(decimal)).toBigDecimal()
+
+    let tokenPrice = BD_ZERO;
+    if (tokenAddress == Address.fromString(underlying)) {
+      tokenPrice = BD_ONE;
+    } else if (checkBalancer(tokenAddress)) {
+      tokenPrice = getPriceForBalancer(tokenAddress.toHexString());
+    } else {
+      tokenPrice = getPriceForCoin(tokenAddress).divDecimal(BD_18)
+    }
+
     price = price.plus(balance.times(tokenPrice))
   }
 
@@ -389,4 +488,12 @@ export function getPriceForUniswapV3(poolAddress: Address): BigDecimal {
   // TODO fix if you will you for other vaults
   // https://blog.uniswap.org/uniswap-v3-math-primer
   return valueInPow.times(pow(BD_TEN, 12))
+}
+
+export function toBigInt(value: BigDecimal): BigInt {
+  const val = value.toString().split('.');
+  if (val.length < 1) {
+    return BigInt.zero();
+  }
+  return BigInt.fromString(val[0])
 }

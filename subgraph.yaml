@@ -44,7 +44,65 @@ dataSources:
         - name: VaultV2Contract
           file: ./abis/VaultV2.json
         - name: CamelotPairContract
-          file: ./abis/CamelotPair.json
+          file: ./abis/camelot/CamelotPair.json
+        - name: CamelotFactoryContract
+          file: ./abis/camelot/CamelotFactory.json
+        - name: RadiantPriceProvider
+          file: ./abis/radiant/PriceProvider.json
+        - name: LizardFactoryContract
+          file: ./abis/lizard/LizardFactory.json
+        - name: LizardPairContract
+          file: ./abis/lizard/LizardPair.json
+      eventHandlers:
+        - event: SharePriceChangeLog(indexed address,indexed address,uint256,uint256,uint256)
+          handler: handleSharePriceChangeLog
+      file: ./src/ControllerListener.ts
+
+  - kind: ethereum
+    name: Controller2
+    network: arbitrum-one
+    source:
+      address: "0x68B2FC1566f411C1Af8fF5bFDA3dD4F3F3e59D03"
+      startBlock: 65807284
+      abi: ControllerContract
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.5
+      language: wasm/assemblyscript
+      entities:
+        - Vault
+        - Strategy
+      abis:
+        - name: ControllerContract
+          file: ./abis/harvest/Controller.json
+        - name: ERC20
+          file: ./abis/ERC20.json
+        - name: VaultContract
+          file: ./abis/Vault.json
+        - name: OracleContract
+          file: ./abis/Oracle.json
+        - name: UniswapV2PairContract
+          file: ./abis/uniswap/UniswapV2Pair.json
+        - name: WeightedPool2TokensContract
+          file: ./abis/balancer/WeightedPool2Tokens.json
+        - name: BalancerVaultContract
+          file: ./abis/balancer/BalancerVault.json
+        - name: CurveVaultContract
+          file: ./abis/curve/CurveVault.json
+        - name: CurveMinterContract
+          file: ./abis/curve/CurveMinter.json
+        - name: UniswapV3PoolContract
+          file: ./abis/uniswap/UniswapV3Pool.json
+        - name: MeshSwapContract
+          file: ./abis/meshswap/MeshSwapContract.json
+        - name: UniswapV2FactoryContract
+          file: ./abis/sushiswap/UniswapV2Factory.json
+        - name: VaultV2Contract
+          file: ./abis/VaultV2.json
+        - name: CamelotPairContract
+          file: ./abis/camelot/CamelotPair.json
+        - name: CamelotFactoryContract
+          file: ./abis/camelot/CamelotFactory.json
         - name: RadiantPriceProvider
           file: ./abis/radiant/PriceProvider.json
         - name: LizardFactoryContract
@@ -97,7 +155,9 @@ templates:
         - name: VaultV2Contract
           file: ./abis/VaultV2.json
         - name: CamelotPairContract
-          file: ./abis/CamelotPair.json
+          file: ./abis/camelot/CamelotPair.json
+        - name: CamelotFactoryContract
+          file: ./abis/camelot/CamelotFactory.json
         - name: RadiantPriceProvider
           file: ./abis/radiant/PriceProvider.json
         - name: LizardFactoryContract
@@ -151,7 +211,9 @@ templates:
         - name: VaultV2Contract
           file: ./abis/VaultV2.json
         - name: CamelotPairContract
-          file: ./abis/CamelotPair.json
+          file: ./abis/camelot/CamelotPair.json
+        - name: CamelotFactoryContract
+          file: ./abis/camelot/CamelotFactory.json
         - name: RadiantPriceProvider
           file: ./abis/radiant/PriceProvider.json
         - name: LizardFactoryContract
