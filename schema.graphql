@@ -191,7 +191,7 @@ type TotalTvlHistory @entity{
 
   id: ID!
 
-  sequenceId: String!
+  sequenceId: BigInt!
   value: BigDecimal!
 
   timestamp: BigInt!
