@@ -191,6 +191,7 @@ type TotalTvlHistory @entity{
 
   id: ID!
 
+  sequenceId: String!
   value: BigDecimal!
 
   timestamp: BigInt!
@@ -216,4 +217,11 @@ type TotalTvlUtil @entity{
 
   timestamp: BigInt!
   createAtBlock: BigInt!
+}
+
+type TotalTvlCount @entity{
+  # id is 1
+  id: ID!
+
+  length: BigInt!
 }

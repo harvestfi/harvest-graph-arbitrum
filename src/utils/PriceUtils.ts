@@ -40,7 +40,7 @@ import {
   isCurve,
   isLpUniPair,
   isMeshSwap,
-  isPoisonFinanceToken,
+  isPoisonFinanceToken, isWeth,
 } from './PlatformUtils';
 import { UniswapV2PairContract } from "../../generated/Controller/UniswapV2PairContract";
 import { MeshSwapContract } from "../../generated/Controller/MeshSwapContract";
@@ -63,7 +63,7 @@ export function getPriceForCoin(address: Address): BigInt {
   if (address.equals(X_GRAIL)) {
     return getPriceForCamelot(GRAIL);
   }
-  if (address.equals(WA_WETH)) {
+  if (isWeth(address)) {
     return getPriceForCoinWithSwap(WETH, USDC_ARBITRUM, SUSHI_SWAP_FACTORY)
   }
 
@@ -236,7 +236,7 @@ export function getPriceByVault(vault: Vault): BigDecimal {
       return getPriceFotMeshSwap(underlyingAddress)
     }
 
-    if (isMeshSwap(isCamelot.name)) {
+    if (isCamelot(underlying.name)) {
       return getPriceCamelotUniPair(underlyingAddress)
     }
   }

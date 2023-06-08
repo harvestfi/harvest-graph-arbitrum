@@ -36,7 +36,14 @@ export const RADIANT_PRICE = Address.fromString('0x76663727c39Dd46Fed5414d6801c4
 export const X_GRAIL = Address.fromString('0x3caae25ee616f2c8e13c74da0813402eae3f496b');
 export const GRAIL = Address.fromString('0x3d9907f9a368ad0a51be60f7da3b97cf940982d8');
 export const WA_WETH = Address.fromString('0x18C100415988bEF4354EfFAd1188d1c22041B046');
+export const ST_ETH_A_ETH = Address.fromString('0xc505307c6c10201347bdd57f018c6af9b948c501');
+export const R_ETH_A_ETH = Address.fromString('0xde3bd06c0ff5b6c497d7037cd3a1861d2caab2ab');
 
+export const WETH_LIST = [
+  ST_ETH_A_ETH,
+  WA_WETH,
+  R_ETH_A_ETH
+];
 export const CAMELOT_ETH_FARM = Address.fromString('0xd2a7084369cc93672b2ca868757a9f327e3677a4');
 export const SUSHI_ETH_RADIANT = Address.fromString('0x3BFB1ac033ff0aE278Be0583FCCc900FBD9382c6');
 

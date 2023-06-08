@@ -14,7 +14,6 @@ import { SharePriceChangeLog } from "../generated/Controller/ControllerContract"
 import { Address, BigDecimal, ethereum } from '@graphprotocol/graph-ts';
 import { calculateAndSaveApyAutoCompound } from "./types/Apy";
 import { createTotalTvl, getTvlUtils } from './types/TotalTvlUtils';
-import { createTvl, createTvlV2 } from './types/Tvl';
 
 
 export function handleSharePriceChangeLog(event: SharePriceChangeLog): void {
