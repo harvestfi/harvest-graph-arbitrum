@@ -150,7 +150,10 @@ function getPriceForCamelot(address: Address): BigInt {
     log.log(log.Level.WARNING, `get_reserve0 is 0 for ${pairAddress.toHexString()} , for address: ${address.toHexString()}`)
     return BigInt.zero();
   }
-  const result = reserves.get_reserve1().divDecimal(reserves.get_reserve0().toBigDecimal())
+  let result = reserves.get_reserve1().divDecimal(reserves.get_reserve0().toBigDecimal())
+  if (camelotPairContract.token1().equals(WETH)) {
+    result = reserves.get_reserve0().divDecimal(reserves.get_reserve1().toBigDecimal())
+  }
   if (result.equals(BD_ZERO)) {
     log.log(log.Level.WARNING, `Result is 0 for ${pairAddress.toHexString()} , for address: ${address.toHexString()}`)
     return BigInt.zero();
