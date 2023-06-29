@@ -111,6 +111,8 @@ dataSources:
           file: ./abis/lizard/LizardFactory.json
         - name: LizardPairContract
           file: ./abis/lizard/LizardPair.json
+        - name: StrategyBaseContract
+          file: ./abis/StrategyBase.json
       eventHandlers:
         - event: SharePriceChangeLog(indexed address,indexed address,uint256,uint256,uint256)
           handler: handleSharePriceChangeLog
@@ -166,6 +168,8 @@ templates:
           file: ./abis/lizard/LizardFactory.json
         - name: LizardPairContract
           file: ./abis/lizard/LizardPair.json
+        - name: StrategyBaseContract
+          file: ./abis/StrategyBase.json
       eventHandlers:
         - event: Transfer(indexed address,indexed address,uint256)
           handler: handleTransfer
@@ -222,6 +226,8 @@ templates:
           file: ./abis/lizard/LizardFactory.json
         - name: LizardPairContract
           file: ./abis/lizard/LizardPair.json
+        - name: StrategyBaseContract
+          file: ./abis/StrategyBase.json
       eventHandlers:
         - event: RewardAdded(address,uint256)
           handler: handleRewardAdded

@@ -27,6 +27,7 @@ export const MODULE_RESULT = 75600;
 export const MODULE_RESULT_V2 = 518400;
 export const CONST_ID = '1';
 
+export const WBTC = Address.fromString('0x2f2a2543B76A4166549F7aaB2e75Bef0aefC5B0f');
 export const WETH = Address.fromString('0x82af49447d8a07e3bd95bd0d56f35241523fbab1');
 export const USDC_ARBITRUM = Address.fromString('0xff970a61a04b1ca14834a43f5de4533ebddb5cc8');
 export const USD_PLUS = Address.fromString('0xe80772eaf6e2e18b651f160bc9158b2a5cafca65');
@@ -108,6 +109,10 @@ export const PS_ADDRESSES_MAINNET = [
 
 export const PS_ADDRESSES_MATIC = [
   '0xab0b2ddb9c7e440fac8e140a89c0dbcbf2d7bbff'.toLowerCase(),
+]
+
+export const BALANCER_BTC_POOLS = [
+  '0x542f16da0efb162d20bf4358efa095b70a100f9e'.toLowerCase(),
 ]
 
 export const LP_UNI_PAIR_CONTRACT_NAME = [
@@ -207,3 +212,4 @@ export function getFarmToken(): Address {
 export function getFromTotalAssets(address: string): boolean {
   return TAKE_FROM_TOTAL_ASSETS.join(' ').includes(address.toLowerCase()) == true
 }
+

@@ -1,4 +1,5 @@
 import {
+  BALANCER_BTC_POOLS,
   BALANCER_CONTRACT_NAME, CAMELOT_CONTRACT,
   CURVE_CONTRACT_NAME,
   F_UNI_V3_CONTRACT_NAME,
@@ -66,6 +67,16 @@ export function checkBalancer(address: Address): boolean {
 export function isWeth(address: Address): boolean {
   for (let i=0;i<WETH_LIST.length;i++) {
     if (address.equals(WETH_LIST[i])) {
+      return true
+    }
+  }
+
+  return false;
+}
+
+export function isBtc(address: string): boolean {
+  for (let i=0;i<BALANCER_BTC_POOLS.length;i++) {
+    if (address.toLowerCase() == BALANCER_BTC_POOLS[i]) {
       return true
     }
   }

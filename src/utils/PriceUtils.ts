@@ -23,7 +23,7 @@ import {
   UNISWAP_V3_POISON_FINANCE_POOL,
   USD_PLUS,
   USDC_ARBITRUM,
-  USDC_DECIMAL, WA_WETH, WETH, X_GRAIL,
+  USDC_DECIMAL, WA_WETH, WBTC, WETH, X_GRAIL,
 } from './Constant';
 import { Token, Vault } from "../../generated/schema";
 import { WeightedPool2TokensContract } from "../../generated/templates/VaultListener/WeightedPool2TokensContract";
@@ -35,7 +35,7 @@ import { fetchContractDecimal } from "./ERC20Utils";
 import { pow, powBI } from "./MathUtils";
 import {
   checkBalancer,
-  isBalancer,
+  isBalancer, isBtc,
   isCamelot,
   isCurve,
   isLpUniPair,
@@ -217,6 +217,10 @@ export function getPriceByVault(vault: Vault): BigDecimal {
         return tempPrice.divDecimal(BD_18)
       }
       return getPriceLpUniPair(underlying.id)
+    }
+
+    if (isBtc(underlying.id)) {
+      return getPriceForCoin(WBTC).divDecimal(BD_18);
     }
 
     if (isPoisonFinanceToken(underlying.name)) {
