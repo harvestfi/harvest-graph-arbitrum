@@ -1,4 +1,4 @@
-import { ApyAutoCompound, ApyReward, Pool, Vault } from "../../generated/schema";
+import { ApyAutoCompound, ApyReward, GeneralApy, Pool, Vault } from '../../generated/schema';
 import { Address, BigDecimal, BigInt, ethereum } from "@graphprotocol/graph-ts";
 import { getPriceByVault, getPriceForCoin } from "../utils/PriceUtils";
 import {
@@ -15,6 +15,7 @@ import {
 import { VaultContract } from "../../generated/Controller/VaultContract";
 import { pow } from "../utils/MathUtils";
 import { calculateTvlUsd } from "../utils/TvlUtils";
+import { loadOrCreateVault } from './Vault';
 
 export function saveApyReward(
   poolAddress: Address,
@@ -73,24 +74,49 @@ export function saveApyReward(
       apyReward.timestamp = block.timestamp
       apyReward.createAtBlock = block.number
       apyReward.save()
+
+      vault.apyReward = apy;
+      vault.apy = vault.apyAutoCompound.plus(vault.apyReward)
+      vault.save();
+      calculateGeneralApy(vault, block);
     }
   }
 }
 
-export function calculateAndSaveApyAutoCompound(id: string, diffSharePrice: BigDecimal, diffTimestamp: BigInt, vaultAddress: string, block: ethereum.Block): BigDecimal {
+export function calculateAndSaveApyAutoCompound(id: string, diffSharePrice: BigDecimal, diffTimestamp: BigInt, vault: Vault, block: ethereum.Block): BigDecimal {
   let apyAutoCompound = ApyAutoCompound.load(id)
   if (apyAutoCompound == null) {
     apyAutoCompound = new ApyAutoCompound(id)
     apyAutoCompound.createAtBlock = block.number
     apyAutoCompound.timestamp = block.timestamp
     apyAutoCompound.apr = calculateAprAutoCompound(diffSharePrice, diffTimestamp.toBigDecimal())
-    apyAutoCompound.apy = calculateApy(apyAutoCompound.apr)
-    apyAutoCompound.vault = vaultAddress
+    const apy = calculateApy(apyAutoCompound.apr);
+    apyAutoCompound.apy = apy;
+    apyAutoCompound.vault = vault.id
     apyAutoCompound.diffSharePrice = diffSharePrice
     apyAutoCompound.diffTimestamp = diffTimestamp.toBigDecimal()
     apyAutoCompound.save()
+
+    vault.apyAutoCompound = apy;
+    vault.apy = vault.apyAutoCompound.plus(vault.apyReward)
+    calculateGeneralApy(vault, block);
   }
   return apyAutoCompound.apr
+}
+
+export function calculateGeneralApy(vault: Vault, block: ethereum.Block): void {
+  const id = `${vault.id}-${block.number}`;
+  let generalApy = GeneralApy.load(id)
+  if (!generalApy) {
+    generalApy = new GeneralApy(id);
+    generalApy.createAtBlock = block.number
+    generalApy.timestamp = block.timestamp;
+    generalApy.apy = vault.apy;
+    generalApy.vault = vault.id;
+    generalApy.apyReward = vault.apyReward
+    generalApy.apyAutoCompound = vault.apyAutoCompound
+    generalApy.save();
+  }
 }
 
 export function calculateApr(period: BigDecimal, reward: BigDecimal, tvl: BigDecimal): BigDecimal {

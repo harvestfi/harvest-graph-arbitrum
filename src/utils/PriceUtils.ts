@@ -196,7 +196,6 @@ function getPriceForRadiant(): BigInt {
   return BigInt.fromString(val[0])
 }
 
-
 export function getPriceByVault(vault: Vault): BigDecimal {
 
   if (isPsAddress(vault.id)) {
