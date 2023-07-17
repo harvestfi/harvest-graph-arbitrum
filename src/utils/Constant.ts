@@ -160,7 +160,7 @@ export const UNISWAP_V3_POISON_FINANCE_POOL = Address.fromString('0xa74eceae9c76
 
 export const NULL_ADDRESS = Address.fromString('0x0000000000000000000000000000000000000000');
 
-
+export const MAX_APY_REWARD = BigDecimal.fromString('1000');
 export const TAKE_FROM_TOTAL_ASSETS = [
   '0xfC2640ca71B1724B89dc2714E661B0089f8c0EED'.toLowerCase(),
 ]

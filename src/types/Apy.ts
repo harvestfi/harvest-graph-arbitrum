@@ -8,10 +8,10 @@ import {
   BD_TEN,
   BD_ZERO,
   getFarmToken,
-  isPsAddress, NULL_ADDRESS,
+  isPsAddress, MAX_APY_REWARD, NULL_ADDRESS,
   SECONDS_OF_YEAR,
-  YEAR_PERIOD
-} from "../utils/Constant";
+  YEAR_PERIOD,
+} from '../utils/Constant';
 import { VaultContract } from "../../generated/Controller/VaultContract";
 import { pow } from "../utils/MathUtils";
 import { calculateTvlUsd } from "../utils/TvlUtils";
@@ -61,6 +61,9 @@ export function saveApyReward(
       rewardForPeriods.push(rewardForPeriod)
       const apr = calculateApr(period, rewardForPeriod, tvlUsd)
       const apy = calculateApy(apr)
+      if (apy.gt(MAX_APY_REWARD)) {
+        return;
+      }
       const apyReward = new ApyReward(`${tx.hash.toHex()}-${vault.id}`)
 
       apyReward.periodFinishes = periodFinishes
