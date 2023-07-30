@@ -130,7 +130,9 @@ export const BALANCER_CONTRACT_NAME = [
   'Balancer'.toLowerCase(),
   '50wstETH-BPT-50bbaUSD'.toLowerCase(),
   'RDNT-WETH'.toLowerCase(),
-  '50tBTC-50WETH'.toLowerCase()
+  '50tBTC-50WETH'.toLowerCase(),
+  '80PAL-20OHM'.toLowerCase(),
+  'AuraBal'.toLowerCase(),
 ]
 export const CURVE_CONTRACT_NAME = 'Curve.fi'.toLowerCase()
 export const F_UNI_V3_CONTRACT_NAME = 'fUniV3'.toLowerCase()
