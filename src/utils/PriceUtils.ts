@@ -17,7 +17,7 @@ import {
   isStableCoin,
   LP_UNI_PAIR_CONTRACT_NAME,
   MESH_SWAP_CONTRACT,
-  NULL_ADDRESS, RADIANT, RADIANT_PRICE,
+  NULL_ADDRESS, RADIANT, RADIANT_PRICE, SILO,
   SOLID_LIZARD_FACTORY, SUSHI_ETH_RADIANT,
   SUSHI_SWAP_FACTORY,
   UNISWAP_V3_POISON_FINANCE_POOL,
@@ -65,6 +65,9 @@ export function getPriceForCoin(address: Address): BigInt {
   }
   if (isWeth(address)) {
     return getPriceForCoinWithSwap(WETH, USDC_ARBITRUM, SUSHI_SWAP_FACTORY)
+  }
+  if (address.equals(SILO)) {
+    return getPriceForCamelot(address);
   }
 
   let price = getPriceForCoinWithSwap(address, USDC_ARBITRUM, SUSHI_SWAP_FACTORY)

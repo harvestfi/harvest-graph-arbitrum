@@ -33,6 +33,7 @@ export const USDC_ARBITRUM = Address.fromString('0xff970a61a04b1ca14834a43f5de45
 export const USD_PLUS = Address.fromString('0xe80772eaf6e2e18b651f160bc9158b2a5cafca65');
 export const IFARM = Address.fromString('0x9dca587dc65ac0a043828b0acd946d71eb8d46c1');
 export const RADIANT = Address.fromString('0x3082CC23568eA640225c2467653dB90e9250AaA0');
+export const SILO = Address.fromString('0x0341c0c0ec423328621788d4854119b97f44e391');
 export const RADIANT_PRICE = Address.fromString('0x76663727c39Dd46Fed5414d6801c4E8890df85cF');
 export const X_GRAIL = Address.fromString('0x3caae25ee616f2c8e13c74da0813402eae3f496b');
 export const GRAIL = Address.fromString('0x3d9907f9a368ad0a51be60f7da3b97cf940982d8');
