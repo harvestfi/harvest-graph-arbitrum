@@ -44,7 +44,7 @@ export function saveApyReward(
       if (isPsAddress(pool.vault)) {
         price = getPriceForCoin(getFarmToken()).divDecimal(BD_18)
       } else {
-        price = getPriceByVault(vault)
+        price = getPriceByVault(vault, block)
       }
 
       const tvlUsd = calculateTvlUsd(Address.fromString(vault.id), price)

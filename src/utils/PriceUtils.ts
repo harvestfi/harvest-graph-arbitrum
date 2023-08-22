@@ -1,4 +1,4 @@
-import { Address, BigDecimal, BigInt, log } from "@graphprotocol/graph-ts";
+import { Address, BigDecimal, BigInt, ethereum, log } from '@graphprotocol/graph-ts';
 import { OracleContract } from "../../generated/templates/VaultListener/OracleContract";
 import {
   BALANCER_CONTRACT_NAME,
@@ -50,6 +50,7 @@ import { CamelotPairContract } from '../../generated/Controller/CamelotPairContr
 import { LizardFactoryContract } from '../../generated/Controller/LizardFactoryContract';
 import { LizardPairContract } from '../../generated/Controller/LizardPairContract';
 import { CamelotFactoryContract } from '../../generated/Controller/CamelotFactoryContract';
+import { createPriceFeed } from '../types/PriceFeed';
 
 
 export function getPriceForCoin(address: Address): BigInt {
@@ -199,15 +200,18 @@ function getPriceForRadiant(): BigInt {
   return BigInt.fromString(val[0])
 }
 
-export function getPriceByVault(vault: Vault): BigDecimal {
+export function getPriceByVault(vault: Vault, block: ethereum.Block): BigDecimal {
 
   if (isPsAddress(vault.id)) {
-    return getPriceForCoin(getFarmToken()).divDecimal(BD_18)
+    const tempPrice = getPriceForCoin(getFarmToken()).divDecimal(BD_18);
+    createPriceFeed(vault, tempPrice, block);
+    return tempPrice;
   }
   const underlyingAddress = vault.underlying
 
   let price = getPriceForCoin(Address.fromString(underlyingAddress))
   if (!price.isZero()) {
+    createPriceFeed(vault, price.divDecimal(BD_18), block);
     return price.divDecimal(BD_18)
   }
 
@@ -216,37 +220,54 @@ export function getPriceByVault(vault: Vault): BigDecimal {
     if (isLpUniPair(underlying.name)) {
       const tempPrice = getPriceForCoin(Address.fromString(underlyingAddress))
       if (tempPrice.gt(DEFAULT_PRICE)) {
+        createPriceFeed(vault, tempPrice.divDecimal(BD_18), block);
         return tempPrice.divDecimal(BD_18)
       }
-      return getPriceLpUniPair(underlying.id)
+
+      const tempInPrice = getPriceLpUniPair(underlying.id);
+      createPriceFeed(vault, tempInPrice, block);
+      return tempInPrice
     }
 
     if (isBtc(underlying.id)) {
-      return getPriceForCoin(WBTC).divDecimal(BD_18);
+      const tempPrice = getPriceForCoin(WBTC).divDecimal(BD_18);;
+      createPriceFeed(vault, tempPrice, block);
+      return tempPrice
     }
 
     if (isPoisonFinanceToken(underlying.name)) {
-      return getPriceForUniswapV3(UNISWAP_V3_POISON_FINANCE_POOL);
+      const tempPrice = getPriceForUniswapV3(UNISWAP_V3_POISON_FINANCE_POOL);
+      createPriceFeed(vault, tempPrice, block);
+      return tempPrice;
     }
     if (isBalancer(underlying.name)) {
-      return getPriceForBalancer(underlying.id)
+      const tempPrice = getPriceForBalancer(underlying.id);
+      createPriceFeed(vault, tempPrice, block);
+      return tempPrice
     }
 
     if (isCurve(underlying.name)) {
       const tempPrice = getPriceForCoin(Address.fromString(underlying.id))
       if (!tempPrice.isZero()) {
+        createPriceFeed(vault, tempPrice.divDecimal(BD_18), block);
         return tempPrice.divDecimal(BD_18)
       }
 
-      return getPriceForCurve(underlyingAddress)
+      const tempInPrice = getPriceForCurve(underlyingAddress);
+      createPriceFeed(vault, tempInPrice, block);
+      return tempInPrice
     }
 
     if (isMeshSwap(underlying.name)) {
-      return getPriceFotMeshSwap(underlyingAddress)
+      const tempPrice = getPriceFotMeshSwap(underlyingAddress)
+      createPriceFeed(vault, tempPrice, block);
+      return tempPrice;
     }
 
     if (isCamelot(underlying.name)) {
-      return getPriceCamelotUniPair(underlyingAddress)
+      const tempPrice = getPriceCamelotUniPair(underlyingAddress);
+      createPriceFeed(vault, tempPrice, block);
+      return tempPrice;
     }
   }
 
