@@ -27,6 +27,8 @@ export const MODULE_RESULT = 75600;
 export const MODULE_RESULT_V2 = 518400;
 export const CONST_ID = '1';
 
+export const TVL_NOT_SAVE = BigDecimal.fromString('100000000')
+
 export const WBTC = Address.fromString('0x2f2a2543B76A4166549F7aaB2e75Bef0aefC5B0f');
 export const WETH = Address.fromString('0x82af49447d8a07e3bd95bd0d56f35241523fbab1');
 export const USDC_ARBITRUM = Address.fromString('0xff970a61a04b1ca14834a43f5de4533ebddb5cc8');

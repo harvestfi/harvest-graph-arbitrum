@@ -21,6 +21,7 @@ type Vault @entity {
   underlying: Token!
   tvl: BigDecimal!
   apy: BigDecimal!
+  priceUnderlying: BigDecimal!
   apyReward: BigDecimal!
   apyAutoCompound: BigDecimal!
   lastShareTimestamp: BigInt!
@@ -167,6 +168,8 @@ type UserBalance @entity {
   vault: Vault!
   userAddress: String!
   value: BigDecimal!
+  poolBalance: BigDecimal!
+  vaultBalance: BigDecimal!
   timestamp: BigInt!
   createAtBlock: BigInt!
 }
@@ -179,8 +182,9 @@ type UserBalanceHistory @entity {
   vault: Vault!
   "Amount balance in user address"
   value: BigDecimal!
-  #  vaultBalance: BigDecimal!
-  #  poolBalance: BigDecimal!
+  vaultBalance: BigDecimal!
+  poolBalance: BigDecimal!
+  priceUnderlying: BigDecimal!
   sharePrice: BigInt!
   timestamp: BigInt!
   createAtBlock: BigInt!
