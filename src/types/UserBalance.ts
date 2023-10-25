@@ -25,12 +25,12 @@ export function createUserBalance(vaultAddress: Address, amount: BigInt, benefic
       userBalance.createAtBlock = block.number
       userBalance.timestamp = block.timestamp
       userBalance.vault = vault.id
-      userBalance.poolBalance = poolBalance
-      userBalance.vaultBalance = vaultBalance
       userBalance.value = BigDecimal.zero()
       userBalance.userAddress = beneficary.toHex()
     }
 
+    userBalance.poolBalance = poolBalance
+    userBalance.vaultBalance = vaultBalance
     userBalance.value = value
 
     userBalance.save()
