@@ -1,5 +1,5 @@
-import { SharePrice, Strategy, Vault } from "../generated/schema";
-import { loadOrCreateVault } from "./types/Vault";
+import { PriceHistory, SharePrice, Strategy, Vault, VaultHistory } from '../generated/schema';
+import { getVaultUtils, loadOrCreateVault } from './types/Vault';
 import { pow, powBI } from "./utils/MathUtils";
 import {
   BD_TEN,
@@ -8,12 +8,13 @@ import {
   EVERY_24_HOURS,
   EVERY_7_DAYS,
   MODULE_RESULT,
-  MODULE_RESULT_V2,
+  MODULE_RESULT_V2, TWO_WEEKS_IN_SECONDS,
 } from './utils/Constant';
 import { SharePriceChangeLog } from "../generated/Controller/ControllerContract";
-import { Address, BigDecimal, ethereum } from '@graphprotocol/graph-ts';
+import { Address, BigDecimal, BigInt, ethereum } from '@graphprotocol/graph-ts';
 import { calculateAndSaveApyAutoCompound } from "./types/Apy";
-import { createTotalTvl, getTvlUtils } from './types/TotalTvlUtils';
+import { createUserBalance } from './types/UserBalance';
+import { getPriceByVault } from './utils/PriceUtils';
 
 
 export function handleSharePriceChangeLog(event: SharePriceChangeLog): void {
@@ -34,25 +35,61 @@ export function handleSharePriceChangeLog(event: SharePriceChangeLog): void {
   sharePrice.timestamp = timestamp;
   sharePrice.save();
 
-  if (vault != null && sharePrice.oldSharePrice != sharePrice.newSharePrice) {
-    const lastShareTimestamp = vault.lastShareTimestamp
-    if (!lastShareTimestamp.isZero()) {
-      const diffSharePrice = sharePrice.newSharePrice.minus(sharePrice.oldSharePrice).divDecimal(pow(BD_TEN, vault.decimal.toI32()))
-      const diffTimestamp = timestamp.minus(lastShareTimestamp)
-      calculateAndSaveApyAutoCompound(`${event.transaction.hash.toHex()}-${vaultAddress}`, diffSharePrice, diffTimestamp, vault, event.block)
+  if (vault != null) {
+    if (sharePrice.oldSharePrice != sharePrice.newSharePrice) {
+      const lastShareTimestamp = vault.lastShareTimestamp
+      if (!lastShareTimestamp.isZero()) {
+        const diffSharePrice = sharePrice.newSharePrice.minus(sharePrice.oldSharePrice).divDecimal(pow(BD_TEN, vault.decimal.toI32()))
+        const diffTimestamp = timestamp.minus(lastShareTimestamp)
+        calculateAndSaveApyAutoCompound(`${event.transaction.hash.toHex()}-${vaultAddress}`, diffSharePrice, diffTimestamp, vault, event.block)
+      }
+      vault.lastShareTimestamp = sharePrice.timestamp
+      vault.lastSharePrice = sharePrice.newSharePrice
+
+      if (vault.lastUsersShareTimestamp.plus(TWO_WEEKS_IN_SECONDS).lt(event.block.timestamp)) {
+        const users = vault.users
+        for (let i = 0; i < users.length; i++) {
+          createUserBalance(event.params.vault, BigInt.zero(), Address.fromString(users[i]), event.transaction, event.block, false);
+        }
+        vault.lastUsersShareTimestamp = event.block.timestamp
+      }
+
+      vault.save()
     }
-    vault.lastShareTimestamp = sharePrice.timestamp
-    vault.lastSharePrice = sharePrice.newSharePrice
-    vault.save()
+
+    const vaultHistoryId = `${event.transaction.hash.toHexString()}-${vaultAddress}`
+    let vaultHistory = VaultHistory.load(vaultHistoryId)
+    if (!vaultHistory) {
+      vaultHistory = new VaultHistory(vaultHistoryId);
+      vaultHistory.vault = vault.id;
+      vaultHistory.sharePrice = vault.lastSharePrice;
+      vaultHistory.sharePriceDec = vault.lastSharePrice.divDecimal(pow(BD_TEN, vault.decimal.toI32()))
+      vaultHistory.priceUnderlying = vault.priceUnderlying;
+      vaultHistory.timestamp = event.block.timestamp;
+      vaultHistory.save();
+    }
 
   }
 }
 
 export function handleBlock(block: ethereum.Block): void {
-  const tvlUtils = getTvlUtils(block)
-  if (block.timestamp.toI32() % EVERY_7_DAYS == MODULE_RESULT_V2) {
-    createTotalTvl(block)
-  } else if (block.timestamp.ge(tvlUtils.lastTimestampUpdate.plus(BI_EVERY_7_DAYS))) {
-    createTotalTvl(block)
+  const vaultUtils = getVaultUtils();
+  for (let i = 0; i < vaultUtils.vaults.length; i++) {
+    const vault = loadOrCreateVault(Address.fromString(vaultUtils.vaults[i]), block);
+    const price = getPriceByVault(vault, block);
+
+    const priceHistoryId = `${vault.id}-${block.number.toString()}`
+    let priceHistory = PriceHistory.load(priceHistoryId)
+    if (!priceHistory) {
+      priceHistory = new PriceHistory(priceHistoryId);
+      priceHistory.vault = vault.id
+      priceHistory.price = price;
+      priceHistory.createAtBlock = block.number
+      priceHistory.timestamp = block.timestamp
+      priceHistory.save();
+    }
+
+    vault.priceUnderlying = price
+    vault.save();
   }
 }

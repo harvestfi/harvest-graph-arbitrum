@@ -7,6 +7,7 @@ import {
 } from './Constant';
 import { WeightedPool2TokensContract } from '../../generated/Controller/WeightedPool2TokensContract';
 import { Address } from '@graphprotocol/graph-ts';
+import { CamelotUniswapV3Vault } from '../../generated/Controller/CamelotUniswapV3Vault';
 
 export function isLpUniPair(name: string): boolean {
   for (let i=0;i<LP_UNI_PAIR_CONTRACT_NAME.length;i++) {
@@ -49,10 +50,8 @@ export function isMeshSwap(name: string): boolean {
 }
 
 export function isCamelot(name: string): boolean {
-  if (name.toLowerCase().startsWith(CAMELOT_CONTRACT)) {
-    return true
-  }
-  return false
+  return !!name.toLowerCase().startsWith(CAMELOT_CONTRACT);
+
 }
 
 export function isPoisonFinanceToken(name: string): boolean {
@@ -82,4 +81,11 @@ export function isBtc(address: string): boolean {
   }
 
   return false;
+}
+
+export function isCamelotUniswapV3(name: string, address: string): boolean {
+  if (!name.toLowerCase().startsWith('a')) {
+    return false
+  }
+  return !CamelotUniswapV3Vault.bind(Address.fromString(address)).try_getTotalAmounts().reverted;
 }

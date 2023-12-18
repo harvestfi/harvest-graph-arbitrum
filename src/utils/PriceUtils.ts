@@ -36,7 +36,7 @@ import { pow, powBI } from "./MathUtils";
 import {
   checkBalancer,
   isBalancer, isBtc,
-  isCamelot,
+  isCamelot, isCamelotUniswapV3,
   isCurve,
   isLpUniPair,
   isMeshSwap,
@@ -51,6 +51,7 @@ import { LizardFactoryContract } from '../../generated/Controller/LizardFactoryC
 import { LizardPairContract } from '../../generated/Controller/LizardPairContract';
 import { CamelotFactoryContract } from '../../generated/Controller/CamelotFactoryContract';
 import { createPriceFeed } from '../types/PriceFeed';
+import { CamelotUniswapV3Vault } from '../../generated/Controller/CamelotUniswapV3Vault';
 
 
 export function getPriceForCoin(address: Address): BigInt {
@@ -266,6 +267,12 @@ export function getPriceByVault(vault: Vault, block: ethereum.Block): BigDecimal
 
     if (isCamelot(underlying.name)) {
       const tempPrice = getPriceCamelotUniPair(underlyingAddress);
+      createPriceFeed(vault, tempPrice, block);
+      return tempPrice;
+    }
+
+    if (isCamelotUniswapV3(underlying.name, underlying.id)) {
+      const tempPrice = getPriceForCamelotUniswapV3(vault)
       createPriceFeed(vault, tempPrice, block);
       return tempPrice;
     }
@@ -526,4 +533,47 @@ export function toBigInt(value: BigDecimal): BigInt {
     return BigInt.zero();
   }
   return BigInt.fromString(val[0])
+}
+
+
+// ((token0Balance * token0Price) + (token1Balance * token1Price)) / (liquidity / 10 ** 18)
+export function getPriceForCamelotUniswapV3(vault: Vault): BigDecimal {
+  const vaultV3 = CamelotUniswapV3Vault.bind(Address.fromString(vault.underlying));
+  const tryPool = vaultV3.try_pool()
+  if (tryPool.reverted) {
+    return BigDecimal.zero();
+  }
+  const poolAddress = tryPool.value
+  if (!poolAddress.equals(NULL_ADDRESS)) {
+    const pool =  UniswapV3PoolContract.bind(poolAddress)
+
+    const liquidity = pool.liquidity()
+    const token0 = ERC20.bind(pool.token0())
+    const token1 = ERC20.bind(pool.token1())
+    const balanceToken0 = token0.balanceOf(poolAddress)
+    const balanceToken1 = token1.balanceOf(poolAddress)
+    const priceToken0 = getPriceForCoin(token0._address)
+    const priceToken1 = getPriceForCoin(token1._address)
+    if (priceToken0.isZero()
+      || liquidity.isZero()
+      || token0.decimals() == 0
+      || token1.decimals() == 0
+      || priceToken1.isZero()
+      || balanceToken1.isZero()
+      || balanceToken0.isZero()) {
+      return BigDecimal.zero()
+    }
+    const balance = priceToken0.divDecimal(BD_18)
+      .times(balanceToken0.divDecimal(pow(BD_TEN, token0.decimals())))
+      .plus(
+        priceToken1.divDecimal(BD_18)
+          .times(balanceToken1.divDecimal(pow(BD_TEN, token1.decimals()))))
+
+    let price = balance
+      .div(liquidity.divDecimal(BD_18))
+
+    return price;
+  }
+
+  return BigDecimal.zero()
 }

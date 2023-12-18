@@ -16,6 +16,7 @@ export const BD_ONE = BigDecimal.fromString('1')
 export const BD_TEN = BigDecimal.fromString('10')
 export const BD_ONE_HUNDRED = BigDecimal.fromString('100')
 export const USDC_DECIMAL = 6;
+export const TWO_WEEKS_IN_SECONDS = BigInt.fromString('1209600');
 
 export const DEFAULT_IFARM_PRICE = BigInt.fromString('40000000000000000000')
 
@@ -46,7 +47,8 @@ export const R_ETH_A_ETH = Address.fromString('0xcba9ff45cfb9ce238afde32b0148eb8
 export const WETH_LIST = [
   ST_ETH_A_ETH,
   WA_WETH,
-  R_ETH_A_ETH
+  R_ETH_A_ETH,
+  Address.fromString('0x36bf227d6bac96e2ab1ebb5492ecec69c691943f'.toLowerCase())
 ];
 export const CAMELOT_ETH_FARM = Address.fromString('0xd2a7084369cc93672b2ca868757a9f327e3677a4');
 export const SUSHI_ETH_RADIANT = Address.fromString('0x3BFB1ac033ff0aE278Be0583FCCc900FBD9382c6');
@@ -99,7 +101,9 @@ export const STABLE_COIN_ARRAY_ARBITRUM = [
   '0xe80772eaf6e2e18b651f160bc9158b2a5cafca65'.toLowerCase(),
   // agEUR
   '0xfa5ed56a203466cbbc2430a43c66b9d8723528e7'.toLowerCase(),
-  '0x93b346b6bc2548da6a1e7d98e9a421b42541425b'.toLowerCase()
+  '0x93b346b6bc2548da6a1e7d98e9a421b42541425b'.toLowerCase(),
+  // wjAura
+  '0xcB9295ac65De60373A25C18d2044D517ed5da8A9'.toLowerCase()
 ]
 
 export const PS_ADDRESSES_MAINNET = [

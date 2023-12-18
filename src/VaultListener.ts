@@ -21,5 +21,4 @@ export function handleInvest(event: Invest): void {
 }
 
 export function handleApproval(event: Approval): void {
-  createTvl(event.address, event.block)
 }

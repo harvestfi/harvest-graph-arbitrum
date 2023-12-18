@@ -1,4 +1,4 @@
-specVersion: 0.0.4
+specVersion: 0.0.8
 schema:
   file: ./schema.graphql
 dataSources:
@@ -11,7 +11,7 @@ dataSources:
       abi: ControllerContract
     mapping:
       kind: ethereum/events
-      apiVersion: 0.0.5
+      apiVersion: 0.0.6
       language: wasm/assemblyscript
       entities:
         - Vault
@@ -55,9 +55,18 @@ dataSources:
           file: ./abis/lizard/LizardPair.json
         - name: StrategyBaseContract
           file: ./abis/StrategyBase.json
+        - name: CamelotUniswapV3Pool
+          file: ./abis/camelot/CamelotUniswapV3Pool.json
+        - name: CamelotUniswapV3Vault
+          file: ./abis/camelot/CamelotUniswapV3Vault.json
       eventHandlers:
         - event: SharePriceChangeLog(indexed address,indexed address,uint256,uint256,uint256)
           handler: handleSharePriceChangeLog
+      blockHandlers:
+        - handler: handleBlock
+          filter:
+            kind: polling
+            every: 315360
       file: ./src/ControllerListener.ts
 
   - kind: ethereum
@@ -69,7 +78,7 @@ dataSources:
       abi: ControllerContract
     mapping:
       kind: ethereum/events
-      apiVersion: 0.0.5
+      apiVersion: 0.0.6
       language: wasm/assemblyscript
       entities:
         - Vault
@@ -113,6 +122,10 @@ dataSources:
           file: ./abis/lizard/LizardPair.json
         - name: StrategyBaseContract
           file: ./abis/StrategyBase.json
+        - name: CamelotUniswapV3Pool
+          file: ./abis/camelot/CamelotUniswapV3Pool.json
+        - name: CamelotUniswapV3Vault
+          file: ./abis/camelot/CamelotUniswapV3Vault.json
       eventHandlers:
         - event: SharePriceChangeLog(indexed address,indexed address,uint256,uint256,uint256)
           handler: handleSharePriceChangeLog
@@ -127,7 +140,7 @@ templates:
       abi: VaultContract
     mapping:
       kind: ethereum/events
-      apiVersion: 0.0.5
+      apiVersion: 0.0.6
       language: wasm/assemblyscript
       entities:
         - Vault
@@ -170,6 +183,10 @@ templates:
           file: ./abis/lizard/LizardPair.json
         - name: StrategyBaseContract
           file: ./abis/StrategyBase.json
+        - name: CamelotUniswapV3Pool
+          file: ./abis/camelot/CamelotUniswapV3Pool.json
+        - name: CamelotUniswapV3Vault
+          file: ./abis/camelot/CamelotUniswapV3Vault.json
       eventHandlers:
         - event: Transfer(indexed address,indexed address,uint256)
           handler: handleTransfer
@@ -185,7 +202,7 @@ templates:
       abi: PotPoolContract
     mapping:
       kind: ethereum/events
-      apiVersion: 0.0.5
+      apiVersion: 0.0.6
       language: wasm/assemblyscript
       entities:
         - Pool
@@ -228,6 +245,10 @@ templates:
           file: ./abis/lizard/LizardPair.json
         - name: StrategyBaseContract
           file: ./abis/StrategyBase.json
+        - name: CamelotUniswapV3Pool
+          file: ./abis/camelot/CamelotUniswapV3Pool.json
+        - name: CamelotUniswapV3Vault
+          file: ./abis/camelot/CamelotUniswapV3Vault.json
       eventHandlers:
         - event: RewardAdded(address,uint256)
           handler: handleRewardAdded
@@ -239,7 +260,7 @@ templates:
       abi: StrategyBaseContract
     mapping:
       kind: ethereum/events
-      apiVersion: 0.0.5
+      apiVersion: 0.0.6
       language: wasm/assemblyscript
       entities:
         - Strategy
@@ -282,6 +303,10 @@ templates:
           file: ./abis/lizard/LizardPair.json
         - name: StrategyBaseContract
           file: ./abis/StrategyBase.json
+        - name: CamelotUniswapV3Pool
+          file: ./abis/camelot/CamelotUniswapV3Pool.json
+        - name: CamelotUniswapV3Vault
+          file: ./abis/camelot/CamelotUniswapV3Vault.json
       eventHandlers:
         - event: ProfitLogInReward(indexed address,uint256,uint256,uint256)
           handler: handleProfitLogInReward

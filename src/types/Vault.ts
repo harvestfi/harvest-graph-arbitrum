@@ -4,7 +4,7 @@ import { loadOrCreateERC20Token } from "./Token";
 import { VaultListener } from "../../generated/templates";
 import { loadOrCreateStrategy } from "./Strategy";
 import { fetchUnderlyingAddress } from "../utils/VaultUtils";
-import { Vault } from "../../generated/schema";
+import { Vault, VaultUtil } from '../../generated/schema';
 import { pushVault } from './TotalTvlUtils';
 
 export function loadOrCreateVault(vaultAddress: Address, block: ethereum.Block, strategyAddress: string = 'unknown'): Vault {
@@ -31,10 +31,31 @@ export function loadOrCreateVault(vaultAddress: Address, block: ethereum.Block, 
     vault.apyReward = BigDecimal.zero();
     vault.apy = BigDecimal.zero();
     vault.apyAutoCompound = BigDecimal.zero();
+    vault.users = [];
+    vault.lastUsersShareTimestamp = BigInt.zero();
     vault.save();
     VaultListener.create(vaultAddress)
-    pushVault(vault.id, block)
+    pushVault(vault.id, block);
+    const vaultUtils= getVaultUtils();
+    const vaults = vaultUtils.vaults
+    vaults.push(vault.id)
+    vaultUtils.vaults = vaults;
+    vaultUtils.vaultLength = vaults.length
+    vaultUtils.save();
   }
 
   return vault;
+}
+
+export function getVaultUtils(): VaultUtil {
+  const id = '1';
+  let vaultUtils = VaultUtil.load(id)
+  if (!vaultUtils) {
+    vaultUtils = new VaultUtil(id);
+    vaultUtils.vaults = [];
+    vaultUtils.vaultLength = 0;
+    vaultUtils.lastBlockPrice = BigInt.zero();
+    vaultUtils.save()
+  }
+  return vaultUtils;
 }

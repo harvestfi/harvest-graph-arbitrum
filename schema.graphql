@@ -27,6 +27,36 @@ type Vault @entity {
   lastShareTimestamp: BigInt!
   lastSharePrice: BigInt!
   skipFirstApyReward: Boolean
+  users: [String!]!
+  lastUsersShareTimestamp: BigInt!
+}
+
+type VaultUtil @entity {
+  id: ID!
+  vaults: [Vault!]!
+  vaultLength: Int!
+  lastBlockPrice: BigInt!
+}
+
+type PriceHistory @entity {
+  id: ID!
+
+  price: BigDecimal!
+  vault: Vault!
+
+  timestamp: BigInt!
+  createAtBlock: BigInt!
+}
+
+type VaultHistory @entity {
+  "tx + vault address"
+  id: ID!
+  vault: Vault!
+
+  priceUnderlying: BigDecimal!
+  sharePrice: BigInt!
+  sharePriceDec: BigDecimal!
+  timestamp: BigInt!
 }
 
 type Strategy @entity {
