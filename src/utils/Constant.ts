@@ -41,6 +41,7 @@ export const RADIANT_PRICE = Address.fromString('0x76663727c39Dd46Fed5414d6801c4
 export const X_GRAIL = Address.fromString('0x3caae25ee616f2c8e13c74da0813402eae3f496b');
 export const GRAIL = Address.fromString('0x3d9907f9a368ad0a51be60f7da3b97cf940982d8');
 export const WA_WETH = Address.fromString('0x18C100415988bEF4354EfFAd1188d1c22041B046');
+export const WST_ETH = Address.fromString('0x5979D7b546E38E414F7E9822514be443A4800529');
 export const ST_ETH_A_ETH = Address.fromString('0x5a7f39435fd9c381e4932fa2047c9a5136a5e3e7');
 export const R_ETH_A_ETH = Address.fromString('0xcba9ff45cfb9ce238afde32b0148eb82cbe63562');
 
@@ -48,7 +49,8 @@ export const WETH_LIST = [
   ST_ETH_A_ETH,
   WA_WETH,
   R_ETH_A_ETH,
-  Address.fromString('0x36bf227d6bac96e2ab1ebb5492ecec69c691943f'.toLowerCase())
+  Address.fromString('0x36bf227d6bac96e2ab1ebb5492ecec69c691943f'.toLowerCase()),
+  Address.fromString('0xe62880CC6872c9E9Fb1DDd73f400850fdaBE798D'.toLowerCase())
 ];
 export const CAMELOT_ETH_FARM = Address.fromString('0xd2a7084369cc93672b2ca868757a9f327e3677a4');
 export const SUSHI_ETH_RADIANT = Address.fromString('0x3BFB1ac033ff0aE278Be0583FCCc900FBD9382c6');
@@ -103,7 +105,18 @@ export const STABLE_COIN_ARRAY_ARBITRUM = [
   '0xfa5ed56a203466cbbc2430a43c66b9d8723528e7'.toLowerCase(),
   '0x93b346b6bc2548da6a1e7d98e9a421b42541425b'.toLowerCase(),
   // wjAura
-  '0xcB9295ac65De60373A25C18d2044D517ed5da8A9'.toLowerCase()
+  '0xcB9295ac65De60373A25C18d2044D517ed5da8A9'.toLowerCase(),
+  '0xbF353C369Aa753b211374D7ecB286da499991C94'.toLowerCase(),
+  '0x0Fa7b744F18D8E8c3D61B64b110F25CC27E73055'.toLowerCase(),
+  '0x2977b0B54a76c2b56D32cef19f8ea83Cc766cFD9'.toLowerCase(),
+  '0xE5232c2837204ee66952f365f104C09140FB2E43'.toLowerCase(),
+  '0x5Ef78a0966BD47dEd63034678083714b4DE6e013'.toLowerCase(),
+  '0x85cebd962861be410a777755dfa06914de6af003'.toLowerCase(),
+
+  '0x48ad8eE28af1057Cdec42080D3Fd57b3E877d59C'.toLowerCase(),
+  '0xc49bebC972f5390eE1EC8A69E4151838f59334Fc'.toLowerCase(),
+  '0x5Ef78a0966BD47dEd63034678083714b4DE6e013'.toLowerCase(),
+
 ]
 
 export const PS_ADDRESSES_MAINNET = [
@@ -146,6 +159,7 @@ export const F_UNI_V3_CONTRACT_NAME = 'fUniV3'.toLowerCase()
 export const MESH_SWAP_CONTRACT = 'Meshswap'.toLowerCase()
 export const POISON_FINANCE_CONTRACT = 'Poison.Finance Poison Ivy'.toLowerCase();
 export const CAMELOT_CONTRACT = 'Camelot'.toLowerCase();
+export const MAGPIE_CONTRACT = 'Wombat'.toLowerCase();
 
 
 export const UNISWAP_V3_FEES = [

@@ -23,7 +23,7 @@ import {
   UNISWAP_V3_POISON_FINANCE_POOL,
   USD_PLUS,
   USDC_ARBITRUM,
-  USDC_DECIMAL, WA_WETH, WBTC, WETH, X_GRAIL,
+  USDC_DECIMAL, WA_WETH, WBTC, WETH, WST_ETH, X_GRAIL,
 } from './Constant';
 import { Token, Vault } from "../../generated/schema";
 import { WeightedPool2TokensContract } from "../../generated/templates/VaultListener/WeightedPool2TokensContract";
@@ -38,7 +38,7 @@ import {
   isBalancer, isBtc,
   isCamelot, isCamelotUniswapV3,
   isCurve,
-  isLpUniPair,
+  isLpUniPair, isMagpie,
   isMeshSwap,
   isPoisonFinanceToken, isWeth,
 } from './PlatformUtils';
@@ -52,6 +52,7 @@ import { LizardPairContract } from '../../generated/Controller/LizardPairContrac
 import { CamelotFactoryContract } from '../../generated/Controller/CamelotFactoryContract';
 import { createPriceFeed } from '../types/PriceFeed';
 import { CamelotUniswapV3Vault } from '../../generated/Controller/CamelotUniswapV3Vault';
+import { MagpieAsset } from '../../generated/Controller/MagpieAsset';
 
 
 export function getPriceForCoin(address: Address): BigInt {
@@ -64,6 +65,9 @@ export function getPriceForCoin(address: Address): BigInt {
   }
   if (address.equals(X_GRAIL)) {
     return getPriceForCamelot(GRAIL);
+  }
+  if (WST_ETH.equals(address)) {
+    return getPriceForCamelot(address);
   }
   if (isWeth(address)) {
     return getPriceForCoinWithSwap(WETH, USDC_ARBITRUM, SUSHI_SWAP_FACTORY)
@@ -273,6 +277,12 @@ export function getPriceByVault(vault: Vault, block: ethereum.Block): BigDecimal
 
     if (isCamelotUniswapV3(underlying.name, underlying.id)) {
       const tempPrice = getPriceForCamelotUniswapV3(vault)
+      createPriceFeed(vault, tempPrice, block);
+      return tempPrice;
+    }
+
+    if (isMagpie(underlying.name)) {
+      const tempPrice = getPriceForMagpie(vault)
       createPriceFeed(vault, tempPrice, block);
       return tempPrice;
     }
@@ -535,6 +545,24 @@ export function toBigInt(value: BigDecimal): BigInt {
   return BigInt.fromString(val[0])
 }
 
+export function getPriceForMagpie(vault: Vault): BigDecimal {
+  const asset =  MagpieAsset.bind(Address.fromString(vault.underlying))
+  const tryUnderlyingToken = asset.try_underlyingToken()
+  if (tryUnderlyingToken.reverted) {
+    return BigDecimal.zero();
+  }
+  const price = getPriceForCoin(tryUnderlyingToken.value);
+  if (price.isZero()) {
+    return BigDecimal.zero();
+  }
+  let decimal = 18;
+  const tryDecimal = asset.try_underlyingTokenDecimals();
+  if (!tryDecimal.reverted) {
+    decimal = tryDecimal.value;
+  }
+
+  return price.toBigDecimal().div(pow(BD_TEN, decimal));
+}
 
 // ((token0Balance * token0Price) + (token1Balance * token1Price)) / (liquidity / 10 ** 18)
 export function getPriceForCamelotUniswapV3(vault: Vault): BigDecimal {

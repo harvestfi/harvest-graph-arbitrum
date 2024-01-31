@@ -3,7 +3,7 @@ import {
   BALANCER_CONTRACT_NAME, CAMELOT_CONTRACT,
   CURVE_CONTRACT_NAME,
   F_UNI_V3_CONTRACT_NAME,
-  LP_UNI_PAIR_CONTRACT_NAME, MESH_SWAP_CONTRACT, POISON_FINANCE_CONTRACT, WETH_LIST,
+  LP_UNI_PAIR_CONTRACT_NAME, MAGPIE_CONTRACT, MESH_SWAP_CONTRACT, POISON_FINANCE_CONTRACT, WETH_LIST,
 } from './Constant';
 import { WeightedPool2TokensContract } from '../../generated/Controller/WeightedPool2TokensContract';
 import { Address } from '@graphprotocol/graph-ts';
@@ -88,4 +88,8 @@ export function isCamelotUniswapV3(name: string, address: string): boolean {
     return false
   }
   return !CamelotUniswapV3Vault.bind(Address.fromString(address)).try_getTotalAmounts().reverted;
+}
+
+export function isMagpie(name: string): boolean {
+  return !!name.startsWith(MAGPIE_CONTRACT);
 }
