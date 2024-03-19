@@ -1,6 +1,7 @@
 import { Address, BigDecimal, BigInt, ethereum, log } from '@graphprotocol/graph-ts';
 import { OracleContract } from "../../generated/templates/VaultListener/OracleContract";
 import {
+  ARB,
   BALANCER_CONTRACT_NAME,
   BD_18,
   BD_ONE,
@@ -18,7 +19,7 @@ import {
   LP_UNI_PAIR_CONTRACT_NAME,
   MESH_SWAP_CONTRACT,
   NULL_ADDRESS, RADIANT, RADIANT_PRICE, SILO,
-  SOLID_LIZARD_FACTORY, SUSHI_ETH_RADIANT,
+  SOLID_LIZARD_FACTORY, SUSHI_ETH_RADIANT, SUSHI_ETH_WSETH,
   SUSHI_SWAP_FACTORY,
   UNISWAP_V3_POISON_FINANCE_POOL,
   USD_PLUS,
@@ -34,13 +35,13 @@ import { CurveMinterContract } from "../../generated/templates/VaultListener/Cur
 import { fetchContractDecimal } from "./ERC20Utils";
 import { pow, powBI } from "./MathUtils";
 import {
-  checkBalancer,
+  checkBalancer, isArb,
   isBalancer, isBtc,
   isCamelot, isCamelotUniswapV3,
-  isCurve,
+  isCurve, isGammaLpUniPair, isGammaVault,
   isLpUniPair, isMagpie,
   isMeshSwap,
-  isPoisonFinanceToken, isWeth,
+  isPoisonFinanceToken, isWeth, isWsteth,
 } from './PlatformUtils';
 import { UniswapV2PairContract } from "../../generated/Controller/UniswapV2PairContract";
 import { MeshSwapContract } from "../../generated/Controller/MeshSwapContract";
@@ -53,6 +54,7 @@ import { CamelotFactoryContract } from '../../generated/Controller/CamelotFactor
 import { createPriceFeed } from '../types/PriceFeed';
 import { CamelotUniswapV3Vault } from '../../generated/Controller/CamelotUniswapV3Vault';
 import { MagpieAsset } from '../../generated/Controller/MagpieAsset';
+import { GammaVaultContract } from '../../generated/Controller/GammaVaultContract';
 
 
 export function getPriceForCoin(address: Address): BigInt {
@@ -61,13 +63,13 @@ export function getPriceForCoin(address: Address): BigInt {
     return price.isZero() ? DEFAULT_IFARM_PRICE : price;
   }
   if (address.equals(RADIANT)) {
-    return getPriceForRadiant();
+    return getPriceForRadiant(SUSHI_ETH_RADIANT);
   }
   if (address.equals(X_GRAIL)) {
     return getPriceForCamelot(GRAIL);
   }
-  if (WST_ETH.equals(address)) {
-    return getPriceForCamelot(address);
+  if (isWsteth(address)) {
+    return getPriceForRadiant(SUSHI_ETH_WSETH);
   }
   if (isWeth(address)) {
     return getPriceForCoinWithSwap(WETH, USDC_ARBITRUM, SUSHI_SWAP_FACTORY)
@@ -185,8 +187,8 @@ function getPriceForIFARM(): BigInt {
   return ethPrice.div(result);
 }
 
-function getPriceForRadiant(): BigInt {
-  const camelotPairContract = UniswapV2PairContract.bind(SUSHI_ETH_RADIANT);
+function getPriceForRadiant(pool: Address): BigInt {
+  const camelotPairContract = UniswapV2PairContract.bind(pool);
   const tryGetReserves = camelotPairContract.try_getReserves()
   if (tryGetReserves.reverted) {
     log.log(log.Level.WARNING, `Can not get reserves for ${SUSHI_ETH_RADIANT.toHex()}`)
@@ -222,6 +224,13 @@ export function getPriceByVault(vault: Vault, block: ethereum.Block): BigDecimal
 
   const underlying = Token.load(underlyingAddress)
   if (underlying != null) {
+
+    if (isGammaVault(underlying.name, underlying.id)) {
+      const tempInPrice = getPriceGammaLpUniPair(underlying.id);
+      createPriceFeed(vault, tempInPrice, block);
+      return tempInPrice
+    }
+
     if (isLpUniPair(underlying.name)) {
       const tempPrice = getPriceForCoin(Address.fromString(underlyingAddress))
       if (tempPrice.gt(DEFAULT_PRICE)) {
@@ -236,6 +245,12 @@ export function getPriceByVault(vault: Vault, block: ethereum.Block): BigDecimal
 
     if (isBtc(underlying.id)) {
       const tempPrice = getPriceForCoin(WBTC).divDecimal(BD_18);;
+      createPriceFeed(vault, tempPrice, block);
+      return tempPrice
+    }
+
+    if (isArb(underlying.id)) {
+      const tempPrice = getPriceForCoin(ARB).divDecimal(BD_18);;
       createPriceFeed(vault, tempPrice, block);
       return tempPrice
     }
@@ -376,6 +391,45 @@ export function getPriceLpUniPair(underlyingAddress: string): BigDecimal {
   const firstCoin = reserves.get_reserve0().toBigDecimal().times(positionFraction)
     .div(pow(BD_TEN, fetchContractDecimal(token0).toI32()))
   const secondCoin = reserves.get_reserve1().toBigDecimal().times(positionFraction)
+    .div(pow(BD_TEN, fetchContractDecimal(token1).toI32()))
+
+
+  const token0Price = getPriceForCoin(token0)
+  const token1Price = getPriceForCoin(token1)
+
+  if (token0Price.isZero() || token1Price.isZero()) {
+    log.log(log.Level.WARNING, `Some price is zero token0 ${token0.toHex()} = ${token0Price} , token1 ${token1.toHex()} = ${token1Price}`)
+    return BigDecimal.zero()
+  }
+
+  return token0Price
+    .divDecimal(BD_18)
+    .times(firstCoin)
+    .plus(
+      token1Price
+        .divDecimal(BD_18)
+        .times(secondCoin)
+    )
+}
+
+export function getPriceGammaLpUniPair(underlyingAddress: string): BigDecimal {
+  const gammaVault = GammaVaultContract.bind(Address.fromString(underlyingAddress))
+  const tryGetTotalAmounts = gammaVault.try_getTotalAmounts()
+  if (tryGetTotalAmounts.reverted) {
+    log.log(log.Level.WARNING, `Can not get reserves for underlyingAddress = ${underlyingAddress}, try get price for coin`)
+
+    return getPriceForCoin(Address.fromString(underlyingAddress)).divDecimal(BD_18)
+  }
+  const reserves = tryGetTotalAmounts.value
+  const totalSupply = gammaVault.totalSupply()
+  const positionFraction = BD_ONE.div(totalSupply.toBigDecimal().div(BD_18))
+
+  const token0 = gammaVault.token0()
+  const token1 = gammaVault.token1()
+
+  const firstCoin = reserves.getTotal0().toBigDecimal().times(positionFraction)
+    .div(pow(BD_TEN, fetchContractDecimal(token0).toI32()))
+  const secondCoin = reserves.getTotal1().toBigDecimal().times(positionFraction)
     .div(pow(BD_TEN, fetchContractDecimal(token1).toI32()))
 
 

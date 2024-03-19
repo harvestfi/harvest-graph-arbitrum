@@ -44,19 +44,28 @@ export const WA_WETH = Address.fromString('0x18C100415988bEF4354EfFAd1188d1c2204
 export const WST_ETH = Address.fromString('0x5979D7b546E38E414F7E9822514be443A4800529');
 export const ST_ETH_A_ETH = Address.fromString('0x5a7f39435fd9c381e4932fa2047c9a5136a5e3e7');
 export const R_ETH_A_ETH = Address.fromString('0xcba9ff45cfb9ce238afde32b0148eb82cbe63562');
-
+export const ARB = Address.fromString('0x912CE59144191C1204E64559FE8253a0e49E6548');
+export const ARB_POOL = '0xf6da879761961ABD22177242904a6E12BB034C22'.toLowerCase();
 export const WETH_LIST = [
+  WETH,
   ST_ETH_A_ETH,
   WA_WETH,
   R_ETH_A_ETH,
   Address.fromString('0x36bf227d6bac96e2ab1ebb5492ecec69c691943f'.toLowerCase()),
-  Address.fromString('0xe62880CC6872c9E9Fb1DDd73f400850fdaBE798D'.toLowerCase())
+  Address.fromString('0xe62880CC6872c9E9Fb1DDd73f400850fdaBE798D'.toLowerCase()),
+  Address.fromString('0x5477B2E46DD6D2D8E52f8329f0DC283F6f768cFa'),
+  Address.fromString('0x4186BFC76E2E237523CBC30FD220FE055156b41F')
 ];
 export const CAMELOT_ETH_FARM = Address.fromString('0xd2a7084369cc93672b2ca868757a9f327e3677a4');
 export const SUSHI_ETH_RADIANT = Address.fromString('0x3BFB1ac033ff0aE278Be0583FCCc900FBD9382c6');
+export const SUSHI_ETH_WSETH = Address.fromString('0xb0d62768e2Fb9bD437a51B993b77B93Ac9F249d5');
 
 export const CAMELOT_FACTORY = Address.fromString('0x6eccab422d763ac031210895c81787e87b43a652');
 
+export const WST_ETH_LIST = [
+  WST_ETH,
+  Address.fromString('0x79a2e71460c97807EC40D6d670838bEe99848F1d')
+]
 export const STABLE_COIN_ARRAY_MAINNET = [
   '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48'.toLowerCase(),
   '0xe9e7cea3dedca5984780bafc599bd69add087d56'.toLowerCase(),
@@ -116,6 +125,12 @@ export const STABLE_COIN_ARRAY_ARBITRUM = [
   '0x48ad8eE28af1057Cdec42080D3Fd57b3E877d59C'.toLowerCase(),
   '0xc49bebC972f5390eE1EC8A69E4151838f59334Fc'.toLowerCase(),
   '0x5Ef78a0966BD47dEd63034678083714b4DE6e013'.toLowerCase(),
+  '0xaf88d065e77c8cC2239327C5EDb3A432268e5831'.toLowerCase(),
+
+  // underlying
+  '0x399f292939668e591957726df3ec9a0e7dc8ac57'.toLowerCase(),
+  '0x8409de8e98f80d0e40f42849ef0923c2493beead'.toLowerCase(),
+  '0xd86b1c1c7f921f3663921f8917d086379739cda3'.toLowerCase(),
 
 ]
 
@@ -131,8 +146,15 @@ export const PS_ADDRESSES_MATIC = [
   '0xab0b2ddb9c7e440fac8e140a89c0dbcbf2d7bbff'.toLowerCase(),
 ]
 
-export const BALANCER_BTC_POOLS = [
+export const BTC_POOLS = [
   '0x542f16da0efb162d20bf4358efa095b70a100f9e'.toLowerCase(),
+  '0x6c1B07ed05656DEdd90321E94B1cDB26981e65f2'.toLowerCase()
+]
+
+export const GAMMA_VAULTS_NAME = [
+  'arsETH-WETH'.toLowerCase(),
+  'aWBTC-WETH'.toLowerCase(),
+  'aUSDC-DAI'.toLowerCase()
 ]
 
 export const LP_UNI_PAIR_CONTRACT_NAME = [

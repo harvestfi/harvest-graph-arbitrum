@@ -1,13 +1,22 @@
 import {
-  BALANCER_BTC_POOLS,
-  BALANCER_CONTRACT_NAME, CAMELOT_CONTRACT,
+  BTC_POOLS,
+  BALANCER_CONTRACT_NAME,
+  CAMELOT_CONTRACT,
   CURVE_CONTRACT_NAME,
   F_UNI_V3_CONTRACT_NAME,
-  LP_UNI_PAIR_CONTRACT_NAME, MAGPIE_CONTRACT, MESH_SWAP_CONTRACT, POISON_FINANCE_CONTRACT, WETH_LIST,
+  LP_UNI_PAIR_CONTRACT_NAME,
+  MAGPIE_CONTRACT,
+  MESH_SWAP_CONTRACT,
+  POISON_FINANCE_CONTRACT,
+  WETH_LIST,
+  WST_ETH_LIST,
+  ARB_POOL,
+  GAMMA_VAULTS_NAME,
 } from './Constant';
 import { WeightedPool2TokensContract } from '../../generated/Controller/WeightedPool2TokensContract';
 import { Address } from '@graphprotocol/graph-ts';
 import { CamelotUniswapV3Vault } from '../../generated/Controller/CamelotUniswapV3Vault';
+import { GammaVaultContract } from '../../generated/Controller/GammaVaultContract';
 
 export function isLpUniPair(name: string): boolean {
   for (let i=0;i<LP_UNI_PAIR_CONTRACT_NAME.length;i++) {
@@ -16,6 +25,19 @@ export function isLpUniPair(name: string): boolean {
     }
   }
   return false
+}
+
+export function isGammaLpUniPair(name: string): boolean {
+  for (let i=0;i<GAMMA_VAULTS_NAME.length;i++) {
+    if (name.toLowerCase().startsWith(GAMMA_VAULTS_NAME[i])) {
+      return true
+    }
+  }
+  return false
+}
+
+export function isGammaVault(name: string, address: string): boolean {
+  return !!(name.toLowerCase().startsWith('a') && !GammaVaultContract.bind(Address.fromString(address)).try_getBasePosition().reverted);
 }
 
 export function isBalancer(name: string): boolean {
@@ -63,6 +85,16 @@ export function checkBalancer(address: Address): boolean {
   return !contract.try_getPoolId().reverted
 }
 
+export function isWsteth(address: Address): boolean {
+  for (let i= 0; i < WST_ETH_LIST.length; i++) {
+    if (address.equals(WST_ETH_LIST[i])) {
+      return true
+    }
+  }
+  return false;
+
+}
+
 export function isWeth(address: Address): boolean {
   for (let i=0;i<WETH_LIST.length;i++) {
     if (address.equals(WETH_LIST[i])) {
@@ -74,13 +106,17 @@ export function isWeth(address: Address): boolean {
 }
 
 export function isBtc(address: string): boolean {
-  for (let i=0;i<BALANCER_BTC_POOLS.length;i++) {
-    if (address.toLowerCase() == BALANCER_BTC_POOLS[i]) {
+  for (let i=0; i<BTC_POOLS.length; i++) {
+    if (address.toLowerCase() == BTC_POOLS[i]) {
       return true
     }
   }
 
   return false;
+}
+
+export function isArb(address: string): boolean {
+  return ARB_POOL === address;
 }
 
 export function isCamelotUniswapV3(name: string, address: string): boolean {

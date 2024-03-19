@@ -61,6 +61,8 @@ dataSources:
           file: ./abis/camelot/CamelotUniswapV3Vault.json
         - name: MagpieAsset
           file: ./abis/magpie/MagpieAsset.json
+        - name: GammaVaultContract
+          file: ./abis/gamma/GammaVault.json
       eventHandlers:
         - event: SharePriceChangeLog(indexed address,indexed address,uint256,uint256,uint256)
           handler: handleSharePriceChangeLog
@@ -130,6 +132,8 @@ dataSources:
           file: ./abis/camelot/CamelotUniswapV3Vault.json
         - name: MagpieAsset
           file: ./abis/magpie/MagpieAsset.json
+        - name: GammaVaultContract
+          file: ./abis/gamma/GammaVault.json
       eventHandlers:
         - event: SharePriceChangeLog(indexed address,indexed address,uint256,uint256,uint256)
           handler: handleSharePriceChangeLog
@@ -193,6 +197,8 @@ templates:
           file: ./abis/camelot/CamelotUniswapV3Vault.json
         - name: MagpieAsset
           file: ./abis/magpie/MagpieAsset.json
+        - name: GammaVaultContract
+          file: ./abis/gamma/GammaVault.json
       eventHandlers:
         - event: Transfer(indexed address,indexed address,uint256)
           handler: handleTransfer
@@ -257,6 +263,8 @@ templates:
           file: ./abis/camelot/CamelotUniswapV3Vault.json
         - name: MagpieAsset
           file: ./abis/magpie/MagpieAsset.json
+        - name: GammaVaultContract
+          file: ./abis/gamma/GammaVault.json
       eventHandlers:
         - event: RewardAdded(address,uint256)
           handler: handleRewardAdded
@@ -317,6 +325,8 @@ templates:
           file: ./abis/camelot/CamelotUniswapV3Vault.json
         - name: MagpieAsset
           file: ./abis/magpie/MagpieAsset.json
+        - name: GammaVaultContract
+          file: ./abis/gamma/GammaVault.json
       eventHandlers:
         - event: ProfitLogInReward(indexed address,uint256,uint256,uint256)
           handler: handleProfitLogInReward
