@@ -8,7 +8,6 @@ import {
   BD_TEN, BD_ZERO,
   BI_18,
   BI_TEN, CAMELOT_ETH_FARM, CAMELOT_FACTORY,
-  CURVE_CONTRACT_NAME,
   DEFAULT_DECIMAL, DEFAULT_IFARM_PRICE,
   DEFAULT_PRICE,
   F_UNI_V3_CONTRACT_NAME,
@@ -37,11 +36,11 @@ import { pow, powBI } from "./MathUtils";
 import {
   checkBalancer, isArb,
   isBalancer, isBtc,
-  isCamelot, isCamelotUniswapV3,
+  isCamelot, isCamelotUniswapV3, isConvex,
   isCurve, isGammaLpUniPair, isGammaVault,
   isLpUniPair, isMagpie,
   isMeshSwap,
-  isPoisonFinanceToken, isWeth, isWsteth,
+  isPoisonFinanceToken, isStablePool, isWeth, isWsteth,
 } from './PlatformUtils';
 import { UniswapV2PairContract } from "../../generated/Controller/UniswapV2PairContract";
 import { MeshSwapContract } from "../../generated/Controller/MeshSwapContract";
@@ -55,6 +54,7 @@ import { createPriceFeed } from '../types/PriceFeed';
 import { CamelotUniswapV3Vault } from '../../generated/Controller/CamelotUniswapV3Vault';
 import { MagpieAsset } from '../../generated/Controller/MagpieAsset';
 import { GammaVaultContract } from '../../generated/Controller/GammaVaultContract';
+import { ConvexPoolContract } from '../../generated/Controller/ConvexPoolContract';
 
 
 export function getPriceForCoin(address: Address): BigInt {
@@ -76,6 +76,9 @@ export function getPriceForCoin(address: Address): BigInt {
   }
   if (address.equals(SILO)) {
     return getPriceForCamelot(address);
+  }
+  if (isStableCoin(address.toHexString())) {
+    return BI_18;
   }
 
   let price = getPriceForCoinWithSwap(address, USDC_ARBITRUM, SUSHI_SWAP_FACTORY)
@@ -225,6 +228,12 @@ export function getPriceByVault(vault: Vault, block: ethereum.Block): BigDecimal
   const underlying = Token.load(underlyingAddress)
   if (underlying != null) {
 
+    if (isStablePool(underlyingAddress)) {
+      const tempInPrice = BD_ONE;
+      createPriceFeed(vault, tempInPrice, block);
+      return tempInPrice
+    }
+
     if (isGammaVault(underlying.name, underlying.id)) {
       const tempInPrice = getPriceGammaLpUniPair(underlying.id);
       createPriceFeed(vault, tempInPrice, block);
@@ -244,13 +253,19 @@ export function getPriceByVault(vault: Vault, block: ethereum.Block): BigDecimal
     }
 
     if (isBtc(underlying.id)) {
-      const tempPrice = getPriceForCoin(WBTC).divDecimal(BD_18);;
+      const tempPrice = getPriceForCoin(WBTC).divDecimal(BD_18);
       createPriceFeed(vault, tempPrice, block);
       return tempPrice
     }
 
     if (isArb(underlying.id)) {
-      const tempPrice = getPriceForCoin(ARB).divDecimal(BD_18);;
+      const tempPrice = getPriceForCoin(ARB).divDecimal(BD_18);
+      createPriceFeed(vault, tempPrice, block);
+      return tempPrice
+    }
+
+    if (isConvex(underlying.id)) {
+      const tempPrice = getPriceForConvex(underlying.id).divDecimal(BD_18);
       createPriceFeed(vault, tempPrice, block);
       return tempPrice
     }
@@ -304,7 +319,12 @@ export function getPriceByVault(vault: Vault, block: ethereum.Block): BigDecimal
   }
 
   return BigDecimal.zero()
+}
 
+export function getPriceForConvex(underlyingAddress: string): BigInt {
+  const convex = ConvexPoolContract.bind(Address.fromString(underlyingAddress))
+  const tryPrice = convex.try_lp_price();
+  return tryPrice.reverted ? DEFAULT_PRICE : tryPrice.value;
 }
 
 export function getPriceForCurve(underlyingAddress: string): BigDecimal {

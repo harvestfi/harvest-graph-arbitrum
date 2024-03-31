@@ -45,7 +45,17 @@ export const WST_ETH = Address.fromString('0x5979D7b546E38E414F7E9822514be443A48
 export const ST_ETH_A_ETH = Address.fromString('0x5a7f39435fd9c381e4932fa2047c9a5136a5e3e7');
 export const R_ETH_A_ETH = Address.fromString('0xcba9ff45cfb9ce238afde32b0148eb82cbe63562');
 export const ARB = Address.fromString('0x912CE59144191C1204E64559FE8253a0e49E6548');
-export const ARB_POOL = '0xf6da879761961ABD22177242904a6E12BB034C22'.toLowerCase();
+export const ARB_POOL = [
+  '0xf6da879761961ABD22177242904a6E12BB034C22'.toLowerCase(),
+  '0xf6da879761961ABD22177242904a6E12BB034C22'.toLowerCase()
+];
+
+export const CONVEX_POOL_LIST = [
+  '0x3c64d44Ab19D63F09ebaD38fd7b913Ab7E15e341'.toLowerCase(),
+  '0x82670f35306253222F8a165869B28c64739ac62e'.toLowerCase(),
+  '0xF7Fed8Ae0c5B78c19Aadd68b700696933B0Cefd9'.toLowerCase()
+]
+
 export const WETH_LIST = [
   WETH,
   ST_ETH_A_ETH,
@@ -54,7 +64,8 @@ export const WETH_LIST = [
   Address.fromString('0x36bf227d6bac96e2ab1ebb5492ecec69c691943f'.toLowerCase()),
   Address.fromString('0xe62880CC6872c9E9Fb1DDd73f400850fdaBE798D'.toLowerCase()),
   Address.fromString('0x5477B2E46DD6D2D8E52f8329f0DC283F6f768cFa'),
-  Address.fromString('0x4186BFC76E2E237523CBC30FD220FE055156b41F')
+  Address.fromString('0x4186BFC76E2E237523CBC30FD220FE055156b41F'),
+  Address.fromString('0x6F02C88650837C8dfe89F66723c4743E9cF833cd')
 ];
 export const CAMELOT_ETH_FARM = Address.fromString('0xd2a7084369cc93672b2ca868757a9f327e3677a4');
 export const SUSHI_ETH_RADIANT = Address.fromString('0x3BFB1ac033ff0aE278Be0583FCCc900FBD9382c6');
@@ -131,6 +142,17 @@ export const STABLE_COIN_ARRAY_ARBITRUM = [
   '0x399f292939668e591957726df3ec9a0e7dc8ac57'.toLowerCase(),
   '0x8409de8e98f80d0e40f42849ef0923c2493beead'.toLowerCase(),
   '0xd86b1c1c7f921f3663921f8917d086379739cda3'.toLowerCase(),
+
+]
+
+export const STABLE_COIN_POOL_ARRAY = [
+  '0x3aDf984c937FA6846E5a24E0A68521Bdaf767cE1'.toLowerCase(),
+  '0x2FE7AE43591E534C256A1594D326e5779E302Ff4'.toLowerCase(),
+  '0x73aF1150F265419Ef8a5DB41908B700C32D49135'.toLowerCase(),
+  '0xec090cf6DD891D2d014beA6edAda6e05E025D93d'.toLowerCase(),
+  '0xC9B8a3FDECB9D5b218d02555a8Baf332E5B740d5'.toLowerCase(),
+  '0x7f90122BF0700F9E7e1F688fe926940E8839F353'.toLowerCase(),
+  '0x2bb55dC7c125D132322d6f7056FF6a575D64Fb7C'.toLowerCase(),
 
 ]
 
