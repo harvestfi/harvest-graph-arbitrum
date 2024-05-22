@@ -51,10 +51,11 @@ export function isBalancer(name: string): boolean {
 }
 
 export function isCurve(name: string): boolean {
-  if (name.toLowerCase().startsWith(CURVE_CONTRACT_NAME)) {
-    return true;
+  for (let i = 0; i < CURVE_CONTRACT_NAME.length; i++) {
+    if (name.toLowerCase().startsWith(CURVE_CONTRACT_NAME[i])) {
+      return true;
+    }
   }
-
   return false;
 }
 

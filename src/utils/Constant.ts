@@ -170,7 +170,8 @@ export const PS_ADDRESSES_MATIC = [
 
 export const BTC_POOLS = [
   '0x542f16da0efb162d20bf4358efa095b70a100f9e'.toLowerCase(),
-  '0x6c1B07ed05656DEdd90321E94B1cDB26981e65f2'.toLowerCase()
+  '0x6c1B07ed05656DEdd90321E94B1cDB26981e65f2'.toLowerCase(),
+  '0x6c84a8f1c29108F47a79964b5Fe888D4f4D0dE40'.toLowerCase()
 ]
 
 export const GAMMA_VAULTS_NAME = [
@@ -198,7 +199,10 @@ export const BALANCER_CONTRACT_NAME = [
   '80PAL-20OHM'.toLowerCase(),
   'AuraBal'.toLowerCase(),
 ]
-export const CURVE_CONTRACT_NAME = 'Curve.fi'.toLowerCase()
+export const CURVE_CONTRACT_NAME = [
+  'Curve.fi'.toLowerCase(),
+  'fETH/ETH/xETH'.toLowerCase()
+  ]
 export const F_UNI_V3_CONTRACT_NAME = 'fUniV3'.toLowerCase()
 export const MESH_SWAP_CONTRACT = 'Meshswap'.toLowerCase()
 export const POISON_FINANCE_CONTRACT = 'Poison.Finance Poison Ivy'.toLowerCase();
