@@ -5,7 +5,7 @@ import { BD_TEN, BD_ZERO, getFromTotalAssets, TVL_NOT_SAVE } from '../utils/Cons
 import { pow } from "../utils/MathUtils";
 import { fetchContractTotalAssets, fetchPricePerFullShare } from "../utils/VaultUtils";
 import { getPriceByVault } from "../utils/PriceUtils";
-import { totalTvlUp } from './TotalTvlUtils';
+import { canCalculateTotalTvlV2, totalTvlUp } from './TotalTvlUtils';
 
 export function createTvl(address: Address, block: ethereum.Block): Tvl | null {
   const vaultAddress = address;
@@ -14,6 +14,7 @@ export function createTvl(address: Address, block: ethereum.Block): Tvl | null {
     const id = `${block.number.toHex()}-${vaultAddress.toHex()}`
     let tvl = Tvl.load(id)
     if (tvl == null) {
+      canCalculateTotalTvlV2(block);
       tvl = new Tvl(id);
 
       tvl.vault = vault.id
@@ -74,12 +75,25 @@ export function createTotalTvl(oldValue:BigDecimal, newValue: BigDecimal, id: st
   totalTvl.value = totalTvl.value.minus(oldValue).plus(newValue);
   totalTvl.save()
 
-  let totalTvlHistory = TotalTvlHistory.load(id)
-  if (totalTvlHistory == null) {
-    totalTvlHistory = new TotalTvlHistory(id)
+  // let totalTvlHistory = TotalTvlHistory.load(id)
+  // if (totalTvlHistory == null) {
+  //   totalTvlHistory = new TotalTvlHistory(id)
+  //
+  //   totalTvlHistory.sequenceId = totalTvlUp()
+  //   totalTvlHistory.value = totalTvl.value
+  //   totalTvlHistory.timestamp = block.timestamp
+  //   totalTvlHistory.createAtBlock = block.number
+  //   totalTvlHistory.save()
+  // }
+}
 
-    totalTvlHistory.sequenceId = totalTvlUp()
-    totalTvlHistory.value = totalTvl.value
+export function createTvlV2(totalTvl: BigDecimal, block: ethereum.Block): void {
+  let totalTvlHistory = TotalTvlHistoryV2.load(block.number.toString())
+  if (totalTvlHistory == null) {
+    totalTvlHistory = new TotalTvlHistoryV2(block.number.toString())
+
+    totalTvlHistory.sequenceId = totalTvlUp();
+    totalTvlHistory.value = totalTvl
     totalTvlHistory.timestamp = block.timestamp
     totalTvlHistory.createAtBlock = block.number
     totalTvlHistory.save()
