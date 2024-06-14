@@ -219,12 +219,6 @@ export function getPriceByVault(vault: Vault, block: ethereum.Block): BigDecimal
   }
   const underlyingAddress = vault.underlying
 
-  // let price = getPriceForCoin(Address.fromString(underlyingAddress))
-  // if (!price.isZero()) {
-  //   createPriceFeed(vault, price.divDecimal(BD_18), block);
-  //   return price.divDecimal(BD_18)
-  // }
-
   const underlying = Token.load(underlyingAddress)
   if (underlying != null) {
 
@@ -316,6 +310,12 @@ export function getPriceByVault(vault: Vault, block: ethereum.Block): BigDecimal
       createPriceFeed(vault, tempPrice, block);
       return tempPrice;
     }
+  }
+
+  let price = getPriceForCoin(Address.fromString(underlyingAddress))
+  if (!price.isZero()) {
+    createPriceFeed(vault, price.divDecimal(BD_18), block);
+    return price.divDecimal(BD_18)
   }
 
   return BigDecimal.zero()

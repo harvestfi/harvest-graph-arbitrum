@@ -171,7 +171,8 @@ export const PS_ADDRESSES_MATIC = [
 export const BTC_POOLS = [
   '0x542f16da0efb162d20bf4358efa095b70a100f9e'.toLowerCase(),
   '0x6c1B07ed05656DEdd90321E94B1cDB26981e65f2'.toLowerCase(),
-  '0x6c84a8f1c29108F47a79964b5Fe888D4f4D0dE40'.toLowerCase()
+  '0x6c84a8f1c29108F47a79964b5Fe888D4f4D0dE40'.toLowerCase(),
+  '0x2f2a2543B76A4166549F7aaB2e75Bef0aefC5B0f'.toLowerCase()
 ]
 
 export const GAMMA_VAULTS_NAME = [

@@ -16,9 +16,9 @@ export function handleTransfer(event: Transfer): void {
   createUserBalance(event.address, event.params.value, event.params.to, event.transaction, event.block, true)
 }
 
-export function handleInvest(event: Invest): void {
-  createTvl(event.address, event.block)
-}
-
-export function handleApproval(event: Approval): void {
-}
+// export function handleInvest(event: Invest): void {
+//   createTvl(event.address, event.block)
+// }
+//
+// export function handleApproval(event: Approval): void {
+// }

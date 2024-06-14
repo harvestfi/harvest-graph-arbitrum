@@ -34,6 +34,7 @@ export function loadOrCreateVault(vaultAddress: Address, block: ethereum.Block, 
     vault.users = [];
     vault.lastUsersShareTimestamp = BigInt.zero();
     vault.tvlSequenceId = 1;
+    vault.priceFeedSequenceId = 1;
     vault.save();
     VaultListener.create(vaultAddress)
     pushVault(vault.id, block);
