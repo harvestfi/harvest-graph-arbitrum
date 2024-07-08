@@ -318,6 +318,8 @@ export function getPriceByVault(vault: Vault, block: ethereum.Block): BigDecimal
     return price.divDecimal(BD_18)
   }
 
+  createPriceFeed(vault, BigDecimal.zero(), block);
+
   return BigDecimal.zero()
 }
 

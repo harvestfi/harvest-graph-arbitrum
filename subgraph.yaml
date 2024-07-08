@@ -72,7 +72,7 @@ dataSources:
         - handler: handleBlock
           filter:
             kind: polling
-            every: 315360
+            every: 464592
       file: ./src/ControllerListener.ts
 
   - kind: ethereum
@@ -208,10 +208,6 @@ templates:
       eventHandlers:
         - event: Transfer(indexed address,indexed address,uint256)
           handler: handleTransfer
-#        - event: Invest(uint256)
-#          handler: handleInvest
-#        - event: Approval(indexed address,indexed address,uint256)
-#          handler: handleApproval
       file: ./src/VaultListener.ts
   - kind: ethereum/contract
     name: PotPoolListener

@@ -65,7 +65,8 @@ export const WETH_LIST = [
   Address.fromString('0xe62880CC6872c9E9Fb1DDd73f400850fdaBE798D'.toLowerCase()),
   Address.fromString('0x5477B2E46DD6D2D8E52f8329f0DC283F6f768cFa'),
   Address.fromString('0x4186BFC76E2E237523CBC30FD220FE055156b41F'),
-  Address.fromString('0x6F02C88650837C8dfe89F66723c4743E9cF833cd')
+  Address.fromString('0x6F02C88650837C8dfe89F66723c4743E9cF833cd'),
+  Address.fromString('0x95f425c7d730eb7673fca272c2c305f48ed546c3')
 ];
 export const CAMELOT_ETH_FARM = Address.fromString('0xd2a7084369cc93672b2ca868757a9f327e3677a4');
 export const SUSHI_ETH_RADIANT = Address.fromString('0x3BFB1ac033ff0aE278Be0583FCCc900FBD9382c6');
@@ -142,6 +143,12 @@ export const STABLE_COIN_ARRAY_ARBITRUM = [
   '0x399f292939668e591957726df3ec9a0e7dc8ac57'.toLowerCase(),
   '0x8409de8e98f80d0e40f42849ef0923c2493beead'.toLowerCase(),
   '0xd86b1c1c7f921f3663921f8917d086379739cda3'.toLowerCase(),
+  // GHO
+  '0x7dfF72693f6A4149b17e7C6314655f6A9F7c8B33'.toLowerCase(),
+  '0x17fc002b466eec40dae837fc4be5c67993ddbd6f'.toLowerCase(),
+  '0x1446999b0b0e4f7ada6ee73f2ae12a2cfdc5d9e7'.toLowerCase(),
+  '0x68f5d998f00bb2460511021741d098c05721d8ff'.toLowerCase(),
+  '0xce3b19d820cb8b9ae370e423b0a329c4314335fe'.toLowerCase()
 
 ]
 

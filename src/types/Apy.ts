@@ -1,6 +1,6 @@
 import { ApyAutoCompound, ApyReward, GeneralApy, Pool, Vault } from '../../generated/schema';
 import { Address, BigDecimal, BigInt, ethereum } from "@graphprotocol/graph-ts";
-import { getPriceByVault, getPriceForCoin } from "../utils/PriceUtils";
+import { getPriceForCoin } from "../utils/PriceUtils";
 import {
   BD_18,
   BD_ONE,
@@ -12,10 +12,7 @@ import {
   SECONDS_OF_YEAR,
   YEAR_PERIOD,
 } from '../utils/Constant';
-import { VaultContract } from "../../generated/Controller/VaultContract";
 import { pow } from "../utils/MathUtils";
-import { calculateTvlUsd } from "../utils/TvlUtils";
-import { loadOrCreateVault } from './Vault';
 
 export function saveApyReward(
   poolAddress: Address,
@@ -40,14 +37,7 @@ export function saveApyReward(
       let rewardForPeriods: BigDecimal[] = []
       let prices: BigDecimal[] = []
 
-      let price = BigDecimal.zero()
-      if (isPsAddress(pool.vault)) {
-        price = getPriceForCoin(getFarmToken()).divDecimal(BD_18)
-      } else {
-        price = getPriceByVault(vault, block)
-      }
-
-      const tvlUsd = calculateTvlUsd(Address.fromString(vault.id), price)
+      const tvlUsd = vault.tvl
       const rewardTokenPrice = getPriceForCoin(rewardToken)
       let rewardTokenPriceBD = BigDecimal.zero();
       if (rewardTokenPrice.gt(BigInt.zero())) {

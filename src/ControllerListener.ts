@@ -13,8 +13,6 @@ import {
 import { SharePriceChangeLog } from "../generated/Controller/ControllerContract";
 import { Address, BigDecimal, BigInt, ethereum } from '@graphprotocol/graph-ts';
 import { calculateAndSaveApyAutoCompound } from "./types/Apy";
-import { createUserBalance } from './types/UserBalance';
-import { getPriceByVault } from './utils/PriceUtils';
 
 
 export function handleSharePriceChangeLog(event: SharePriceChangeLog): void {
@@ -45,15 +43,6 @@ export function handleSharePriceChangeLog(event: SharePriceChangeLog): void {
       }
       vault.lastShareTimestamp = sharePrice.timestamp
       vault.lastSharePrice = sharePrice.newSharePrice
-
-      if (vault.lastUsersShareTimestamp.plus(TWO_WEEKS_IN_SECONDS).lt(event.block.timestamp)) {
-        const users = vault.users
-        for (let i = 0; i < users.length; i++) {
-          createUserBalance(event.params.vault, BigInt.zero(), Address.fromString(users[i]), event.transaction, event.block, false);
-        }
-        vault.lastUsersShareTimestamp = event.block.timestamp
-      }
-
       vault.save()
     }
 
@@ -76,7 +65,7 @@ export function handleBlock(block: ethereum.Block): void {
   const vaultUtils = getVaultUtils();
   for (let i = 0; i < vaultUtils.vaults.length; i++) {
     const vault = loadOrCreateVault(Address.fromString(vaultUtils.vaults[i]), block);
-    const price = getPriceByVault(vault, block);
+    const price = vault.priceUnderlying;
 
     const priceHistoryId = `${vault.id}-${block.number.toString()}`
     let priceHistory = PriceHistory.load(priceHistoryId)
@@ -88,8 +77,5 @@ export function handleBlock(block: ethereum.Block): void {
       priceHistory.timestamp = block.timestamp
       priceHistory.save();
     }
-
-    vault.priceUnderlying = price
-    vault.save();
   }
 }

@@ -31,7 +31,7 @@ export function getTvlUtils(block: ethereum.Block): TotalTvlUtil {
 export function canCalculateTotalTvlV2(block: ethereum.Block): void {
   const tvlUtil = getTvlUtils(block);
 
-  if (tvlUtil.lastTimestampUpdate.plus(BI_EVERY_7_DAYS) > block.timestamp || tvlUtil.lastTimestampUpdate.isZero()) {
+  if (tvlUtil.lastTimestampUpdate.plus(BI_EVERY_7_DAYS) < block.timestamp) {
     createTotalTvl(block);
   }
 }
