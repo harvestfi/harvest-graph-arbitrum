@@ -222,7 +222,7 @@ export function getPriceByVault(vault: Vault, block: ethereum.Block): BigDecimal
   const underlying = Token.load(underlyingAddress)
   if (underlying != null) {
 
-    if (isStablePool(underlyingAddress)) {
+    if (isStablePool(underlyingAddress) || isStableCoin(underlyingAddress)) {
       const tempInPrice = BD_ONE;
       createPriceFeed(vault, tempInPrice, block);
       return tempInPrice

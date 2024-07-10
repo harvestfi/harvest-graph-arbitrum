@@ -66,7 +66,8 @@ export const WETH_LIST = [
   Address.fromString('0x5477B2E46DD6D2D8E52f8329f0DC283F6f768cFa'),
   Address.fromString('0x4186BFC76E2E237523CBC30FD220FE055156b41F'),
   Address.fromString('0x6F02C88650837C8dfe89F66723c4743E9cF833cd'),
-  Address.fromString('0x95f425c7d730eb7673fca272c2c305f48ed546c3')
+  Address.fromString('0x95f425c7d730eb7673fca272c2c305f48ed546c3'),
+  Address.fromString('0x59745774ed5eff903e615f5a2282cae03484985a')
 ];
 export const CAMELOT_ETH_FARM = Address.fromString('0xd2a7084369cc93672b2ca868757a9f327e3677a4');
 export const SUSHI_ETH_RADIANT = Address.fromString('0x3BFB1ac033ff0aE278Be0583FCCc900FBD9382c6');
@@ -148,8 +149,10 @@ export const STABLE_COIN_ARRAY_ARBITRUM = [
   '0x17fc002b466eec40dae837fc4be5c67993ddbd6f'.toLowerCase(),
   '0x1446999b0b0e4f7ada6ee73f2ae12a2cfdc5d9e7'.toLowerCase(),
   '0x68f5d998f00bb2460511021741d098c05721d8ff'.toLowerCase(),
-  '0xce3b19d820cb8b9ae370e423b0a329c4314335fe'.toLowerCase()
-
+  '0xce3b19d820cb8b9ae370e423b0a329c4314335fe'.toLowerCase(),
+  '0x6f33daf91d2acae10f5cd7bbe3f31716ed123f1d'.toLowerCase(),
+  '0x93a416206b4ae3204cfe539edfee6bc05a62963e'.toLowerCase(),
+  '0x67d11005af05bb1e9fdb1cfc261c23de3e1055a1'.toLowerCase()
 ]
 
 export const STABLE_COIN_POOL_ARRAY = [
@@ -209,7 +212,9 @@ export const BALANCER_CONTRACT_NAME = [
 ]
 export const CURVE_CONTRACT_NAME = [
   'Curve.fi'.toLowerCase(),
-  'fETH/ETH/xETH'.toLowerCase()
+  'fETH/ETH/xETH'.toLowerCase(),
+  '2BTC-ng'.toLowerCase(),
+  'Tri'.toLowerCase(),
   ]
 export const F_UNI_V3_CONTRACT_NAME = 'fUniV3'.toLowerCase()
 export const MESH_SWAP_CONTRACT = 'Meshswap'.toLowerCase()
