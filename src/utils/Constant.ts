@@ -67,7 +67,11 @@ export const WETH_LIST = [
   Address.fromString('0x4186BFC76E2E237523CBC30FD220FE055156b41F'),
   Address.fromString('0x6F02C88650837C8dfe89F66723c4743E9cF833cd'),
   Address.fromString('0x95f425c7d730eb7673fca272c2c305f48ed546c3'),
-  Address.fromString('0x59745774ed5eff903e615f5a2282cae03484985a')
+  Address.fromString('0x59745774ed5eff903e615f5a2282cae03484985a'),
+  Address.fromString('0x90e6CB5249f5e1572afBF8A96D8A1ca6aCFFd739'),
+  Address.fromString('0xd0EC47c54cA5e20aaAe4616c25C825c7f48D4069'),
+  Address.fromString('0x2d6CeD12420a9AF5a83765a8c48Be2aFcD1A8FEb'),
+
 ];
 export const CAMELOT_ETH_FARM = Address.fromString('0xd2a7084369cc93672b2ca868757a9f327e3677a4');
 export const SUSHI_ETH_RADIANT = Address.fromString('0x3BFB1ac033ff0aE278Be0583FCCc900FBD9382c6');
