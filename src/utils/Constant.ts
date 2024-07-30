@@ -156,7 +156,8 @@ export const STABLE_COIN_ARRAY_ARBITRUM = [
   '0xce3b19d820cb8b9ae370e423b0a329c4314335fe'.toLowerCase(),
   '0x6f33daf91d2acae10f5cd7bbe3f31716ed123f1d'.toLowerCase(),
   '0x93a416206b4ae3204cfe539edfee6bc05a62963e'.toLowerCase(),
-  '0x67d11005af05bb1e9fdb1cfc261c23de3e1055a1'.toLowerCase()
+  '0x67d11005af05bb1e9fdb1cfc261c23de3e1055a1'.toLowerCase(),
+  '0x498Bf2B1e120FeD3ad3D42EA2165E9b73f99C1e5'.toLowerCase()
 ]
 
 export const STABLE_COIN_POOL_ARRAY = [
@@ -253,12 +254,10 @@ export const TAKE_FROM_TOTAL_ASSETS = [
   '0xfC2640ca71B1724B89dc2714E661B0089f8c0EED'.toLowerCase(),
 ]
 export function isStableCoin(address: string): boolean {
-  if (dataSource.network() == 'mainnet') {
-    return STABLE_COIN_ARRAY_MAINNET.join(' ').includes(address) == true
-  } else if (dataSource.network() == 'matic') {
-    return STABLE_COIN_ARRAY_MATIC.join(' ').includes(address) == true
-  } else if (dataSource.network() == 'arbitrum-one') {
-    return STABLE_COIN_ARRAY_ARBITRUM.join(' ').includes(address) == true
+  for (let i=0;i<STABLE_COIN_ARRAY_ARBITRUM.length;i++) {
+    if (STABLE_COIN_ARRAY_ARBITRUM[i].toLowerCase() == address.toLowerCase()) {
+      return true
+    }
   }
   return false
 }
