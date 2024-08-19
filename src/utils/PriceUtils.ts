@@ -55,6 +55,7 @@ import { CamelotUniswapV3Vault } from '../../generated/Controller/CamelotUniswap
 import { MagpieAsset } from '../../generated/Controller/MagpieAsset';
 import { GammaVaultContract } from '../../generated/Controller/GammaVaultContract';
 import { ConvexPoolContract } from '../../generated/Controller/ConvexPoolContract';
+import { loadOrCreateERC20Token } from '../types/Token';
 
 
 export function getPriceForCoin(address: Address): BigInt {
@@ -211,105 +212,96 @@ function getPriceForRadiant(pool: Address): BigInt {
 }
 
 export function getPriceByVault(vault: Vault, block: ethereum.Block): BigDecimal {
+  const underlyingAddress = vault.underlying
 
-  if (isPsAddress(vault.id)) {
-    const tempPrice = getPriceForCoin(getFarmToken()).divDecimal(BD_18);
+  const underlying = loadOrCreateERC20Token(Address.fromString(underlyingAddress))
+  if (isStablePool(underlyingAddress) || isStableCoin(underlyingAddress)) {
+    const tempInPrice = BD_ONE;
+    createPriceFeed(vault, tempInPrice, block);
+    return tempInPrice
+  }
+
+  if (isBtc(underlying.id)) {
+    const tempPrice = getPriceForCoin(WBTC).divDecimal(BD_18);
+    createPriceFeed(vault, tempPrice, block);
+    return tempPrice
+  }
+
+  if (isGammaVault(underlying.name, underlying.id)) {
+    const tempInPrice = getPriceGammaLpUniPair(underlying.id);
+    createPriceFeed(vault, tempInPrice, block);
+    return tempInPrice
+  }
+
+  if (isLpUniPair(underlying.name)) {
+    const tempPrice = getPriceForCoin(Address.fromString(underlyingAddress))
+    if (tempPrice.gt(DEFAULT_PRICE)) {
+      createPriceFeed(vault, tempPrice.divDecimal(BD_18), block);
+      return tempPrice.divDecimal(BD_18)
+    }
+
+    const tempInPrice = getPriceLpUniPair(underlying.id);
+    createPriceFeed(vault, tempInPrice, block);
+    return tempInPrice
+  }
+
+  if (isArb(underlying.id)) {
+    const tempPrice = getPriceForCoin(ARB).divDecimal(BD_18);
+    createPriceFeed(vault, tempPrice, block);
+    return tempPrice
+  }
+
+  if (isConvex(underlying.id)) {
+    const tempPrice = getPriceForConvex(underlying.id).divDecimal(BD_18);
+    createPriceFeed(vault, tempPrice, block);
+    return tempPrice
+  }
+
+  if (isPoisonFinanceToken(underlying.name)) {
+    const tempPrice = getPriceForUniswapV3(UNISWAP_V3_POISON_FINANCE_POOL);
     createPriceFeed(vault, tempPrice, block);
     return tempPrice;
   }
-  const underlyingAddress = vault.underlying
+  if (isBalancer(underlying.name)) {
+    const tempPrice = getPriceForBalancer(underlying.id);
+    createPriceFeed(vault, tempPrice, block);
+    return tempPrice
+  }
 
-  const underlying = Token.load(underlyingAddress)
-  if (underlying != null) {
-
-    if (isStablePool(underlyingAddress) || isStableCoin(underlyingAddress)) {
-      const tempInPrice = BD_ONE;
-      createPriceFeed(vault, tempInPrice, block);
-      return tempInPrice
+  if (isCurve(underlying.name)) {
+    const tempPrice = getPriceForCoin(Address.fromString(underlying.id))
+    if (!tempPrice.isZero()) {
+      createPriceFeed(vault, tempPrice.divDecimal(BD_18), block);
+      return tempPrice.divDecimal(BD_18)
     }
 
-    if (isGammaVault(underlying.name, underlying.id)) {
-      const tempInPrice = getPriceGammaLpUniPair(underlying.id);
-      createPriceFeed(vault, tempInPrice, block);
-      return tempInPrice
-    }
+    const tempInPrice = getPriceForCurve(underlyingAddress);
+    createPriceFeed(vault, tempInPrice, block);
+    return tempInPrice
+  }
 
-    if (isLpUniPair(underlying.name)) {
-      const tempPrice = getPriceForCoin(Address.fromString(underlyingAddress))
-      if (tempPrice.gt(DEFAULT_PRICE)) {
-        createPriceFeed(vault, tempPrice.divDecimal(BD_18), block);
-        return tempPrice.divDecimal(BD_18)
-      }
+  if (isMeshSwap(underlying.name)) {
+    const tempPrice = getPriceFotMeshSwap(underlyingAddress)
+    createPriceFeed(vault, tempPrice, block);
+    return tempPrice;
+  }
 
-      const tempInPrice = getPriceLpUniPair(underlying.id);
-      createPriceFeed(vault, tempInPrice, block);
-      return tempInPrice
-    }
+  if (isCamelot(underlying.name)) {
+    const tempPrice = getPriceCamelotUniPair(underlyingAddress);
+    createPriceFeed(vault, tempPrice, block);
+    return tempPrice;
+  }
 
-    if (isBtc(underlying.id)) {
-      const tempPrice = getPriceForCoin(WBTC).divDecimal(BD_18);
-      createPriceFeed(vault, tempPrice, block);
-      return tempPrice
-    }
+  if (isCamelotUniswapV3(underlying.name, underlying.id)) {
+    const tempPrice = getPriceForCamelotUniswapV3(vault)
+    createPriceFeed(vault, tempPrice, block);
+    return tempPrice;
+  }
 
-    if (isArb(underlying.id)) {
-      const tempPrice = getPriceForCoin(ARB).divDecimal(BD_18);
-      createPriceFeed(vault, tempPrice, block);
-      return tempPrice
-    }
-
-    if (isConvex(underlying.id)) {
-      const tempPrice = getPriceForConvex(underlying.id).divDecimal(BD_18);
-      createPriceFeed(vault, tempPrice, block);
-      return tempPrice
-    }
-
-    if (isPoisonFinanceToken(underlying.name)) {
-      const tempPrice = getPriceForUniswapV3(UNISWAP_V3_POISON_FINANCE_POOL);
-      createPriceFeed(vault, tempPrice, block);
-      return tempPrice;
-    }
-    if (isBalancer(underlying.name)) {
-      const tempPrice = getPriceForBalancer(underlying.id);
-      createPriceFeed(vault, tempPrice, block);
-      return tempPrice
-    }
-
-    if (isCurve(underlying.name)) {
-      const tempPrice = getPriceForCoin(Address.fromString(underlying.id))
-      if (!tempPrice.isZero()) {
-        createPriceFeed(vault, tempPrice.divDecimal(BD_18), block);
-        return tempPrice.divDecimal(BD_18)
-      }
-
-      const tempInPrice = getPriceForCurve(underlyingAddress);
-      createPriceFeed(vault, tempInPrice, block);
-      return tempInPrice
-    }
-
-    if (isMeshSwap(underlying.name)) {
-      const tempPrice = getPriceFotMeshSwap(underlyingAddress)
-      createPriceFeed(vault, tempPrice, block);
-      return tempPrice;
-    }
-
-    if (isCamelot(underlying.name)) {
-      const tempPrice = getPriceCamelotUniPair(underlyingAddress);
-      createPriceFeed(vault, tempPrice, block);
-      return tempPrice;
-    }
-
-    if (isCamelotUniswapV3(underlying.name, underlying.id)) {
-      const tempPrice = getPriceForCamelotUniswapV3(vault)
-      createPriceFeed(vault, tempPrice, block);
-      return tempPrice;
-    }
-
-    if (isMagpie(underlying.name)) {
-      const tempPrice = getPriceForMagpie(vault)
-      createPriceFeed(vault, tempPrice, block);
-      return tempPrice;
-    }
+  if (isMagpie(underlying.name)) {
+    const tempPrice = getPriceForMagpie(vault)
+    createPriceFeed(vault, tempPrice, block);
+    return tempPrice;
   }
 
   let price = getPriceForCoin(Address.fromString(underlyingAddress))
