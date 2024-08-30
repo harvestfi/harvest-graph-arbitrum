@@ -14,7 +14,7 @@ import {
   getFarmToken,
   getOracleAddress, GRAIL, IFARM,
   isPsAddress,
-  isStableCoin,
+  isStableCoin, isStableVault,
   LP_UNI_PAIR_CONTRACT_NAME,
   MESH_SWAP_CONTRACT,
   NULL_ADDRESS, RADIANT, RADIANT_PRICE, SILO,
@@ -212,6 +212,12 @@ function getPriceForRadiant(pool: Address): BigInt {
 }
 
 export function getPriceByVault(vault: Vault, block: ethereum.Block): BigDecimal {
+  if (isStableVault(vault.id)) {
+    const tempInPrice = BD_ONE;
+    createPriceFeed(vault, tempInPrice, block);
+    return tempInPrice
+  }
+
   const underlyingAddress = vault.underlying
 
   const underlying = loadOrCreateERC20Token(Address.fromString(underlyingAddress))

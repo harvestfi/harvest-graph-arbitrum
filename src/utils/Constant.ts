@@ -164,6 +164,15 @@ export const STABLE_COIN_ARRAY_ARBITRUM = [
   '0x12275DCB9048680c4Be40942eA4D92c74C63b844'.toLowerCase()
 ]
 
+export const STABLE_VAULT_ARRAY_ARBITRUM = [
+  '0x2f5c116ab613ec601ed810c5a46402a994fd7151'.toLowerCase(),
+  '0x1d52512e7a7a101cd2af55f0b7ccd646ebd5f81e'.toLowerCase(),
+  '0xbf6028b0af43eee4d26c04f74f1638b7b52a39a7'.toLowerCase(),
+  '0xbe70cefa4e5c74093b0b26516d35ebabb840a8b3'.toLowerCase(),
+  '0x6c5ea65451796345b068e3acf5e3b85fba6b46ae'.toLowerCase(),
+  '0x31dbd3eff737dcd45ca8d0824a5da94e37a79366'.toLowerCase()
+  ]
+
 export const STABLE_COIN_POOL_ARRAY = [
   '0x3aDf984c937FA6846E5a24E0A68521Bdaf767cE1'.toLowerCase(),
   '0x2FE7AE43591E534C256A1594D326e5779E302Ff4'.toLowerCase(),
@@ -192,7 +201,8 @@ export const BTC_POOLS = [
   '0x6c1B07ed05656DEdd90321E94B1cDB26981e65f2'.toLowerCase(),
   '0x6c84a8f1c29108F47a79964b5Fe888D4f4D0dE40'.toLowerCase(),
   '0x2f2a2543B76A4166549F7aaB2e75Bef0aefC5B0f'.toLowerCase(),
-  '0x186cf879186986a20aadfb7ead50e3c20cb26cec'.toLowerCase()
+  '0x186cf879186986a20aadfb7ead50e3c20cb26cec'.toLowerCase(),
+  '0xe957cE03cCdd88f02ed8b05C9a3A28ABEf38514A'.toLowerCase()
 ]
 
 export const GAMMA_VAULTS_NAME = [
@@ -261,6 +271,15 @@ export const TAKE_FROM_TOTAL_ASSETS = [
 export function isStableCoin(address: string): boolean {
   for (let i=0;i<STABLE_COIN_ARRAY_ARBITRUM.length;i++) {
     if (STABLE_COIN_ARRAY_ARBITRUM[i].toLowerCase() == address.toLowerCase()) {
+      return true
+    }
+  }
+  return false
+}
+
+export function isStableVault(address: string): boolean {
+  for (let i=0;i<STABLE_VAULT_ARRAY_ARBITRUM.length;i++) {
+    if (STABLE_VAULT_ARRAY_ARBITRUM[i].toLowerCase() == address.toLowerCase()) {
       return true
     }
   }
