@@ -233,6 +233,12 @@ export function getPriceByVault(vault: Vault, block: ethereum.Block): BigDecimal
     return tempPrice
   }
 
+  if (isWeth(Address.fromString(underlyingAddress))) {
+    const tempPrice = getPriceForCoin(WETH).divDecimal(BD_18);
+    createPriceFeed(vault, tempPrice, block);
+    return tempPrice
+  }
+
   if (isGammaVault(underlying.name, underlying.id)) {
     const tempInPrice = getPriceGammaLpUniPair(underlying.id);
     createPriceFeed(vault, tempInPrice, block);
