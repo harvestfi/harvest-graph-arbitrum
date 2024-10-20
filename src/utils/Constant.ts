@@ -244,6 +244,7 @@ export const MESH_SWAP_CONTRACT = 'Meshswap'.toLowerCase()
 export const POISON_FINANCE_CONTRACT = 'Poison.Finance Poison Ivy'.toLowerCase();
 export const CAMELOT_CONTRACT = 'Camelot'.toLowerCase();
 export const MAGPIE_CONTRACT = 'Wombat'.toLowerCase();
+export const PENDLE_CONTRACT_NAME = 'Pendle'.toLowerCase()
 
 
 export const UNISWAP_V3_FEES = [

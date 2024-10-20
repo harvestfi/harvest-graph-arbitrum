@@ -1,5 +1,4 @@
 import { Address, BigDecimal, BigInt, ethereum, log } from '@graphprotocol/graph-ts';
-import { OracleContract } from "../../generated/templates/VaultListener/OracleContract";
 import {
   ARB,
   BALANCER_CONTRACT_NAME,
@@ -9,15 +8,9 @@ import {
   BI_18,
   BI_TEN, CAMELOT_ETH_FARM, CAMELOT_FACTORY,
   DEFAULT_DECIMAL, DEFAULT_IFARM_PRICE,
-  DEFAULT_PRICE,
-  F_UNI_V3_CONTRACT_NAME,
-  getFarmToken,
-  getOracleAddress, GRAIL, IFARM,
-  isPsAddress,
+  DEFAULT_PRICE, GRAIL, IFARM,
   isStableCoin, isStableVault,
-  LP_UNI_PAIR_CONTRACT_NAME,
-  MESH_SWAP_CONTRACT,
-  NULL_ADDRESS, RADIANT, RADIANT_PRICE, SILO,
+  NULL_ADDRESS, RADIANT, SILO,
   SOLID_LIZARD_FACTORY, SUSHI_ETH_RADIANT, SUSHI_ETH_WSETH,
   SUSHI_SWAP_FACTORY,
   UNISWAP_V3_POISON_FINANCE_POOL,
@@ -39,7 +32,7 @@ import {
   isCamelot, isCamelotUniswapV3, isConvex,
   isCurve, isGammaLpUniPair, isGammaVault,
   isLpUniPair, isMagpie,
-  isMeshSwap,
+  isMeshSwap, isPendle,
   isPoisonFinanceToken, isStablePool, isWeth, isWsteth,
 } from './PlatformUtils';
 import { UniswapV2PairContract } from "../../generated/Controller/UniswapV2PairContract";
@@ -56,6 +49,7 @@ import { MagpieAsset } from '../../generated/Controller/MagpieAsset';
 import { GammaVaultContract } from '../../generated/Controller/GammaVaultContract';
 import { ConvexPoolContract } from '../../generated/Controller/ConvexPoolContract';
 import { loadOrCreateERC20Token } from '../types/Token';
+import { PendlePoolContract } from '../../generated/Controller2/PendlePoolContract';
 
 
 export function getPriceForCoin(address: Address): BigInt {
@@ -312,6 +306,12 @@ export function getPriceByVault(vault: Vault, block: ethereum.Block): BigDecimal
 
   if (isMagpie(underlying.name)) {
     const tempPrice = getPriceForMagpie(vault)
+    createPriceFeed(vault, tempPrice, block);
+    return tempPrice;
+  }
+
+  if (isPendle(underlying.name)) {
+    const tempPrice = getPriceForPendle(underlying)
     createPriceFeed(vault, tempPrice, block);
     return tempPrice;
   }
@@ -684,4 +684,49 @@ export function getPriceForCamelotUniswapV3(vault: Vault): BigDecimal {
   }
 
   return BigDecimal.zero()
+}
+
+function getPriceForPendle(underlying: Token): BigDecimal {
+  const pendleAddress = Address.fromString(underlying.id);
+  const pendleContract = PendlePoolContract.bind(pendleAddress);
+
+  const tryReadTokens = pendleContract.try_readTokens();
+  if (tryReadTokens.reverted) {
+    log.log(log.Level.WARNING, `Failed to read tokens from Pendle pool at ${pendleAddress.toHexString()}`);
+    return BigDecimal.zero();
+  }
+
+  const tryReadState = pendleContract.try_readState(pendleAddress);
+  if (tryReadState.reverted) {
+    log.log(log.Level.WARNING, `Failed to read state from Pendle pool at ${pendleAddress.toHexString()}`);
+    return BigDecimal.zero();
+  }
+
+  const state = tryReadState.value;
+  const totalPt = state.totalPt.toBigDecimal();
+  const totalSy = state.totalSy.toBigDecimal();
+
+  if (totalPt.equals(BigDecimal.zero()) || totalSy.equals(BigDecimal.zero())) {
+    log.log(log.Level.WARNING, `Total PT or SY in Pendle pool is zero at ${pendleAddress.toHexString()}`);
+    return BigDecimal.zero();
+  }
+
+  const tokens = tryReadTokens.value;
+  const pricePt = getPriceForCoin(tokens.get_PT());
+  const priceSy = getPriceForCoin(tokens.get_SY());
+
+  if (pricePt.isZero()) {
+    log.log(log.Level.WARNING, `Price for PT token is zero`);
+  }
+  if (priceSy.isZero()) {
+    log.log(log.Level.WARNING, `Price for SY token is zero`);
+  }
+  if (pricePt.isZero() || priceSy.isZero()) {
+    return BigDecimal.zero();
+  }
+
+  return pricePt
+    .divDecimal(BD_18)
+    .times(totalPt)
+    .plus(priceSy.divDecimal(BD_18).times(totalSy));
 }

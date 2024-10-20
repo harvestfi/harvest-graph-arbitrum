@@ -138,6 +138,8 @@ dataSources:
           file: ./abis/gamma/GammaVault.json
         - name: ConvexPoolContract
           file: ./abis/convex/ConvexPool.json
+        - name: PendlePoolContract
+          file: ./abis/pendle/PendlePool.json
       eventHandlers:
         - event: SharePriceChangeLog(indexed address,indexed address,uint256,uint256,uint256)
           handler: handleSharePriceChangeLog
@@ -205,6 +207,8 @@ templates:
           file: ./abis/gamma/GammaVault.json
         - name: ConvexPoolContract
           file: ./abis/convex/ConvexPool.json
+        - name: PendlePoolContract
+          file: ./abis/pendle/PendlePool.json
       eventHandlers:
         - event: Transfer(indexed address,indexed address,uint256)
           handler: handleTransfer
@@ -269,6 +273,8 @@ templates:
           file: ./abis/gamma/GammaVault.json
         - name: ConvexPoolContract
           file: ./abis/convex/ConvexPool.json
+        - name: PendlePoolContract
+          file: ./abis/pendle/PendlePool.json
       eventHandlers:
         - event: RewardAdded(address,uint256)
           handler: handleRewardAdded
@@ -333,6 +339,8 @@ templates:
           file: ./abis/gamma/GammaVault.json
         - name: ConvexPoolContract
           file: ./abis/convex/ConvexPool.json
+        - name: PendlePoolContract
+          file: ./abis/pendle/PendlePool.json
       eventHandlers:
         - event: ProfitLogInReward(indexed address,uint256,uint256,uint256)
           handler: handleProfitLogInReward

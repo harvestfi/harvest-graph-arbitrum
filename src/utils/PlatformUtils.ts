@@ -11,7 +11,7 @@ import {
   WETH_LIST,
   WST_ETH_LIST,
   ARB_POOL,
-  GAMMA_VAULTS_NAME, STABLE_COIN_POOL_ARRAY, CONVEX_POOL_LIST,
+  GAMMA_VAULTS_NAME, STABLE_COIN_POOL_ARRAY, CONVEX_POOL_LIST, PENDLE_CONTRACT_NAME,
 } from './Constant';
 import { WeightedPool2TokensContract } from '../../generated/Controller/WeightedPool2TokensContract';
 import { Address } from '@graphprotocol/graph-ts';
@@ -71,6 +71,10 @@ export function isMeshSwap(name: string): boolean {
     return true;
   }
   return false;
+}
+
+export function isPendle(name: string): boolean {
+  return !!name.toLowerCase().startsWith(PENDLE_CONTRACT_NAME);
 }
 
 export function isCamelot(name: string): boolean {
