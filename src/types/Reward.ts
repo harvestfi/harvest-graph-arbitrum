@@ -1,5 +1,6 @@
 import { Pool, Reward } from "../../generated/schema";
 import { Address, BigInt, ethereum } from "@graphprotocol/graph-ts";
+import { stringIdToBytes } from '../utils/IdUtils';
 
 export function saveReward(
   poolAddress: Address,
@@ -13,7 +14,7 @@ export function saveReward(
   let pool = Pool.load(poolAddress.toHex())
   if (pool != null) {
     // create reward
-    let reward = new Reward(`${tx.hash.toHex()}-${pool.id}-${rewardToken.toHex()}`)
+    let reward = new Reward(stringIdToBytes(`${tx.hash.toHex()}-${pool.id}-${rewardToken.toHex()}`));
     reward.timestamp = block.timestamp
     reward.pool = poolAddress.toHex()
     reward.token = rewardToken.toHex()

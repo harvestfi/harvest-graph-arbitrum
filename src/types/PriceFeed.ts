@@ -2,9 +2,10 @@ import { PriceFeed, Vault } from '../../generated/schema';
 import { BigDecimal, BigInt, ethereum } from '@graphprotocol/graph-ts';
 import { pow } from '../utils/MathUtils';
 import { BD_TEN } from '../utils/Constant';
+import { stringIdToBytes } from '../utils/IdUtils';
 
 export function createPriceFeed(vault: Vault, price: BigDecimal, block: ethereum.Block): PriceFeed {
-  const id = `${vault.id}-${block.number.toString()}`;
+  const id = stringIdToBytes(`${vault.id}-${block.number.toString()}`);
   let priceFeed = PriceFeed.load(id);
   if (!priceFeed) {
     priceFeed = new PriceFeed(id);

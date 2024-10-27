@@ -1,5 +1,6 @@
 import { Address, BigDecimal, BigInt, dataSource } from "@graphprotocol/graph-ts";
 import { pow } from "./MathUtils";
+import { stringIdToBytes } from './IdUtils';
 
 export const UNKNOWN = 'unknown';
 
@@ -26,7 +27,7 @@ export const EVERY_7_DAYS = 604800;
 export const BI_EVERY_7_DAYS = BigInt.fromString('604800');
 export const MODULE_RESULT = 75600;
 export const MODULE_RESULT_V2 = 518400;
-export const CONST_ID = '1';
+export const CONST_ID = stringIdToBytes('1');
 
 export const TVL_NOT_SAVE = BigDecimal.fromString('100000000')
 
@@ -162,7 +163,10 @@ export const STABLE_COIN_ARRAY_ARBITRUM = [
   '0x498Bf2B1e120FeD3ad3D42EA2165E9b73f99C1e5'.toLowerCase(),
   '0x845c8bc94610807fcbab5dd2bc7ac9dabaff3c55'.toLowerCase(),
   '0x45b47fe1bed067de6b4b89e0285e6b571a64c57c'.toLowerCase(),
-  '0x12275DCB9048680c4Be40942eA4D92c74C63b844'.toLowerCase()
+  '0x12275DCB9048680c4Be40942eA4D92c74C63b844'.toLowerCase(),
+  '0xCA5d8F8a8d49439357d3CF46Ca2e720702F132b8'.toLowerCase(),
+  '0xb165a74407fE1e519d6bCbDeC1Ed3202B35a4140'.toLowerCase(),
+  '0x7CFaDFD5645B50bE87d546f42699d863648251ad'.toLowerCase()
 ]
 
 export const STABLE_VAULT_ARRAY_ARBITRUM = [
@@ -232,6 +236,7 @@ export const BALANCER_CONTRACT_NAME = [
   '50tBTC-50WETH'.toLowerCase(),
   '80PAL-20OHM'.toLowerCase(),
   'AuraBal'.toLowerCase(),
+  'Gyroscope'.toLowerCase(),
 ]
 export const CURVE_CONTRACT_NAME = [
   'Curve.fi'.toLowerCase(),

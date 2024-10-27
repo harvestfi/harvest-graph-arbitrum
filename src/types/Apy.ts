@@ -13,6 +13,7 @@ import {
   YEAR_PERIOD,
 } from '../utils/Constant';
 import { pow } from "../utils/MathUtils";
+import { stringIdToBytes } from '../utils/IdUtils';
 
 export function saveApyReward(
   poolAddress: Address,
@@ -54,7 +55,7 @@ export function saveApyReward(
       if (apy.gt(MAX_APY_REWARD)) {
         return;
       }
-      const apyReward = new ApyReward(`${tx.hash.toHex()}-${vault.id}`)
+      const apyReward = new ApyReward(stringIdToBytes(`${tx.hash.toHex()}-${vault.id}`));
 
       apyReward.periodFinishes = periodFinishes
       apyReward.rewardRates = rewardRates
@@ -77,9 +78,9 @@ export function saveApyReward(
 }
 
 export function calculateAndSaveApyAutoCompound(id: string, diffSharePrice: BigDecimal, diffTimestamp: BigInt, vault: Vault, block: ethereum.Block): BigDecimal {
-  let apyAutoCompound = ApyAutoCompound.load(id)
+  let apyAutoCompound = ApyAutoCompound.load(stringIdToBytes(id));
   if (apyAutoCompound == null) {
-    apyAutoCompound = new ApyAutoCompound(id)
+    apyAutoCompound = new ApyAutoCompound(stringIdToBytes(id));
     apyAutoCompound.createAtBlock = block.number
     apyAutoCompound.timestamp = block.timestamp
     apyAutoCompound.apr = calculateAprAutoCompound(diffSharePrice, diffTimestamp.toBigDecimal())
@@ -98,7 +99,7 @@ export function calculateAndSaveApyAutoCompound(id: string, diffSharePrice: BigD
 }
 
 export function calculateGeneralApy(vault: Vault, block: ethereum.Block): void {
-  const id = `${vault.id}-${block.number}`;
+  const id = stringIdToBytes(`${vault.id}-${block.number}`);
   let generalApy = GeneralApy.load(id)
   if (!generalApy) {
     generalApy = new GeneralApy(id);

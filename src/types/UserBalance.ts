@@ -11,6 +11,7 @@ import { VaultContract } from "../../generated/templates/VaultListener/VaultCont
 import { ERC20 } from "../../generated/Controller/ERC20";
 import { pow } from "../utils/MathUtils";
 import { BD_TEN } from "../utils/Constant";
+import { stringIdToBytes } from '../utils/IdUtils';
 
 export function createUserBalance(vaultAddress: Address, amount: BigInt, beneficary: Address, tx: ethereum.Transaction, block: ethereum.Block, isDeposit: boolean): void {
   const vault = Vault.load(vaultAddress.toHex())
@@ -25,7 +26,7 @@ export function createUserBalance(vaultAddress: Address, amount: BigInt, benefic
     const vaultBalance = vaultContract.balanceOf(beneficary).divDecimal(pow(BD_TEN, vault.decimal.toI32()))
     const value = vaultBalance.plus(poolBalance)
 
-    const userBalanceId = `${vault.id}-${beneficary.toHex()}`
+    const userBalanceId = stringIdToBytes(`${vault.id}-${beneficary.toHex()}`);
     let userBalance = UserBalance.load(userBalanceId)
     if (userBalance == null) {
       userBalance = new UserBalance(userBalanceId)
@@ -57,7 +58,7 @@ export function createUserBalance(vaultAddress: Address, amount: BigInt, benefic
 
     userBalance.save()
 
-    const historyId = `${tx.hash.toHex()}-${beneficary.toHex()}-${vault.id}-${isDeposit.toString()}`;
+    const historyId = stringIdToBytes(`${tx.hash.toHex()}-${beneficary.toHex()}-${vault.id}-${isDeposit.toString()}`);
     const userBalanceHistory = new UserBalanceHistory(historyId)
     userBalanceHistory.createAtBlock = block.number
     userBalanceHistory.timestamp = block.timestamp
@@ -77,7 +78,7 @@ export function createUserBalance(vaultAddress: Address, amount: BigInt, benefic
 
     updateVaultUsers(vault, value, beneficary.toHex());
 
-    const userTransaction = new UserTransaction(`${tx.hash.toHex()}-${vault.id}-${isDeposit.toString()}`)
+    const userTransaction = new UserTransaction(stringIdToBytes(`${tx.hash.toHex()}-${vault.id}-${isDeposit.toString()}`));
     userTransaction.createAtBlock = block.number
     userTransaction.timestamp = block.timestamp
     userTransaction.userAddress = beneficary.toHex()

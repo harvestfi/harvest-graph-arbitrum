@@ -61,9 +61,9 @@ export function createTotalTvl(block: ethereum.Block): void {
 }
 
 export function totalTvlUp(): BigInt {
-  let totalCount = TotalTvlCount.load('1')
+  let totalCount = TotalTvlCount.load(CONST_ID)
   if (!totalCount) {
-    totalCount = new TotalTvlCount('1');
+    totalCount = new TotalTvlCount(CONST_ID);
     totalCount.length = BigInt.zero();
   }
 

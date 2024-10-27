@@ -1,17 +1,18 @@
 import { Address, BigDecimal, ethereum } from "@graphprotocol/graph-ts";
 import { TotalTvl, TotalTvlHistory, TotalTvlHistoryV2, Tvl, Vault } from '../../generated/schema';
 import { fetchContractTotalSupply } from "../utils/ERC20Utils";
-import { BD_TEN, BD_ZERO, getFromTotalAssets, TVL_NOT_SAVE } from '../utils/Constant';
+import { BD_TEN, BD_ZERO, CONST_ID, getFromTotalAssets, TVL_NOT_SAVE } from '../utils/Constant';
 import { pow } from "../utils/MathUtils";
 import { fetchContractTotalAssets, fetchPricePerFullShare } from "../utils/VaultUtils";
 import { getPriceByVault } from "../utils/PriceUtils";
 import { canCalculateTotalTvlV2, totalTvlUp } from './TotalTvlUtils';
+import { stringIdToBytes } from '../utils/IdUtils';
 
 export function createTvl(address: Address, block: ethereum.Block): Tvl | null {
   const vaultAddress = address;
   const vault = Vault.load(vaultAddress.toHex())
   if (vault != null) {
-    const id = `${block.number.toHex()}-${vaultAddress.toHex()}`
+    const id = stringIdToBytes(`${block.number.toHex()}-${vaultAddress.toHex()}`);
     let tvl = Tvl.load(id)
     if (tvl == null) {
       canCalculateTotalTvlV2(block);
@@ -50,7 +51,7 @@ export function createTvl(address: Address, block: ethereum.Block): Tvl | null {
       tvl.tvlSequenceId = vault.tvlSequenceId;
       tvl.save()
 
-      createTotalTvl(vault.tvl, tvl.value, id, block)
+      createTotalTvl(vault.tvl, tvl.value)
       vault.tvl = tvl.value
       vault.priceUnderlying = price
       vault.tvlSequenceId = vault.tvlSequenceId + 1;
@@ -63,34 +64,23 @@ export function createTvl(address: Address, block: ethereum.Block): Tvl | null {
   return null;
 }
 
-export function createTotalTvl(oldValue:BigDecimal, newValue: BigDecimal, id: string, block: ethereum.Block): void {
-  const defaultId = '1';
-  let totalTvl = TotalTvl.load(defaultId)
+export function createTotalTvl(oldValue:BigDecimal, newValue: BigDecimal): void {
+  let totalTvl = TotalTvl.load(CONST_ID)
   if (totalTvl == null) {
-    totalTvl = new TotalTvl(defaultId)
+    totalTvl = new TotalTvl(CONST_ID)
     totalTvl.value = BigDecimal.zero()
     totalTvl.save()
   }
 
   totalTvl.value = totalTvl.value.minus(oldValue).plus(newValue);
   totalTvl.save()
-
-  // let totalTvlHistory = TotalTvlHistory.load(id)
-  // if (totalTvlHistory == null) {
-  //   totalTvlHistory = new TotalTvlHistory(id)
-  //
-  //   totalTvlHistory.sequenceId = totalTvlUp()
-  //   totalTvlHistory.value = totalTvl.value
-  //   totalTvlHistory.timestamp = block.timestamp
-  //   totalTvlHistory.createAtBlock = block.number
-  //   totalTvlHistory.save()
-  // }
 }
 
 export function createTvlV2(totalTvl: BigDecimal, block: ethereum.Block): void {
-  let totalTvlHistory = TotalTvlHistoryV2.load(block.number.toString())
+  const id = stringIdToBytes(`${block.number.toString()}`);
+  let totalTvlHistory = TotalTvlHistoryV2.load(id)
   if (totalTvlHistory == null) {
-    totalTvlHistory = new TotalTvlHistoryV2(block.number.toString())
+    totalTvlHistory = new TotalTvlHistoryV2(id)
 
     totalTvlHistory.sequenceId = totalTvlUp();
     totalTvlHistory.value = totalTvl
