@@ -1,4 +1,4 @@
-import { Address, ethereum } from "@graphprotocol/graph-ts";
+import { Address, BigInt, ethereum } from '@graphprotocol/graph-ts';
 import { Pool, Vault } from "../../generated/schema";
 import { PotPoolListener } from "../../generated/templates";
 import { loadOrCreateVault } from "./Vault";
@@ -8,7 +8,7 @@ import { PotPoolContract } from "../../generated/templates/VaultListener/PotPool
 const TYPE = 'PotPool'
 
 
-export function loadOrCreatePotPool(poolAddress: Address, ethBlock: ethereum.Block): Pool {
+export function loadOrCreatePotPool(poolAddress: Address, timestamp: BigInt = BigInt.zero(), block: BigInt = BigInt.zero()): Pool {
   let pool = Pool.load(poolAddress.toHex())
   if (pool == null) {
     let poolContract = PotPoolContract.bind(poolAddress)
@@ -20,14 +20,14 @@ export function loadOrCreatePotPool(poolAddress: Address, ethBlock: ethereum.Blo
       rewardTokens = [rewardToken.id];
     }
     pool = new Pool(poolAddress.toHex())
-    pool.timestamp = ethBlock.timestamp
-    pool.createAtBlock = ethBlock.number
+    pool.timestamp = timestamp
+    pool.createAtBlock = block
     pool.vault = vaultAddress.toHex()
     pool.type = TYPE
     pool.rewardTokens = rewardTokens
     pool.save()
 
-    const vault = loadOrCreateVault(vaultAddress, ethBlock)
+    const vault = loadOrCreateVault(vaultAddress.toHex(), timestamp, block)
     vault.pool = poolAddress.toHex()
     vault.save()
     PotPoolListener.create(poolAddress);

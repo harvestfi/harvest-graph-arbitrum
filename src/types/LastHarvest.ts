@@ -1,18 +1,17 @@
-import { Address, ethereum } from '@graphprotocol/graph-ts';
+import { Address, BigInt, Bytes, ethereum } from '@graphprotocol/graph-ts';
 import { LastHarvest } from '../../generated/schema';
 import { loadOrCreateStrategy } from './Strategy';
-import { stringIdToBytes } from '../utils/IdUtils';
 
-export function loadOrCreateLastHarvest(address: Address, block: ethereum.Block, tx: ethereum.Transaction): LastHarvest {
-  let strategy = loadOrCreateStrategy(address.toHex(), block);
-  const id = stringIdToBytes(`${strategy.id}-${tx.hash.toHex()}`);
+export function loadOrCreateLastHarvest(address: Address, tx: string, timestamp: BigInt = BigInt.zero(), block: BigInt = BigInt.zero()): LastHarvest {
+  let strategy = loadOrCreateStrategy(address.toHex(), timestamp, block);
+  const id = Bytes.fromUTF8(`${strategy.id}-${tx}`)
   let lastHarvest = LastHarvest.load(id)
   if (lastHarvest == null) {
     lastHarvest = new LastHarvest(id);
     lastHarvest.strategy = strategy.id
-    lastHarvest.tx = tx.hash.toHex();
-    lastHarvest.timestamp = block.timestamp
-    lastHarvest.createAtBlock = block.number
+    lastHarvest.tx = tx;
+    lastHarvest.timestamp = timestamp
+    lastHarvest.createAtBlock = block
     lastHarvest.save();
   }
   return lastHarvest;

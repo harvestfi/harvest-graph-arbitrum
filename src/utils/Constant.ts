@@ -22,6 +22,7 @@ export const TWO_WEEKS_IN_SECONDS = BigInt.fromString('1209600');
 export const DEFAULT_IFARM_PRICE = BigInt.fromString('40000000000000000000')
 
 export const EVERY_24_HOURS = 86400;
+export const BI_12_HOURS = BigInt.fromI32(43200);
 export const BI_EVERY_24_HOURS = BigInt.fromString('86400');
 export const EVERY_7_DAYS = 604800;
 export const BI_EVERY_7_DAYS = BigInt.fromString('604800');
@@ -29,7 +30,7 @@ export const MODULE_RESULT = 75600;
 export const MODULE_RESULT_V2 = 518400;
 export const CONST_ID = stringIdToBytes('1');
 
-export const TVL_NOT_SAVE = BigDecimal.fromString('100000000')
+export const MAX_TVL = BigDecimal.fromString('100000000')
 
 export const WBTC = Address.fromString('0x2f2a2543B76A4166549F7aaB2e75Bef0aefC5B0f');
 export const WETH = Address.fromString('0x82af49447d8a07e3bd95bd0d56f35241523fbab1');

@@ -1,6 +1,5 @@
 import { ApyAutoCompound, ApyReward, GeneralApy, Pool, Vault } from '../../generated/schema';
-import { Address, BigDecimal, BigInt, ethereum } from "@graphprotocol/graph-ts";
-import { getPriceForCoin } from "../utils/PriceUtils";
+import { Address, BigDecimal, BigInt, Bytes, ethereum } from '@graphprotocol/graph-ts';
 import {
   BD_18,
   BD_ONE,
@@ -13,76 +12,64 @@ import {
   YEAR_PERIOD,
 } from '../utils/Constant';
 import { pow } from "../utils/MathUtils";
-import { stringIdToBytes } from '../utils/IdUtils';
+import { loadOrCreatePotPool } from './PotPool';
+import { loadOrCreateVault } from './Vault';
+import { getTokenInPrice } from './Token';
 
 export function saveApyReward(
   poolAddress: Address,
   rewardToken: Address,
   rewardRate: BigInt,
   periodFinish: BigInt,
-  tx: ethereum.Transaction,
-  block: ethereum.Block
+  timestamp: BigInt = BigInt.zero(),
+  block: BigInt = BigInt.zero()
 ): void {
-  let pool = Pool.load(poolAddress.toHex())
-  if (pool != null) {
-    let vault = Vault.load(pool.vault)
-    if (vault != null) {
-
-      if (vault.skipFirstApyReward) {
-        vault.skipFirstApyReward = false
-        vault.save()
-        return
-      }
-      let rewardRates: BigInt[] = []
-      let periodFinishes: BigInt[] = []
-      let rewardForPeriods: BigDecimal[] = []
-      let prices: BigDecimal[] = []
-
-      const tvlUsd = vault.tvl
-      const rewardTokenPrice = getPriceForCoin(rewardToken)
-      let rewardTokenPriceBD = BigDecimal.zero();
-      if (rewardTokenPrice.gt(BigInt.zero())) {
-        rewardTokenPriceBD = rewardTokenPrice.divDecimal(BD_18)
-      }
-      prices.push(rewardTokenPriceBD)
-      periodFinishes.push(periodFinish)
-      rewardRates.push(rewardRate)
-      const period = (periodFinish.minus(block.timestamp)).toBigDecimal()
-      const rewardForPeriod = rewardRate.divDecimal(BD_18).times(rewardTokenPriceBD).times(period)
-      rewardForPeriods.push(rewardForPeriod)
-      const apr = calculateApr(period, rewardForPeriod, tvlUsd)
-      const apy = calculateApy(apr)
-      if (apy.gt(MAX_APY_REWARD)) {
-        return;
-      }
-      const apyReward = new ApyReward(stringIdToBytes(`${tx.hash.toHex()}-${vault.id}`));
-
-      apyReward.periodFinishes = periodFinishes
-      apyReward.rewardRates = rewardRates
-      apyReward.rewardForPeriods = rewardForPeriods
-      apyReward.prices = prices;
-      apyReward.apr = apr
-      apyReward.apy = apy
-      apyReward.tvlUsd = tvlUsd
-      apyReward.vault = vault.id
-      apyReward.timestamp = block.timestamp
-      apyReward.createAtBlock = block.number
-      apyReward.save()
-
-      vault.apyReward = apy;
-      vault.apy = vault.apyAutoCompound.plus(vault.apyReward)
-      vault.save();
-      calculateGeneralApy(vault, block);
-    }
+  const pool = loadOrCreatePotPool(poolAddress, timestamp, block)
+  let vault = loadOrCreateVault(pool.vault, timestamp, block)
+  if (vault.skipFirstApyReward) {
+    vault.skipFirstApyReward = false
+    vault.save()
+    return
   }
+
+  const rewardTokenPrice = getTokenInPrice(rewardToken, timestamp).price
+  let rewardTokenPriceBD = BigDecimal.zero();
+  if (rewardTokenPrice.gt(BigInt.zero())) {
+    rewardTokenPriceBD = rewardTokenPrice.divDecimal(BD_18)
+  }
+  const period = (periodFinish.minus(timestamp)).toBigDecimal()
+  const rewardForPeriod = rewardRate.divDecimal(BD_18).times(rewardTokenPriceBD).times(period)
+  const apr = calculateApr(period, rewardForPeriod, vault.tvl)
+  const apy = calculateApy(apr)
+  if (apy.gt(MAX_APY_REWARD)) {
+    return;
+  }
+  const apyReward = new ApyReward(Bytes.fromUTF8(`${timestamp}-${vault.id}`))
+
+  apyReward.periodFinishes = periodFinish
+  apyReward.rewardRates = rewardRate
+  apyReward.rewardForPeriods = rewardForPeriod
+  apyReward.prices = rewardTokenPriceBD;
+  apyReward.apr = apr
+  apyReward.apy = apy
+  apyReward.tvlUsd = vault.tvl
+  apyReward.vault = vault.id
+  apyReward.timestamp = timestamp
+  apyReward.createAtBlock = block
+  apyReward.save()
+
+  vault.apyReward = apy;
+  vault.apy = vault.apyAutoCompound.plus(vault.apyReward)
+  vault.save();
+  calculateGeneralApy(vault, block);
 }
 
-export function calculateAndSaveApyAutoCompound(id: string, diffSharePrice: BigDecimal, diffTimestamp: BigInt, vault: Vault, block: ethereum.Block): BigDecimal {
-  let apyAutoCompound = ApyAutoCompound.load(stringIdToBytes(id));
+export function calculateAndSaveApyAutoCompound(id: Bytes, diffSharePrice: BigDecimal, diffTimestamp: BigInt, vault: Vault, timestamp: BigInt = BigInt.zero(), block: BigInt = BigInt.zero()): BigDecimal {
+  let apyAutoCompound = ApyAutoCompound.load(id)
   if (apyAutoCompound == null) {
-    apyAutoCompound = new ApyAutoCompound(stringIdToBytes(id));
-    apyAutoCompound.createAtBlock = block.number
-    apyAutoCompound.timestamp = block.timestamp
+    apyAutoCompound = new ApyAutoCompound(id)
+    apyAutoCompound.createAtBlock = block
+    apyAutoCompound.timestamp = timestamp
     apyAutoCompound.apr = calculateAprAutoCompound(diffSharePrice, diffTimestamp.toBigDecimal())
     const apy = calculateApy(apyAutoCompound.apr);
     apyAutoCompound.apy = apy;
@@ -98,13 +85,13 @@ export function calculateAndSaveApyAutoCompound(id: string, diffSharePrice: BigD
   return apyAutoCompound.apr
 }
 
-export function calculateGeneralApy(vault: Vault, block: ethereum.Block): void {
-  const id = stringIdToBytes(`${vault.id}-${block.number}`);
+export function calculateGeneralApy(vault: Vault, timestamp: BigInt = BigInt.zero(), block: BigInt = BigInt.zero()): void {
+  const id = Bytes.fromUTF8(`${vault.id}-${block}`);
   let generalApy = GeneralApy.load(id)
   if (!generalApy) {
     generalApy = new GeneralApy(id);
-    generalApy.createAtBlock = block.number
-    generalApy.timestamp = block.timestamp;
+    generalApy.createAtBlock = block
+    generalApy.timestamp = timestamp;
     generalApy.apy = vault.apy;
     generalApy.vault = vault.id;
     generalApy.apyReward = vault.apyReward

@@ -205,7 +205,7 @@ function getPriceForRadiant(pool: Address): BigInt {
   return BigInt.fromString(val[0])
 }
 
-export function getPriceByVault(vault: Vault, block: ethereum.Block): BigDecimal {
+export function getPriceByVault(vault: Vault, timestamp: BigInt = BigInt.zero(), block: BigInt = BigInt.zero()): BigDecimal {
   if (isStableVault(vault.id)) {
     const tempInPrice = BD_ONE;
     createPriceFeed(vault, tempInPrice, block);
