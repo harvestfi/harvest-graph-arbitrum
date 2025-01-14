@@ -33,6 +33,7 @@ export function createTvl(address: Address, timestamp: BigInt = BigInt.zero(), b
       if (timestamp.gt(vault.lastPriceUpdate.plus(BI_12_HOURS))) {
         vault.lastPriceUpdate = timestamp
         vault.priceUnderlying = getPriceByVault(vault, timestamp, block)
+        vault.priceFeedSequenceId = vault.priceFeedSequenceId + 1;
       }
       tvl.priceUnderlying = vault.priceUnderlying
 
