@@ -8,7 +8,7 @@ export function loadOrCreateStrategy(address: string, timestamp: BigInt, block: 
   let strategy = Strategy.load(address);
   if (strategy == null) {
     strategy = new Strategy(address);
-    strategy.vault = loadOrCreateVault(vault != '' ? vault : getVaultAddress(Address.fromString(address)).toHexString(), timestamp, block, strategy.id).id;
+    strategy.vault = loadOrCreateVault(vault != '' ? vault : getVaultAddress(Address.fromString(address)).toHexString(), timestamp, block).id;
     strategy.timestamp = timestamp;
     strategy.createAtBlock = block;
     strategy.save();
