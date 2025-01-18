@@ -21,8 +21,8 @@ export function saveApyReward(
   rewardToken: Address,
   rewardRate: BigInt,
   periodFinish: BigInt,
-  timestamp: BigInt = BigInt.zero(),
-  block: BigInt = BigInt.zero()
+  timestamp: BigInt,
+  block: BigInt
 ): void {
   const pool = loadOrCreatePotPool(poolAddress, timestamp, block)
   let vault = loadOrCreateVault(pool.vault, timestamp, block)
@@ -61,10 +61,10 @@ export function saveApyReward(
   vault.apyReward = apy;
   vault.apy = vault.apyAutoCompound.plus(vault.apyReward)
   vault.save();
-  calculateGeneralApy(vault, block);
+  calculateGeneralApy(vault, timestamp, block);
 }
 
-export function calculateAndSaveApyAutoCompound(id: Bytes, diffSharePrice: BigDecimal, diffTimestamp: BigInt, vault: Vault, timestamp: BigInt = BigInt.zero(), block: BigInt = BigInt.zero()): BigDecimal {
+export function calculateAndSaveApyAutoCompound(id: Bytes, diffSharePrice: BigDecimal, diffTimestamp: BigInt, vault: Vault, timestamp: BigInt, block: BigInt): BigDecimal {
   let apyAutoCompound = ApyAutoCompound.load(id)
   if (apyAutoCompound == null) {
     apyAutoCompound = new ApyAutoCompound(id)
@@ -80,12 +80,12 @@ export function calculateAndSaveApyAutoCompound(id: Bytes, diffSharePrice: BigDe
 
     vault.apyAutoCompound = apy;
     vault.apy = vault.apyAutoCompound.plus(vault.apyReward)
-    calculateGeneralApy(vault, block);
+    calculateGeneralApy(vault, timestamp, block);
   }
   return apyAutoCompound.apr
 }
 
-export function calculateGeneralApy(vault: Vault, timestamp: BigInt = BigInt.zero(), block: BigInt = BigInt.zero()): void {
+export function calculateGeneralApy(vault: Vault, timestamp: BigInt, block: BigInt): void {
   const id = Bytes.fromUTF8(`${vault.id}-${block}`);
   let generalApy = GeneralApy.load(id)
   if (!generalApy) {

@@ -4,11 +4,11 @@ import { StrategyListener } from '../../generated/templates';
 import { loadOrCreateVault } from './Vault';
 import { StrategyBaseContract } from '../../generated/Controller/StrategyBaseContract';
 
-export function loadOrCreateStrategy(address: string, timestamp: BigInt = BigInt.zero(), block: BigInt = BigInt.zero(), vault: string = ''): Strategy {
+export function loadOrCreateStrategy(address: string, timestamp: BigInt, block: BigInt, vault: string = ''): Strategy {
   let strategy = Strategy.load(address);
   if (strategy == null) {
     strategy = new Strategy(address);
-    strategy.vault = loadOrCreateVault(vault != '' ? vault : getVaultAddress(Address.fromString(address)).toHexString()).id;
+    strategy.vault = loadOrCreateVault(vault != '' ? vault : getVaultAddress(Address.fromString(address)).toHexString(), timestamp, block, strategy.id).id;
     strategy.timestamp = timestamp;
     strategy.createAtBlock = block;
     strategy.save();

@@ -10,7 +10,7 @@ import { ERC20 } from "../../generated/Controller/ERC20";
 import { pow } from "../utils/MathUtils";
 import { BD_TEN } from "../utils/Constant";
 
-export function createUserBalance(vaultAddress: Address, amount: BigInt, beneficary: Address, isDeposit: boolean, tx: string, timestamp: BigInt = BigInt.zero(), block: BigInt = BigInt.zero()): UserBalance | null {
+export function createUserBalance(vaultAddress: Address, amount: BigInt, beneficary: Address, isDeposit: boolean, tx: string, timestamp: BigInt, block: BigInt): UserBalance | null {
   const vault = Vault.load(vaultAddress.toHex())
   if (vault != null) {
     const vaultContract = VaultContract.bind(vaultAddress)

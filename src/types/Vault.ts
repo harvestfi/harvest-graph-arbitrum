@@ -8,7 +8,7 @@ import { Vault } from '../../generated/schema';
 import { BI_TEN } from '../utils/Constant';
 import { powBI } from '../utils/MathUtils';
 
-export function loadOrCreateVault(vaultVal: string, timestamp: BigInt = BigInt.zero(), block: BigInt = BigInt.zero(), strategyAddress: string = 'unknown'): Vault {
+export function loadOrCreateVault(vaultVal: string, timestamp: BigInt, block: BigInt, strategyAddress: string = 'unknown'): Vault {
   let vault = Vault.load(vaultVal)
   if (vault == null) {
     const vaultAddress = Address.fromString(vaultVal);

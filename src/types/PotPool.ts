@@ -8,7 +8,7 @@ import { PotPoolContract } from "../../generated/templates/VaultListener/PotPool
 const TYPE = 'PotPool'
 
 
-export function loadOrCreatePotPool(poolAddress: Address, timestamp: BigInt = BigInt.zero(), block: BigInt = BigInt.zero()): Pool {
+export function loadOrCreatePotPool(poolAddress: Address, timestamp: BigInt, block: BigInt): Pool {
   let pool = Pool.load(poolAddress.toHex())
   if (pool == null) {
     let poolContract = PotPoolContract.bind(poolAddress)

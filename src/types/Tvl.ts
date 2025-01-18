@@ -6,7 +6,7 @@ import { pow } from "../utils/MathUtils";
 import { fetchContractTotalAssets, fetchPricePerFullShare } from "../utils/VaultUtils";
 import { getPriceByVault } from "../utils/PriceUtils";
 
-export function createTvl(address: Address, timestamp: BigInt = BigInt.zero(), block: BigInt = BigInt.zero()): Tvl | null {
+export function createTvl(address: Address, timestamp: BigInt, block: BigInt): Tvl | null {
   const vaultAddress = address;
   const vault = Vault.load(vaultAddress.toHex())
   if (vault != null) {
@@ -78,7 +78,7 @@ export function createTotalTvl(oldValue:BigDecimal, newValue: BigDecimal, timest
   createTvlV2(totalTvl.value, timestamp, block);
 }
 
-export function createTvlV2(totalTvl: BigDecimal, timestamp: BigInt = BigInt.zero(), block: BigInt = BigInt.zero()): void {
+export function createTvlV2(totalTvl: BigDecimal, timestamp: BigInt, block: BigInt): void {
   const id = Bytes.fromUTF8(`${block}`)
   let totalTvlHistory = TotalTvlHistoryV2.load(id)
   if (totalTvlHistory == null) {

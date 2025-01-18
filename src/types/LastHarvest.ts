@@ -2,7 +2,7 @@ import { Address, BigInt, Bytes, ethereum } from '@graphprotocol/graph-ts';
 import { LastHarvest } from '../../generated/schema';
 import { loadOrCreateStrategy } from './Strategy';
 
-export function loadOrCreateLastHarvest(address: Address, tx: string, timestamp: BigInt = BigInt.zero(), block: BigInt = BigInt.zero()): LastHarvest {
+export function loadOrCreateLastHarvest(address: Address, tx: string, timestamp: BigInt, block: BigInt): LastHarvest {
   let strategy = loadOrCreateStrategy(address.toHex(), timestamp, block);
   const id = Bytes.fromUTF8(`${strategy.id}-${tx}`)
   let lastHarvest = LastHarvest.load(id)
