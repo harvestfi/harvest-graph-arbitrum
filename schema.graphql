@@ -336,9 +336,65 @@ type TokenInPrice @entity {
   lastUpdate: BigInt!
 }
 
-type Test @entity {
+type PoolCheck @entity(immutable: true) {
   id: ID!
-  value: BigInt!
+}
+
+########################
+###   PLASMA VAULT   ###
+########################
+
+type PlasmaVault @entity {
+  id: String!
+
+  name: String!
+  symbol: String!
+  decimals: Int!
+
+  tvl: BigDecimal!
+  apy: BigDecimal!
+  historySequenceId: BigInt!
+
+  assetOld: BigDecimal!
+  assetNew: BigDecimal!
+  allocDatas: [BigDecimal!]!
+  newAllocDatas: [BigDecimal!]!
+
   timestamp: BigInt!
   createAtBlock: BigInt!
+}
+
+type PlasmaVaultHistory @entity(immutable: true) {
+  "tx + vault address"
+  id: Bytes!
+  tvl: BigDecimal!
+  apy: BigDecimal!
+  priceUnderlying: BigDecimal!
+  sharePrice: BigInt!
+  historySequenceId: BigInt!
+  plasmaVault: PlasmaVault!
+
+  assetOld: BigDecimal!
+  assetNew: BigDecimal!
+  allocDatas: [BigDecimal!]!
+  newAllocDatas: [BigDecimal!]!
+
+  timestamp: BigInt!
+  createAtBlock: BigInt!
+}
+
+type PlasmaUserBalance @entity {
+  id: Bytes!
+  userAddress: String!
+  plasmaVault: PlasmaVault!
+  value: BigDecimal!
+  timestamp: BigInt!
+}
+
+type PlasmaUserBalanceHistory @entity(immutable: true) {
+  id: Bytes!
+  userAddress: String!
+  plasmaVault: PlasmaVault!
+  value: BigDecimal!
+  timestamp: BigInt!
 }

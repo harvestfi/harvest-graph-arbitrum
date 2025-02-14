@@ -24,3 +24,12 @@ export function powBI(value: BigInt, scale: number): BigInt {
 function canPowNext(value: string): boolean {
   return value.length < 5558
 }
+
+// BigDecimal to BigInt
+export function bdToBI(value: BigDecimal): BigInt {
+  let index = value.toString().indexOf('.');
+  if (index != -1) {
+    return BigInt.fromString(value.toString().substring(0, index))
+  }
+  return BigInt.fromString(value.toString())
+}

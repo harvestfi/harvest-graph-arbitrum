@@ -53,6 +53,9 @@ import { PendlePoolContract } from '../../generated/Controller2/PendlePoolContra
 
 
 export function getPriceForCoin(address: Address): BigInt {
+  if (isStableCoin(address.toHexString())) {
+    return BI_18;
+  }
   if (address.equals(IFARM)) {
     const price = getPriceForIFARM();
     return price.isZero() ? DEFAULT_IFARM_PRICE : price;
@@ -71,9 +74,6 @@ export function getPriceForCoin(address: Address): BigInt {
   }
   if (address.equals(SILO)) {
     return getPriceForCamelot(address);
-  }
-  if (isStableCoin(address.toHexString())) {
-    return BI_18;
   }
 
   let price = getPriceForCoinWithSwap(address, USDC_ARBITRUM, SUSHI_SWAP_FACTORY)
