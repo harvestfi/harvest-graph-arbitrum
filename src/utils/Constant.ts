@@ -75,7 +75,10 @@ export const WETH_LIST = [
   Address.fromString('0x2d6CeD12420a9AF5a83765a8c48Be2aFcD1A8FEb'),
   Address.fromString('0x18C14C2D707b2212e17d1579789Fc06010cfca23'),
   Address.fromString('0x18b0fc5a233acf1586da7c199ca9e3f486305a29'),
-
+  // plasma weth vault
+  Address.fromString('0xF0c9DC8512ad23C00a576b0BAFb661Ccd8e35d88'),
+  // plasma weth vault
+  Address.fromString('0x18B9Dc9762Ec6095f34f2d77042Ab8283fA764B4'),
 ];
 export const CAMELOT_ETH_FARM = Address.fromString('0xd2a7084369cc93672b2ca868757a9f327e3677a4');
 export const SUSHI_ETH_RADIANT = Address.fromString('0x3BFB1ac033ff0aE278Be0583FCCc900FBD9382c6');
@@ -170,7 +173,11 @@ export const STABLE_COIN_ARRAY_ARBITRUM = [
   '0x7CFaDFD5645B50bE87d546f42699d863648251ad'.toLowerCase(),
 
   // plasma usd vault
-  '0x7fbfd8cda97c0221b39c581c34afd24c523a3990'.toLowerCase()
+  '0x7fbfd8cda97c0221b39c581c34afd24c523a3990'.toLowerCase(),
+  // plasma usd vault 2
+  '0xBa37b2b01A9443daD533a63A8791D1C25ec3674c'.toLowerCase(),
+  // plasma usd vault 3
+  '0xC015d83e24FDDe23100AD1E9baD837878fbfaB94'.toLowerCase(),
 ]
 
 export const STABLE_VAULT_ARRAY_ARBITRUM = [
@@ -213,7 +220,11 @@ export const BTC_POOLS = [
   '0x6c84a8f1c29108F47a79964b5Fe888D4f4D0dE40'.toLowerCase(),
   '0x2f2a2543B76A4166549F7aaB2e75Bef0aefC5B0f'.toLowerCase(),
   '0x186cf879186986a20aadfb7ead50e3c20cb26cec'.toLowerCase(),
-  '0xe957cE03cCdd88f02ed8b05C9a3A28ABEf38514A'.toLowerCase()
+  '0xe957cE03cCdd88f02ed8b05C9a3A28ABEf38514A'.toLowerCase(),
+  // plasma btc vault
+  '0x548EBB86287ac06082405bf3862c61c4E1ea996D'.toLowerCase(),
+  // plasma btc vault 2
+  '0xF0c9DC8512ad23C00a576b0BAFb661Ccd8e35d88'.toLowerCase(),
 ]
 
 export const GAMMA_VAULTS_NAME = [
