@@ -53,6 +53,26 @@ export function handleTransfer(event: Transfer): void {
 
   vault.tvl = vaultContract.totalAssets().divDecimal(pow(BD_TEN, underlyingDecimal)).times(price);
   vault.save();
+
+  const vaultHistory = new PlasmaVaultHistory(stringIdToBytes(`transfer-${event.transaction.hash.toHex()}-${event.address.toHexString()}`));
+  vaultHistory.tvl = vault.tvl;
+  vaultHistory.apy = vault.apy;
+  vaultHistory.plasmaVault = vault.id;
+  vaultHistory.historySequenceId = vault.historySequenceId;
+  vaultHistory.priceUnderlying = getPriceForCoin(Address.fromString(vault.id)).divDecimal(BD_18);
+  vaultHistory.sharePrice = bdToBI(
+    vaultContract.totalAssets().
+    divDecimal(pow(BD_TEN, underlyingDecimal))
+      .div(vaultContract.totalSupply().divDecimal(pow(BD_TEN, vault.decimals)))
+      .times(pow(BD_TEN, underlyingDecimal))
+  );
+  vaultHistory.assetOld = vault.assetOld;
+  vaultHistory.assetNew = vault.assetNew;
+  vaultHistory.allocDatas = vault.allocDatas;
+  vaultHistory.newAllocDatas = vault.newAllocDatas;
+  vaultHistory.timestamp = event.block.timestamp;
+  vaultHistory.createAtBlock = event.block.number;
+  vaultHistory.save();
 }
 
 export function handleMarketBalancesUpdated(event: MarketBalancesUpdated): void {
