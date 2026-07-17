@@ -1,7 +1,7 @@
 import { MarketBalancesUpdated, PlasmaVaultContract } from '../generated/PlasmaVault/PlasmaVaultContract';
-import { PlasmaUserBalance, PlasmaUserBalanceHistory, PlasmaVault, PlasmaVaultHistory } from '../generated/schema';
+import { PlasmaUserBalance, PlasmaUserBalanceHistory, PlasmaVault, PlasmaVaultHistory, UserTransaction } from '../generated/schema';
 import { Transfer } from '../generated/Controller/ERC20';
-import { Address, BigDecimal, BigInt, log } from '@graphprotocol/graph-ts';
+import { Address, BigDecimal, BigInt, Bytes, log } from '@graphprotocol/graph-ts';
 import { FuseContract } from '../generated/PlasmaVault/FuseContract';
 import { loadOrCreateVault } from './types/Vault';
 import { getPriceForCoin } from './utils/PriceUtils';
@@ -23,16 +23,18 @@ export function handleTransfer(event: Transfer): void {
     vault.apy = BigDecimal.zero();
     vault.assetOld = BigDecimal.zero();
     vault.assetNew = BigDecimal.zero();
+    vault.lastSharePrice = BigInt.zero();
     vault.allocDatas = [];
     vault.newAllocDatas = [];
     vault.timestamp = event.block.timestamp;
+    vault.priceUnderlying = BigDecimal.zero();
     vault.createAtBlock = event.block.number;
   }
   if (event.params.from != Address.zero()) {
-    createUserBalance(vault, event.params.from, event.params.value, event.block.timestamp, false);
+    createUserBalance(vault, event.params.from, event.params.value, event.block.timestamp, event.transaction.hash.toHex(), event.block.number, false, event.transaction.from.toHexString());
   }
   if (event.params.to != Address.zero()) {
-    createUserBalance(vault, event.params.to, event.params.value, event.block.timestamp, true);
+    createUserBalance(vault, event.params.to, event.params.value, event.block.timestamp, event.transaction.hash.toHex(), event.block.number, true, event.transaction.from.toHexString());
   }
 
   const fuses = vaultContract.getInstantWithdrawalFuses();
@@ -52,7 +54,6 @@ export function handleTransfer(event: Transfer): void {
   const price = getPriceForCoin(Address.fromString(vault.id)).divDecimal(BD_18);
 
   vault.tvl = vaultContract.totalAssets().divDecimal(pow(BD_TEN, underlyingDecimal)).times(price);
-  vault.save();
 
   const vaultHistory = new PlasmaVaultHistory(stringIdToBytes(`transfer-${event.transaction.hash.toHex()}-${event.address.toHexString()}`));
   vaultHistory.tvl = vault.tvl;
@@ -73,6 +74,10 @@ export function handleTransfer(event: Transfer): void {
   vaultHistory.timestamp = event.block.timestamp;
   vaultHistory.createAtBlock = event.block.number;
   vaultHistory.save();
+
+  vault.priceUnderlying = vaultHistory.priceUnderlying;
+  vault.lastSharePrice = vaultHistory.sharePrice;
+  vault.save();
 }
 
 export function handleMarketBalancesUpdated(event: MarketBalancesUpdated): void {
@@ -88,10 +93,12 @@ export function handleMarketBalancesUpdated(event: MarketBalancesUpdated): void 
     vault.apy = BigDecimal.zero();
     vault.assetOld = BigDecimal.zero();
     vault.assetNew = BigDecimal.zero();
+    vault.lastSharePrice = BigInt.zero();
     vault.allocDatas = [];
     vault.newAllocDatas = [];
     vault.timestamp = event.block.timestamp;
     vault.createAtBlock = event.block.number;
+    vault.priceUnderlying = BigDecimal.zero();
     vault.save();
   }
 
@@ -158,7 +165,6 @@ export function handleMarketBalancesUpdated(event: MarketBalancesUpdated): void 
   vault.apy = apy;
   vault.allocDatas = allocDatas;
   vault.newAllocDatas = newAllocDatas;
-  vault.save();
 
   const vaultHistory = new PlasmaVaultHistory(stringIdToBytes(`${event.transaction.hash.toHex()}-${event.address.toHexString()}`));
   vaultHistory.tvl = vault.tvl;
@@ -179,12 +185,16 @@ export function handleMarketBalancesUpdated(event: MarketBalancesUpdated): void 
   vaultHistory.timestamp = event.block.timestamp;
   vaultHistory.createAtBlock = event.block.number;
   vaultHistory.save();
+
+  vault.priceUnderlying = vaultHistory.priceUnderlying;
+  vault.lastSharePrice = vaultHistory.sharePrice;
+  vault.save();
 }
 
-function createUserBalance(plasmaVault: PlasmaVault, user: Address, amount: BigInt, timestamp: BigInt, isDeposit: boolean): void {
+function createUserBalance(plasmaVault: PlasmaVault, user: Address, amount: BigInt, timestamp: BigInt, tx: string, block: BigInt, isDeposit: boolean, txOrigin: string): void {
   let userBalance = PlasmaUserBalance.load(stringIdToBytes(plasmaVault.id + '-' + user.toHexString()));
   if (userBalance == null) {
-    userBalance = new PlasmaUserBalance(stringIdToBytes(user.toHexString()));
+    userBalance = new PlasmaUserBalance(stringIdToBytes(plasmaVault.id + '-' + user.toHexString()));
     userBalance.userAddress = user.toHexString();
     userBalance.plasmaVault = plasmaVault.id;
     userBalance.value = BigDecimal.zero();
@@ -199,5 +209,21 @@ function createUserBalance(plasmaVault: PlasmaVault, user: Address, amount: BigI
   userBalanceHistory.value = userBalance.value;
   userBalanceHistory.plasmaVault = plasmaVault.id;
   userBalanceHistory.timestamp = timestamp;
+  userBalanceHistory.tx = tx;
   userBalanceHistory.save();
+
+  const userTransaction = new UserTransaction(Bytes.fromUTF8(`${tx}-${plasmaVault.id}-${isDeposit.toString()}`))
+  userTransaction.createAtBlock = block
+  userTransaction.timestamp = timestamp
+  userTransaction.userAddress = user.toHexString();
+  userTransaction.plasmaVault = plasmaVault.id
+  userTransaction.transactionType = isDeposit
+    ? 'Deposit'
+    : 'Withdraw'
+  userTransaction.sharePrice = plasmaVault.lastSharePrice;
+  userTransaction.value = amount
+  userTransaction.tx = tx;
+  userTransaction.txOrigin = txOrigin;
+  userTransaction.price = plasmaVault.priceUnderlying;
+  userTransaction.save();
 }

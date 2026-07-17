@@ -8,9 +8,10 @@ import {
 import { VaultContract } from "../../generated/templates/VaultListener/VaultContract";
 import { ERC20 } from "../../generated/Controller/ERC20";
 import { pow } from "../utils/MathUtils";
-import { BD_TEN } from "../utils/Constant";
+import { BD_TEN, BI_1_HOUR } from '../utils/Constant';
+import { fetchPricePerFullShare } from '../utils/VaultUtils';
 
-export function createUserBalance(vaultAddress: Address, amount: BigInt, beneficary: Address, isDeposit: boolean, tx: string, timestamp: BigInt, block: BigInt): UserBalance | null {
+export function createUserBalance(vaultAddress: Address, amount: BigInt, beneficary: Address, isDeposit: boolean, tx: string, timestamp: BigInt, block: BigInt, txOrigin: string): UserBalance | null {
   const vault = Vault.load(vaultAddress.toHex())
   if (vault != null) {
     const vaultContract = VaultContract.bind(vaultAddress)
@@ -32,6 +33,13 @@ export function createUserBalance(vaultAddress: Address, amount: BigInt, benefic
       userBalance.value = BigDecimal.zero()
       userBalance.userAddress = beneficary.toHex()
       userBalance.underlyingBalance = BigDecimal.zero()
+    }
+
+    if (vault.lastShareTimestamp.plus(BI_1_HOUR).lt(timestamp)) {
+      const sharePrice = fetchPricePerFullShare(vaultAddress)
+      vault.lastSharePrice = sharePrice
+      vault.lastShareTimestamp = timestamp
+      vault.save()
     }
 
     const delimiter = pow(BD_TEN, vault.decimal.toI32());
@@ -67,6 +75,7 @@ export function createUserBalance(vaultAddress: Address, amount: BigInt, benefic
     userBalanceHistory.poolBalance = userBalance.poolBalance
     userBalanceHistory.vaultBalance = userBalance.vaultBalance
     userBalanceHistory.priceUnderlying = vault.priceUnderlying
+    userBalanceHistory.tx = tx;
 
     userBalanceHistory.sharePrice = vault.lastSharePrice;
     userBalanceHistory.save()
@@ -81,6 +90,9 @@ export function createUserBalance(vaultAddress: Address, amount: BigInt, benefic
       : 'Withdraw'
     userTransaction.sharePrice = vault.lastSharePrice;
     userTransaction.value = amount
+    userTransaction.tx = tx;
+    userTransaction.txOrigin = txOrigin;
+    userTransaction.price = vault.priceUnderlying;
     userTransaction.save();
 
     return userBalance;

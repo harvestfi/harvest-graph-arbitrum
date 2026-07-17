@@ -4,7 +4,7 @@ import { loadOrCreateERC20Token } from "./Token";
 import { VaultListener } from "../../generated/templates";
 import { loadOrCreateStrategy } from "./Strategy";
 import { fetchUnderlyingAddress } from "../utils/VaultUtils";
-import { Vault } from '../../generated/schema';
+import { Vault, VaultUtil } from '../../generated/schema';
 import { BI_TEN } from '../utils/Constant';
 import { powBI } from '../utils/MathUtils';
 
@@ -40,9 +40,27 @@ export function loadOrCreateVault(vaultVal: string, timestamp: BigInt, block: Bi
     vault.users = [];
     vault.lastTimestampProcess = BigInt.zero();
     vault.lastUsersShareTimestamp = BigInt.zero();
+    vault.lastTotalSupply = BigInt.zero();
+    vault.lastApr = BigDecimal.zero();
+    vault.lastDiffTimestamp = BigDecimal.zero();
+    vault.lastDiffSharePrice = BigDecimal.zero();
+    vault.lastVaultSnapshotTs = BigInt.zero();
     vault.save();
     VaultListener.create(vaultAddress)
   }
 
   return vault;
+}
+
+export function getVaultUtils(): VaultUtil {
+  const id = '1';
+  let vaultUtils = VaultUtil.load(id)
+  if (!vaultUtils) {
+    vaultUtils = new VaultUtil(id);
+    vaultUtils.vaults = [];
+    vaultUtils.vaultLength = 0;
+    vaultUtils.lastBlockPrice = BigInt.zero();
+    vaultUtils.save()
+  }
+  return vaultUtils;
 }

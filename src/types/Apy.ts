@@ -80,6 +80,7 @@ export function calculateAndSaveApyAutoCompound(id: Bytes, diffSharePrice: BigDe
 
     vault.apyAutoCompound = apy;
     vault.apy = vault.apyAutoCompound.plus(vault.apyReward)
+    vault.lastApr = apyAutoCompound.apr
     calculateGeneralApy(vault, timestamp, block);
   }
   return apyAutoCompound.apr

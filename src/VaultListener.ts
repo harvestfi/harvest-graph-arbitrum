@@ -16,6 +16,6 @@ export function handleTransfer(event: Transfer): void {
     poolCheck.save();
   }
   createTvl(event.address, event.block.timestamp, event.block.number)
-  createUserBalance(event.address, event.params.value, event.params.from, false, event.transaction.hash.toHex(), event.block.timestamp, event.block.number)
-  createUserBalance(event.address, event.params.value, event.params.to, true, event.transaction.hash.toHex(), event.block.timestamp, event.block.number)
+  createUserBalance(event.address, event.params.value, event.params.from, false, event.transaction.hash.toHex(), event.block.timestamp, event.block.number, event.transaction.from.toHexString())
+  createUserBalance(event.address, event.params.value, event.params.to, true, event.transaction.hash.toHex(), event.block.timestamp, event.block.number, event.transaction.from.toHexString())
 }

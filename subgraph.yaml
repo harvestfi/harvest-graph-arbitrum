@@ -1,18 +1,18 @@
 specVersion: 0.0.8
 schema:
   file: ./schema.graphql
-#features:
-#  - grafting # feature name
-#graft:
-#  base: QmW6KZQ5BPrYUB4zYnHGT7ixmQqpNsS7MNgLw7bd63E97k
-#  block: 310817825
+features:
+ - grafting # feature name
+# graft:
+#  base: QmNu1K1TsMRRBhvvUSvy7KiYNBpcaRD5jCRRoAgBPjGG5i
+#  block: 376193490
 dataSources:
   - kind: ethereum
     name: Controller
     network: arbitrum-one
     source:
       address: "0xDED9a861da155b953f48DCDCe854A199bcEE0072"
-      startBlock: 65807284
+      startBlock: 265807284
       abi: ControllerContract
     mapping:
       kind: ethereum/events
@@ -70,9 +70,18 @@ dataSources:
           file: ./abis/gamma/GammaVault.json
         - name: ConvexPoolContract
           file: ./abis/convex/ConvexPool.json
+        - name: PotPoolContract
+          file: ./abis/harvest/PotPool.json
+        - name: PendlePoolContract
+          file: ./abis/pendle/PendlePool.json
       eventHandlers:
         - event: SharePriceChangeLog(indexed address,indexed address,uint256,uint256,uint256)
           handler: handleSharePriceChangeLog
+      blockHandlers:
+        - handler: handleBlock
+          filter:
+            kind: polling
+            every: 4838400
       file: ./src/ControllerListener.ts
   - kind: ethereum
     name: Controller2
@@ -139,6 +148,8 @@ dataSources:
           file: ./abis/convex/ConvexPool.json
         - name: PendlePoolContract
           file: ./abis/pendle/PendlePool.json
+        - name: PotPoolContract
+          file: ./abis/harvest/PotPool.json
       eventHandlers:
         - event: SharePriceChangeLog(indexed address,indexed address,uint256,uint256,uint256)
           handler: handleSharePriceChangeLog
@@ -362,6 +373,78 @@ dataSources:
           handler: handleMarketBalancesUpdated
       file: ./src/PlasmaVaultListener.ts
   - kind: ethereum
+    name: UsdcPlasmaVault4
+    network: arbitrum-one
+    source:
+      address: "0x407D3d942d0911a2fEA7E22417f81E27c02D6c6F"
+      abi: PlasmaVaultContract
+      startBlock: 376959652
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.6
+      language: wasm/assemblyscript
+      entities:
+        - PlasmaVault
+      abis:
+        - name: PlasmaVaultContract
+          file: ./abis/PlasmaVault.json
+        - name: FuseContract
+          file: ./abis/Fuse.json
+        - name: ERC20
+          file: ./abis/ERC20.json
+        - name: VaultContract
+          file: ./abis/Vault.json
+        - name: OracleContract
+          file: ./abis/Oracle.json
+        - name: UniswapV2PairContract
+          file: ./abis/uniswap/UniswapV2Pair.json
+        - name: WeightedPool2TokensContract
+          file: ./abis/balancer/WeightedPool2Tokens.json
+        - name: BalancerVaultContract
+          file: ./abis/balancer/BalancerVault.json
+        - name: CurveVaultContract
+          file: ./abis/curve/CurveVault.json
+        - name: CurveMinterContract
+          file: ./abis/curve/CurveMinter.json
+        - name: UniswapV3PoolContract
+          file: ./abis/uniswap/UniswapV3Pool.json
+        - name: MeshSwapContract
+          file: ./abis/meshswap/MeshSwapContract.json
+        - name: UniswapV2FactoryContract
+          file: ./abis/sushiswap/UniswapV2Factory.json
+        - name: VaultV2Contract
+          file: ./abis/VaultV2.json
+        - name: CamelotPairContract
+          file: ./abis/camelot/CamelotPair.json
+        - name: CamelotFactoryContract
+          file: ./abis/camelot/CamelotFactory.json
+        - name: RadiantPriceProvider
+          file: ./abis/radiant/PriceProvider.json
+        - name: LizardFactoryContract
+          file: ./abis/lizard/LizardFactory.json
+        - name: LizardPairContract
+          file: ./abis/lizard/LizardPair.json
+        - name: StrategyBaseContract
+          file: ./abis/StrategyBase.json
+        - name: CamelotUniswapV3Pool
+          file: ./abis/camelot/CamelotUniswapV3Pool.json
+        - name: CamelotUniswapV3Vault
+          file: ./abis/camelot/CamelotUniswapV3Vault.json
+        - name: MagpieAsset
+          file: ./abis/magpie/MagpieAsset.json
+        - name: GammaVaultContract
+          file: ./abis/gamma/GammaVault.json
+        - name: ConvexPoolContract
+          file: ./abis/convex/ConvexPool.json
+        - name: PendlePoolContract
+          file: ./abis/pendle/PendlePool.json
+      eventHandlers:
+        - event: Transfer(indexed address,indexed address,uint256)
+          handler: handleTransfer
+        - event: MarketBalancesUpdated(uint256[],int256)
+          handler: handleMarketBalancesUpdated
+      file: ./src/PlasmaVaultListener.ts
+  - kind: ethereum
     name: WbtcPlasmaVault
     network: arbitrum-one
     source:
@@ -506,6 +589,78 @@ dataSources:
           handler: handleMarketBalancesUpdated
       file: ./src/PlasmaVaultListener.ts
   - kind: ethereum
+    name: WbtcPlasmaVault3
+    network: arbitrum-one
+    source:
+      address: "0x49b2248f7a7a703731852db0b2217f40da75B8aB"
+      abi: PlasmaVaultContract
+      startBlock: 391473252
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.6
+      language: wasm/assemblyscript
+      entities:
+        - PlasmaVault
+      abis:
+        - name: PlasmaVaultContract
+          file: ./abis/PlasmaVault.json
+        - name: FuseContract
+          file: ./abis/Fuse.json
+        - name: ERC20
+          file: ./abis/ERC20.json
+        - name: VaultContract
+          file: ./abis/Vault.json
+        - name: OracleContract
+          file: ./abis/Oracle.json
+        - name: UniswapV2PairContract
+          file: ./abis/uniswap/UniswapV2Pair.json
+        - name: WeightedPool2TokensContract
+          file: ./abis/balancer/WeightedPool2Tokens.json
+        - name: BalancerVaultContract
+          file: ./abis/balancer/BalancerVault.json
+        - name: CurveVaultContract
+          file: ./abis/curve/CurveVault.json
+        - name: CurveMinterContract
+          file: ./abis/curve/CurveMinter.json
+        - name: UniswapV3PoolContract
+          file: ./abis/uniswap/UniswapV3Pool.json
+        - name: MeshSwapContract
+          file: ./abis/meshswap/MeshSwapContract.json
+        - name: UniswapV2FactoryContract
+          file: ./abis/sushiswap/UniswapV2Factory.json
+        - name: VaultV2Contract
+          file: ./abis/VaultV2.json
+        - name: CamelotPairContract
+          file: ./abis/camelot/CamelotPair.json
+        - name: CamelotFactoryContract
+          file: ./abis/camelot/CamelotFactory.json
+        - name: RadiantPriceProvider
+          file: ./abis/radiant/PriceProvider.json
+        - name: LizardFactoryContract
+          file: ./abis/lizard/LizardFactory.json
+        - name: LizardPairContract
+          file: ./abis/lizard/LizardPair.json
+        - name: StrategyBaseContract
+          file: ./abis/StrategyBase.json
+        - name: CamelotUniswapV3Pool
+          file: ./abis/camelot/CamelotUniswapV3Pool.json
+        - name: CamelotUniswapV3Vault
+          file: ./abis/camelot/CamelotUniswapV3Vault.json
+        - name: MagpieAsset
+          file: ./abis/magpie/MagpieAsset.json
+        - name: GammaVaultContract
+          file: ./abis/gamma/GammaVault.json
+        - name: ConvexPoolContract
+          file: ./abis/convex/ConvexPool.json
+        - name: PendlePoolContract
+          file: ./abis/pendle/PendlePool.json
+      eventHandlers:
+        - event: Transfer(indexed address,indexed address,uint256)
+          handler: handleTransfer
+        - event: MarketBalancesUpdated(uint256[],int256)
+          handler: handleMarketBalancesUpdated
+      file: ./src/PlasmaVaultListener.ts
+  - kind: ethereum
     name: WethPlasmaVault
     network: arbitrum-one
     source:
@@ -584,6 +739,78 @@ dataSources:
       address: "0x18B9Dc9762Ec6095f34f2d77042Ab8283fA764B4"
       abi: PlasmaVaultContract
       startBlock: 310818248
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.6
+      language: wasm/assemblyscript
+      entities:
+        - PlasmaVault
+      abis:
+        - name: PlasmaVaultContract
+          file: ./abis/PlasmaVault.json
+        - name: FuseContract
+          file: ./abis/Fuse.json
+        - name: ERC20
+          file: ./abis/ERC20.json
+        - name: VaultContract
+          file: ./abis/Vault.json
+        - name: OracleContract
+          file: ./abis/Oracle.json
+        - name: UniswapV2PairContract
+          file: ./abis/uniswap/UniswapV2Pair.json
+        - name: WeightedPool2TokensContract
+          file: ./abis/balancer/WeightedPool2Tokens.json
+        - name: BalancerVaultContract
+          file: ./abis/balancer/BalancerVault.json
+        - name: CurveVaultContract
+          file: ./abis/curve/CurveVault.json
+        - name: CurveMinterContract
+          file: ./abis/curve/CurveMinter.json
+        - name: UniswapV3PoolContract
+          file: ./abis/uniswap/UniswapV3Pool.json
+        - name: MeshSwapContract
+          file: ./abis/meshswap/MeshSwapContract.json
+        - name: UniswapV2FactoryContract
+          file: ./abis/sushiswap/UniswapV2Factory.json
+        - name: VaultV2Contract
+          file: ./abis/VaultV2.json
+        - name: CamelotPairContract
+          file: ./abis/camelot/CamelotPair.json
+        - name: CamelotFactoryContract
+          file: ./abis/camelot/CamelotFactory.json
+        - name: RadiantPriceProvider
+          file: ./abis/radiant/PriceProvider.json
+        - name: LizardFactoryContract
+          file: ./abis/lizard/LizardFactory.json
+        - name: LizardPairContract
+          file: ./abis/lizard/LizardPair.json
+        - name: StrategyBaseContract
+          file: ./abis/StrategyBase.json
+        - name: CamelotUniswapV3Pool
+          file: ./abis/camelot/CamelotUniswapV3Pool.json
+        - name: CamelotUniswapV3Vault
+          file: ./abis/camelot/CamelotUniswapV3Vault.json
+        - name: MagpieAsset
+          file: ./abis/magpie/MagpieAsset.json
+        - name: GammaVaultContract
+          file: ./abis/gamma/GammaVault.json
+        - name: ConvexPoolContract
+          file: ./abis/convex/ConvexPool.json
+        - name: PendlePoolContract
+          file: ./abis/pendle/PendlePool.json
+      eventHandlers:
+        - event: Transfer(indexed address,indexed address,uint256)
+          handler: handleTransfer
+        - event: MarketBalancesUpdated(uint256[],int256)
+          handler: handleMarketBalancesUpdated
+      file: ./src/PlasmaVaultListener.ts
+  - kind: ethereum
+    name: WethPlasmaVault3
+    network: arbitrum-one
+    source:
+      address: "0xcE4D997A3B404F9Eaa796F89DEae40747D3647B7"
+      abi: PlasmaVaultContract
+      startBlock: 391469938
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.6

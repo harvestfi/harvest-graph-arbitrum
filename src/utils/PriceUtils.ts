@@ -52,7 +52,8 @@ import { loadOrCreateERC20Token } from '../types/Token';
 import { PendlePoolContract } from '../../generated/Controller2/PendlePoolContract';
 
 
-export function getPriceForCoin(address: Address): BigInt {
+export function getPriceForCoin(mainAddress: Address): BigInt {
+  let address = mainAddress;
   if (isStableCoin(address.toHexString())) {
     return BI_18;
   }
@@ -74,6 +75,9 @@ export function getPriceForCoin(address: Address): BigInt {
   }
   if (address.equals(SILO)) {
     return getPriceForCamelot(address);
+  }
+  if (isBtc(address.toHexString())) {
+    address = WBTC;
   }
 
   let price = getPriceForCoinWithSwap(address, USDC_ARBITRUM, SUSHI_SWAP_FACTORY)
@@ -160,7 +164,12 @@ function getPriceForCamelot(address: Address): BigInt {
     return BigInt.zero();
   }
   let result = reserves.get_reserve1().divDecimal(reserves.get_reserve0().toBigDecimal())
-  if (camelotPairContract.token1().equals(WETH)) {
+  const tryToken1 = camelotPairContract.try_token1()
+  if (tryToken1.reverted) {
+    log.log(log.Level.WARNING, `Can not get token1 for ${pairAddress.toHexString()} , for address: ${address.toHexString()}`)
+    return BigInt.zero();
+  }
+  if (tryToken1.value.equals(WETH)) {
     result = reserves.get_reserve0().divDecimal(reserves.get_reserve1().toBigDecimal())
   }
   if (result.equals(BD_ZERO)) {

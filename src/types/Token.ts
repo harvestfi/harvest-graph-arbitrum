@@ -1,7 +1,7 @@
 import { Address, BigInt, Bytes } from '@graphprotocol/graph-ts';
 import { Token, TokenInPrice } from '../../generated/schema';
 import { ERC20 } from "../../generated/Controller/ERC20";
-import { BI_12_HOURS, DEFAULT_DECIMAL, UNKNOWN } from '../utils/Constant';
+import { BI_12_HOURS, BI_4_HOURS, DEFAULT_DECIMAL, UNKNOWN } from '../utils/Constant';
 import { getPriceForCoin } from '../utils/PriceUtils';
 
 export function loadOrCreateERC20Token(tokenAddress: Address): Token{
@@ -27,7 +27,7 @@ export function getTokenInPrice(address: Address, timestamp: BigInt): TokenInPri
     tokenInPrice.save();
     return tokenInPrice;
   }
-  if (timestamp.gt(tokenInPrice.lastUpdate.plus(BI_12_HOURS))) {
+  if (timestamp.gt(tokenInPrice.lastUpdate.plus(BI_4_HOURS))) {
     tokenInPrice.price = getPriceForCoin(address);
     tokenInPrice.lastUpdate = timestamp;
     tokenInPrice.save();

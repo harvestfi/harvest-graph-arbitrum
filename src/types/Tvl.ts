@@ -1,7 +1,7 @@
 import { Address, BigDecimal, BigInt, Bytes, ethereum } from '@graphprotocol/graph-ts';
 import { TotalTvl, TotalTvlCount, TotalTvlHistory, TotalTvlHistoryV2, Tvl, Vault } from '../../generated/schema';
 import { fetchContractTotalSupply } from "../utils/ERC20Utils";
-import { BD_TEN, BD_ZERO, BI_12_HOURS, CONST_ID, getFromTotalAssets, MAX_TVL } from '../utils/Constant';
+import { BD_TEN, BD_ZERO, BI_12_HOURS, BI_2_HOURS, BI_4_HOURS, CONST_ID, getFromTotalAssets, MAX_TVL } from '../utils/Constant';
 import { pow } from "../utils/MathUtils";
 import { fetchContractTotalAssets, fetchPricePerFullShare } from "../utils/VaultUtils";
 import { getPriceByVault } from "../utils/PriceUtils";
@@ -30,7 +30,7 @@ export function createTvl(address: Address, timestamp: BigInt, block: BigInt): T
       tvl.sharePriceDivDecimal = BigDecimal.fromString(tvl.sharePrice.toString()).div(decimal)
       tvl.decimal = decimal
 
-      if (timestamp.gt(vault.lastPriceUpdate.plus(BI_12_HOURS))) {
+      if (timestamp.gt(vault.lastPriceUpdate.plus(BI_2_HOURS))) {
         vault.lastPriceUpdate = timestamp
         vault.priceUnderlying = getPriceByVault(vault, timestamp, block)
         vault.priceFeedSequenceId = vault.priceFeedSequenceId + 1;
@@ -50,6 +50,7 @@ export function createTvl(address: Address, timestamp: BigInt, block: BigInt): T
 
       createTotalTvl(vault.tvl, tvl.value, timestamp, block)
       vault.tvl = tvl.value
+      vault.lastTotalSupply = tvl.totalSupply
       vault.tvlSequenceId = vault.tvlSequenceId + 1;
       vault.save()
     }

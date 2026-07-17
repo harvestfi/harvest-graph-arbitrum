@@ -23,6 +23,9 @@ export const DEFAULT_IFARM_PRICE = BigInt.fromString('40000000000000000000')
 
 export const EVERY_24_HOURS = 86400;
 export const BI_12_HOURS = BigInt.fromI32(43200);
+export const BI_2_HOURS = BigInt.fromI32(7200);
+export const BI_4_HOURS = BigInt.fromI32(14400);
+export const BI_1_HOUR = BigInt.fromI32(3600);
 export const BI_EVERY_24_HOURS = BigInt.fromString('86400');
 export const EVERY_7_DAYS = 604800;
 export const BI_EVERY_7_DAYS = BigInt.fromString('604800');
@@ -79,6 +82,8 @@ export const WETH_LIST = [
   Address.fromString('0xF0c9DC8512ad23C00a576b0BAFb661Ccd8e35d88'),
   // plasma weth vault
   Address.fromString('0x18B9Dc9762Ec6095f34f2d77042Ab8283fA764B4'),
+  Address.fromString('0x1fb84fa6d252762e8367ea607a6586e09dcebe3d'),
+  Address.fromString('0xcE4D997A3B404F9Eaa796F89DEae40747D3647B7'),
 ];
 export const CAMELOT_ETH_FARM = Address.fromString('0xd2a7084369cc93672b2ca868757a9f327e3677a4');
 export const SUSHI_ETH_RADIANT = Address.fromString('0x3BFB1ac033ff0aE278Be0583FCCc900FBD9382c6');
@@ -171,6 +176,7 @@ export const STABLE_COIN_ARRAY_ARBITRUM = [
   '0xCA5d8F8a8d49439357d3CF46Ca2e720702F132b8'.toLowerCase(),
   '0xb165a74407fE1e519d6bCbDeC1Ed3202B35a4140'.toLowerCase(),
   '0x7CFaDFD5645B50bE87d546f42699d863648251ad'.toLowerCase(),
+  '0x6491c05a82219b8d1479057361ff1654749b876b'.toLowerCase(),
 
   // plasma usd vault
   '0x7fbfd8cda97c0221b39c581c34afd24c523a3990'.toLowerCase(),
@@ -178,6 +184,11 @@ export const STABLE_COIN_ARRAY_ARBITRUM = [
   '0xBa37b2b01A9443daD533a63A8791D1C25ec3674c'.toLowerCase(),
   // plasma usd vault 3
   '0xC015d83e24FDDe23100AD1E9baD837878fbfaB94'.toLowerCase(),
+  // plasma usd vault 4
+  '0x407D3d942d0911a2fEA7E22417f81E27c02D6c6F'.toLowerCase(),
+  '0x0f13fb925edc3e1fe947209010d9c0e072986adc'.toLowerCase(),
+  '0x9c0fbb8cade7b178b135fd2f1da125a37b27f442'.toLowerCase(),
+
 ]
 
 export const STABLE_VAULT_ARRAY_ARBITRUM = [
@@ -187,8 +198,7 @@ export const STABLE_VAULT_ARRAY_ARBITRUM = [
   '0xbe70cefa4e5c74093b0b26516d35ebabb840a8b3'.toLowerCase(),
   '0x6c5ea65451796345b068e3acf5e3b85fba6b46ae'.toLowerCase(),
   '0x31dbd3eff737dcd45ca8d0824a5da94e37a79366'.toLowerCase(),
-  '0x9c0fbb8cade7b178b135fd2f1da125a37b27f442'.toLowerCase(),
-  '0x0f13fb925edc3e1fe947209010d9c0e072986adc'.toLowerCase(),
+  '0xe5ccea9a64a096365f05dffb1cbbe04b8fd7c710'.toLowerCase()
   ]
 
 export const STABLE_COIN_POOL_ARRAY = [
@@ -225,6 +235,8 @@ export const BTC_POOLS = [
   '0x548EBB86287ac06082405bf3862c61c4E1ea996D'.toLowerCase(),
   // plasma btc vault 2
   '0xF0c9DC8512ad23C00a576b0BAFb661Ccd8e35d88'.toLowerCase(),
+  '0xd66964bd4049f7fd2e279fe048eaa2c12e802658'.toLowerCase(),
+  '0x49b2248f7a7a703731852db0b2217f40da75B8aB'.toLowerCase(),
 ]
 
 export const GAMMA_VAULTS_NAME = [
@@ -258,6 +270,7 @@ export const CURVE_CONTRACT_NAME = [
   'fETH/ETH/xETH'.toLowerCase(),
   '2BTC-ng'.toLowerCase(),
   'Tri'.toLowerCase(),
+  'zun'.toLowerCase()
   ]
 export const F_UNI_V3_CONTRACT_NAME = 'fUniV3'.toLowerCase()
 export const MESH_SWAP_CONTRACT = 'Meshswap'.toLowerCase()
